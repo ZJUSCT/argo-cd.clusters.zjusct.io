@@ -51,6 +51,8 @@ server:
     parentRefs:
       - name: envoy-gateway
         namespace: default
+        group: gateway.networking.k8s.io
+        kind: Gateway
     hostnames:
       - argo-cd.s.zjusct.io
       - argo-cd.clusters.zjusct.io
