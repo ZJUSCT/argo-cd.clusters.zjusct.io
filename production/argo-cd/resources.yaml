@@ -42,6 +42,7 @@ spec:
   template:
     metadata:
       name: '{{path.basename}}'
+      namespace: '{{path.basename}}'
     spec:
       project: default
       source:
