@@ -1,4 +1,8 @@
 # https://github.com/argoproj/argoproj-deployments/tree/master/argocd
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-cd
 ---
 # https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/
 # https://argo-cd.readthedocs.io/en/stable/user-guide/projects/#the-default-project
@@ -18,6 +22,7 @@ spec:
   - group: '*'
     kind: '*'
   # https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/#allowing-additional-namespaces-in-an-appproject
+  # let argo deploy applications in any namespace
   sourceNamespaces:
     - '*'
 ---
@@ -29,11 +34,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://git.zju.edu.cn/zjusct/ops/argo-private.git
-    path: argo/prod
+    repoURL: https://git.zju.edu.cn/zjusct/ops/argo.clusters.zjusct.io.git
+    path: argo-cd
   destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
+    name: in-cluster
+    namespace: argo-cd
   syncPolicy:
     automated:
       prune: true
