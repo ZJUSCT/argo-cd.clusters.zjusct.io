@@ -20,8 +20,11 @@ configs:
     # fixes HTTP reverse proxy 307 problem
     server.insecure: "true"
     # https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/
+    # https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Appset-Any-Namespace/
+    # allow applications and applicationsets in any namespace
     application.namespaces: "*"
-  
+    applicationsetcontroller.namespaces: "*"
+
   secret:
     # argocdServerAdminPassword: <sealed>
     createSecret: false
