@@ -25,11 +25,11 @@ configs:
   secret:
     argocdServerAdminPassword: #<override>
 
-  repositories:
+  # https://github.com/argoproj/argo-cd/discussions/20028
+  # repositories seems now functioning, use credentialTemplates instead
+  credentialTemplates:
     argo-private:
-      type: git
       url: https://git.zju.edu.cn/zjusct/ops/argo-private.git
-      name: argo-private
       password: #<override>
       username: username
 
