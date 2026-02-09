@@ -6,7 +6,6 @@ agent:
     repository: hub.docker.com/jenkins/inbound-agent
 
 controller:
-
   image:
     registry: harbor.clusters.zjusct.io
     repository: hub.docker.com/jenkins/jenkins
@@ -50,3 +49,29 @@ controller:
     hostName: "jenkins.s.zjusct.io"
     paths:
       - "/"
+
+  existingSecret: jenkins-jcasc
+
+  JCasC:
+    enabled: true
+    overwriteConfigurration: true
+    configScripts:
+      # reference https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos
+      kubernetes: | # https://plugins.jenkins.io/kubernetes/
+        jenkins:
+          clouds:
+            - kubernetes:
+                containerCap: 10
+                containerCapStr: "10"
+                jenkinsTunnel: "jenkins-agent.jenkins.svc.cluster.local:50000"
+                jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080"
+                name: "kubernetes"
+                namespace: "jenkins"
+                podLabels:
+                  - key: "jenkins/jenkins-jenkins-agent"
+                    value: "true"
+                serverUrl: "https://kubernetes.default"
+      misc: |
+        unclassified:
+          location:
+            url: "http://jenkins.clusters.zjusct.io/"
