@@ -43,10 +43,6 @@ redis-ha:
 
 controller:
   replicas: 1
-  extraArgs:
-    # https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/#allowing-additional-namespaces-in-an-appproject
-    # let argo deploy applications in any namespace
-    - --application-namespaces=*
 
 server:
   replicas: 2
