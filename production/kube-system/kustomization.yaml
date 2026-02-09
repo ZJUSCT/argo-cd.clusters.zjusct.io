@@ -2,8 +2,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# default namespace is kube-system
-
 # https://github.com/bitnami-labs/sealed-secrets/releases
 resources:
   - https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.34.0/controller.yaml

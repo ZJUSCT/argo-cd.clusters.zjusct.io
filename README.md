@@ -1,4 +1,4 @@
-# argo.clusters.zjusct.io
+# argo-cd.clusters.zjusct.io
 
 中文文档见 [服务部署工具 - ZJUSCT](https://www.zjusct.io/operation/k8s/svc/tools.md)。
 
