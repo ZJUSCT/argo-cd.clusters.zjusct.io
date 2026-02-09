@@ -1,0 +1,60 @@
+# https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
+
+global:
+  domain: "argo.clusters.zjusct.io"
+  image:
+    repository: harbor.clusters.zjusct.io/quay.io/argoproj/argocd
+
+configs:
+  cm:
+    # https://argo-cd.readthedocs.io/en/stable/operator-manual/web_based_terminal/
+    # enable kubectl exec in web UI
+    exec.enabled: true
+    # https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/#kustomizing-helm-charts
+    # https://github.com/kubernetes-sigs/kustomize/issues/4658#issuecomment-1815675157
+    # enable helm and helm values override for kustomize in argo
+    kustomize.buildOptions: "--enable-helm --load-restrictor=LoadRestrictionsNone"
+
+  params:
+    # https://github.com/argoproj/argo-cd/issues/13578
+    # fixes HTTP reverse proxy 307 problem
+    server.insecure: "true"
+    # https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/
+    application.namespaces: "*"
+  
+  secret:
+    argocdServerAdminPassword: #<override>
+
+  repositories:
+    argo-private:
+      type: git
+      url: https://git.zju.edu.cn/zjusct/ops/argo-private.git
+      name: argo-private
+      password: #<override>
+      username: username
+
+# redis-ha:
+#   enabled: true
+
+controller:
+  # replicas: 1
+  extraArgs:
+    # let argo deploy applications in any namespace
+    - --application-namespaces=*
+
+server:
+  # replicas: 2
+  httproute:
+    enabled: true
+    parentRefs:
+      - name: envoy-gateway
+        namespace: default
+    hostnames:
+      - argo.s.zjusct.io
+      - argo.clusters.zjusct.io
+
+# repoServer:
+#   replicas: 2
+# 
+# applicationSet:
+#   replicas: 2

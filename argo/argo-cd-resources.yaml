@@ -1,0 +1,38 @@
+# https://github.com/argoproj/argoproj-deployments/tree/master/argocd
+---
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  description: Project used to Sync the Argo CD Application
+  destinations:
+    - namespace: "*"
+      server: https://kubernetes.default.svc
+  sourceRepos:
+    - "*"
+  sourceNamespaces:
+    - "*"
+---
+# https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://git.zju.edu.cn/zjusct/ops/argo-private.git
+    path: argo/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
