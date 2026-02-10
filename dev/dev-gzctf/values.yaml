@@ -89,6 +89,11 @@ postgresql-ha:
       registry: harbor.clusters.zjusct.io
       repository: hub.docker.com/bitnamilegacy/os-shell
 
+  # Persistence configuration
+  persistence:
+    storageClass: ceph-block
+    size: 2Gi
+
 # https://github.com/minio/minio/blob/master/helm/minio/values.yaml
 minio:
   enabled: true
