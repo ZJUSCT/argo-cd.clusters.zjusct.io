@@ -86,7 +86,7 @@ spec:
         path: '{{path}}'
         # Use kustomized-helm plugin for applications with Helm dependencies
         plugin:
-          name: kustomized-helm
+          name: kustomized-helm-v1.0
       destination:
         name: in-cluster
         namespace: '{{path.basename}}'
