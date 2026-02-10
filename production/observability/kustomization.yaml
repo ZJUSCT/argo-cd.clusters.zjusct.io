@@ -7,8 +7,8 @@ namespace: observability
 resources:
   - resources/namespace.yaml
   - resources/grafana-sealedsecret.yaml
+  - resources/clickhouse-statefulset.yaml
   # - resources/grafana-datasources.yaml
-  # - resources/clickhouse-statefulset.yaml
   # After creating sealed secrets, uncomment:
   # - resources/otelcol-sealedsecret.yaml
   # - resources/influxdb-sealedsecret.yaml
