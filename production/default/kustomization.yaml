@@ -8,6 +8,7 @@ resources:
   - resources/metallb.yaml
   - resources/cert-manager.yaml
   - resources/envoy-gateway.yaml
+  - resources/headlamp-token.yaml
 
 helmCharts:
 - name: cilium
