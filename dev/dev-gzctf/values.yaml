@@ -36,7 +36,8 @@ gzctf:
       - gzctf.clusters.zjusct.io
 
   pvc:
-    storageClassName: ""
+    storageClassName: "ceph-block"
+    size: "10Gi"
 
 # https://github.com/microsoft/garnet/blob/main/charts/garnet/values.yaml
 garnet:
