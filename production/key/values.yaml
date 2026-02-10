@@ -25,16 +25,16 @@ sharedStorageClassName: "cephfs"
 # https://github.com/bitwarden/helm-charts/tree/main/charts/self-host#argo-cd-support
 # Set the Argo CD annotations on the Kubernetes jobs
 jobs:
-  db:
-    preInstallMigrator:
-      annotations:
-        argocd.argoproj.io/hook: Sync
-  setup:
-    annotations:
-      argocd.argoproj.io/hook: PreSync
-  secret:
-    annotations:
-      argocd.argoproj.io/hook: PreSync
+  # db:
+  #   preInstallMigrator:
+  #     annotations:
+  #       argocd.argoproj.io/hook: Sync
+  # setup:
+  #   annotations:
+  #     argocd.argoproj.io/hook: PreSync
+  # secret:
+  #   annotations:
+  #     argocd.argoproj.io/hook: PreSync
   cleanup:
     enabled: false
 # Set the Argo CD annotations on the database resources
