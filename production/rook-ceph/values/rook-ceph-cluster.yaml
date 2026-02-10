@@ -1,0 +1,353 @@
+configOverride: |
+  [global]
+  mon_allow_pool_delete = true
+  osd_pool_default_size = 2
+  osd_pool_default_min_size = 1
+  auth_allow_insecure_global_id_reclaim = false
+
+toolbox:
+  enabled: true
+
+route:
+  dashboard:
+    host:
+      #name: ceph.s.zjusct.io
+      name: ceph.clusters.zjusct.io
+    parentRefs:
+      - name: envoy-gateway
+        namespace: default
+
+monitoring:
+  enabled: true
+  createPrometheusRules: true
+
+cephClusterSpec:
+  network:
+    provider: host
+    addressRanges:
+      public:
+        - "172.25.4.0/24" # 以太网
+      cluster:
+        - "172.25.0.0/24" # IB
+
+  placement:
+    all:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: ceph
+                  operator: In
+                  values: ["yes"]
+
+    mon:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: ceph-core
+                  operator: In
+                  values: ["preferred"]
+
+    mgr:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: ceph-core
+                  operator: In
+                  values: ["preferred"]
+
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+
+  mgr:
+    count: 2
+    allowMultiplePerNode: false
+    modules:
+      - name: pg_autoscaler
+        enabled: false
+      - name: balancer
+        enabled: true
+      - name: rook
+        enabled: true
+      - name: dashboard
+        enabled: true
+      - name: nfs
+        enabled: false
+      - name: restful
+        enabled: true
+
+  dashboard:
+    enabled: true
+    ssl: false
+
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+      - name: "storage"
+        devices:
+          - name: "/dev/disk/by-id/wwn-0x5000c500a3a22588"
+            config:
+              deviceClass: hdd
+          - name: "/dev/disk/by-id/wwn-0x5000c500a39cd7f3"
+            config:
+              deviceClass: hdd
+          - name: "/dev/disk/by-id/wwn-0x5000c500a3a1e885"
+            config:
+              deviceClass: hdd
+          - name: "/dev/disk/by-id/wwn-0x5000cca24cc17625"
+            config:
+              deviceClass: hdd
+          - name: "/dev/disk/by-id/wwn-0x5000cca0bef2f716"
+            config:
+              deviceClass: hdd
+          - name: "/dev/disk/by-id/wwn-0x5000cca0c3d521de"
+            config:
+              deviceClass: hdd
+          - name: "/dev/disk/by-id/wwn-0x5000c500d5434779"
+            config:
+              deviceClass: hdd
+          - name: "/dev/disk/by-id/wwn-0x5000cca0c3d5a7ee"
+            config:
+              deviceClass: hdd
+              
+      - name: m600
+        devices:
+          - name: /dev/disk/by-id/ata-ST2000DM001-1CH164_Z1E5B3FZ
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part1
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-ST2000DM001-1ER164_W4Z0VQBC
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part2
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-SAMSUNG_HD204UI_S2H7JX0C400382
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part3
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-ST2000DM001-1ER164_W4Z0SF74
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part4
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG108600VR960CGN
+            config:
+              deviceClass: ssd
+
+          - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG108600WD960CGN
+            config:
+              deviceClass: ssd
+
+          - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e461f4495551
+            config:
+              deviceClass: nvme
+          - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e4723bd15451
+            config:
+              deviceClass: nvme
+          - name: /dev/disk/by-id/nvme-eui.5d8bc59060003a09d8bc591e3b060001
+            config:
+              deviceClass: nvme
+          - name: /dev/disk/by-id/nvme-eui.36344830549008810025385300000001
+            config:
+              deviceClass: nvme
+
+      - name: m601
+        devices:
+          - name: /dev/disk/by-id/ata-ST2000DM001-1ER164_W4Z0XS4C
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part1
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-ST2000DM001-1CH164_Z2F0WAN4
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part2
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-ST2000DM001-1CH164_Z1F3HRW0
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part3
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-WDC_WD20EFPX-68C4TN0_WD-WX22D34JCRV2
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part4
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-ST2000DM001-1ER164_W4Z0T9MT
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part5
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-ST2000NM0055-1V4104_ZC203SJ7
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part6
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG10860250960CGN
+            config:
+              deviceClass: ssd
+
+          - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e4768f455451
+            config:
+              deviceClass: nvme
+
+          - name: /dev/disk/by-id/nvme-eui.5d8bc59060003a0ad8bc591e3b060001
+            config:
+              deviceClass: nvme
+
+cephBlockPools:
+  - name: ceph-blockpool
+    namespace: rook-ceph
+    spec:
+      failureDomain: host
+      replicated:
+        size: 2
+
+    storageClass:
+      enabled: true
+      name: ceph-block
+      isDefault: true
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+
+cephObjectStores:
+  - name: default
+    namespace: rook-ceph
+    spec:
+      allowUsersInNamespaces:
+        - "*"
+
+      metadataPool:
+        failureDomain: host
+        replicated:
+          size: 2
+          min_size: 1
+        parameters:
+          pg_autoscale_mode: "off"
+
+      dataPool:
+        failureDomain: host
+        replicated:
+          size: 2
+          min_size: 1
+        parameters:
+          pg_autoscale_mode: "off"
+
+      preservePoolsOnDelete: true
+
+      gateway:
+        port: 8080
+        instances: 2
+        priorityClassName: system-cluster-critical
+
+    storageClass:
+      enabled: true
+      name: ceph-bucket
+      reclaimPolicy: Delete
+      volumeBindingMode: "Immediate"
+      parameters:
+        region: us-east-1
+
+    route:
+      enabled: true
+      host:
+        name: radosgw.clusters.zjusct.io
+        path: /
+        pathType: PathPrefix
+      parentRefs:
+        - name: envoy-gateway
+          namespace: default
+
+cephFileSystems:
+  - name: cephfs
+    namespace: rook-ceph
+    spec:
+      metadataPool:
+        failureDomain: host
+        crushRule: nvme
+        replicated:
+          size: 2
+          min_size: 1
+        parameters:
+          pg_autoscale_mode: "off"
+
+      dataPools:
+        - name: cephfs-hdd-data
+          failureDomain: host
+          crushRule: hdd
+          replicated:
+            size: 2
+            min_size: 1
+          parameters:
+            pg_autoscale_mode: "off"
+
+        - name: cephfs-nvme-data
+          failureDomain: host
+          crushRule: nvme
+          replicated:
+            size: 2
+            min_size: 1
+          parameters:
+            pg_autoscale_mode: "off"
+
+        - name: cephfs-ssd-data
+          failureDomain: host
+          crushRule: ssd
+          replicated:
+            size: 2
+            min_size: 1
+          parameters:
+            pg_autoscale_mode: "off"
+
+        - name: cephfs-home
+          failureDomain: host
+          crushRule: nvme
+          replicated:
+            size: 2
+            min_size: 1
+          parameters:
+            pg_autoscale_mode: "off"
+
+      preserveFilesystemOnDelete: true
+
+      metadataServer:
+        activeCount: 2
+        activeStandby: true
+        priorityClassName: system-cluster-critical
+
+    # ✅ chart 需要的是 storageClass（单数）
+    storageClass:
+      enabled: true
+      name: cephfs-nvme
+      isDefault: false
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+      mountOptions: []
+      pool: cephfs-nvme-data
+      parameters:
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+        csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
