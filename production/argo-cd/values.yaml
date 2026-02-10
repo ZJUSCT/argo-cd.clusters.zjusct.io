@@ -62,3 +62,4 @@ repoServer:
 
 applicationSet:
   replicas: 2
+  allowAnyNamespace: true
