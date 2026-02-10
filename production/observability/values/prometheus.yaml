@@ -31,6 +31,18 @@ server:
     type: ClusterIP
     servicePort: 9090
 
+  # Gateway API HTTPRoute configuration
+  route:
+    main:
+      enabled: true
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      parentRefs:
+        - name: envoy-gateway
+          namespace: default
+      hostnames:
+        - prometheus.clusters.zjusct.io
+
   # Resource limits
   resources:
     limits:
