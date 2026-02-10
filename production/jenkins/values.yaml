@@ -17,7 +17,9 @@ controller:
         repository: hub.docker.com/kiwigrid/k8s-sidecar
 
   admin:
-    createSecret: false
+    createSecret: true
+    # if existingSecret is set, secret will not be created
+    # see https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/templates/secret.yaml
     existingSecret: jenkins
     # username: admin
     # password: #<sealed>
