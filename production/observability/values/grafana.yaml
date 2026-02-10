@@ -1,0 +1,88 @@
+# Grafana Helm Chart Values
+# https://github.com/grafana/helm-charts/tree/main/charts/grafana
+# Reference values: https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+
+# Image configuration
+image:
+  repository: harbor.clusters.zjusct.io/docker.io/grafana/grafana
+  pullPolicy: IfNotPresent
+
+# Admin credentials
+admin:
+  existingSecret: grafana-secrets
+  userKey: admin-user
+  passwordKey: admin-password
+
+# Persistence for Grafana data
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClassName: "" # Use default storage class
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+
+# Ingress configuration - disabled, using Gateway API instead
+ingress:
+  enabled: false
+
+# Environment variables
+env:
+  GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+
+# Environment variables from secrets
+envFromSecrets:
+  - name: grafana-secrets
+
+# Provisioning
+# Mount existing provisioning configs from ConfigMaps
+sidecar:
+  image:
+    repository: harbor.clusters.zjusct.io/quay.io/kiwigrid/k8s-sidecar
+  dashboards:
+    enabled: true
+    folder: /tmp/dashboards
+    folderAnnotation: grafana_folder
+    provider:
+      foldersFromFilesStructure: true
+  datasources:
+    enabled: true
+  notifiers:
+    enabled: true
+
+# Download dashboards image
+downloadDashboardsImage:
+  repository: harbor.clusters.zjusct.io/docker.io/curlimages/curl
+
+# Init chown data image
+initChownData:
+  image:
+    repository: harbor.clusters.zjusct.io/docker.io/library/busybox
+
+# Resource limits
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Grafana configuration from grafana.ini
+grafana.ini:
+  server:
+    root_url: https://grafana.clusters.zjusct.io
+  users:
+    default_theme: system
+    home_page: /dashboards
+  security:
+    allow_embedding: true
+    disable_gravatar: true
+  log:
+    level: warn
+  tracing.opentelemetry:
+    custom_attributes: service.name:grafana
+  tracing.opentelemetry.otlp:
+    address: otelcol-gateway:4317

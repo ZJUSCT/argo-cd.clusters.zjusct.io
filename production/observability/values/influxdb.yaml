@@ -1,0 +1,55 @@
+# InfluxDB 2 Helm Chart Values
+# https://github.com/influxdata/helm-charts/tree/master/charts/influxdb2
+
+# Admin user configuration
+adminUser:
+  organization: zjusct
+  bucket: zjusct
+  user: zjusct
+  retention_policy: "180d"
+  existingSecret: influxdb-secrets
+  passwordKey: admin-password
+  tokenKey: admin-token
+
+# Persistence
+persistence:
+  enabled: true
+  size: 50Gi
+  storageClass: "" # Use default storage class
+  mountPath: /var/lib/influxdb2
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8086
+
+# Ingress configuration (if needed)
+ingress:
+  enabled: false
+  className: nginx
+  hostname: influxdb.clusters.zjusct.io
+  tls: true
+  secretName: influxdb-tls
+
+# Resource limits
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 2Gi
+
+# Environment variables
+env:
+  - name: DOCKER_INFLUXDB_INIT_MODE
+    value: "setup"
+  - name: DOCKER_INFLUXDB_INIT_USERNAME
+    value: "zjusct"
+  - name: DOCKER_INFLUXDB_INIT_ORG
+    value: "zjusct"
+  - name: DOCKER_INFLUXDB_INIT_BUCKET
+    value: "zjusct"
+  - name: DOCKER_INFLUXDB_INIT_RETENTION
+    value: "180d"
+  # Add DOCKER_INFLUXDB_INIT_PASSWORD and INFLUXDB_TOKEN via SealedSecret

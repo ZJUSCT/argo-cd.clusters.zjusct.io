@@ -1,0 +1,71 @@
+# https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
+
+image:
+  repository: harbor.clusters.zjusct.io/quay.io/prometheus/prometheus
+
+configmapReload:
+  prometheus:
+    image:
+      repository: harbor.clusters.zjusct.io/quay.io/prometheus-operator/prometheus-config-reloader
+
+server:
+  image:
+    repository: harbor.clusters.zjusct.io/quay.io/prometheus/prometheus
+  # Persistence for Prometheus data
+  persistentVolume:
+    enabled: true
+    size: 50Gi
+    storageClass: "" # Use default storage class
+
+  # Retention configuration
+  retention: "180d"
+
+  # Enable remote write receiver
+  enableRemoteWriteReceiver: true
+
+  # Enable admin API
+  enableAdminAPI: true
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    servicePort: 9090
+
+  # Resource limits
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 500m
+      memory: 2Gi
+
+# Disable components we don't need for this use case
+alertmanager:
+  enabled: false
+
+pushgateway:
+  enabled: false
+
+nodeExporter:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+# Server configuration
+serverFiles:
+  prometheus.yml:
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    # Enable out-of-order ingestion for OTLP data
+    storage:
+      tsdb:
+        out_of_order_time_window: 30m
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']

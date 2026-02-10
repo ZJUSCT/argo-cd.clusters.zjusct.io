@@ -1,0 +1,72 @@
+# OpenTelemetry Collector SNMP Helm Chart Values
+# https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-collector
+
+mode: deployment
+
+replicaCount: 1
+
+# Image configuration
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: "" # Use latest stable version
+
+# Resource limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# OpenTelemetry Collector configuration
+# NOTE: SNMP receiver configuration is complex and specific to your infrastructure
+# You'll need to migrate the full snmp.yaml configuration here
+config:
+  receivers:
+    # Placeholder - copy SNMP receiver configurations from grafana.clusters.zjusct.io/config/otelcol/snmp.yaml
+    # Example structure:
+    # snmp/pdu-30966-1:
+    #   collection_interval: 15s
+    #   endpoint: udp://pdu1.internal.zjusct.io:161
+    #   version: v3
+    #   security_level: auth_priv
+    #   user: zjusct
+    #   auth_type: "MD5"
+    #   auth_password: ${env:SNMP_AUTH_KEY}
+    #   privacy_type: "DES"
+    #   privacy_password: ${env:SNMP_PRIVATE_KEY}
+    #   ... (see full config in original file)
+
+  processors:
+    batch: {}
+    memory_limiter:
+      limit_mib: 512
+      spike_limit_mib: 128
+      check_interval: 5s
+
+  exporters:
+    otlp/gateway:
+      endpoint: otelcol-gateway:4317
+      tls:
+        insecure: true
+
+  service:
+    pipelines:
+      metrics:
+        receivers: [] # Add your SNMP receivers here
+        processors: [memory_limiter, batch]
+        exporters: [otlp/gateway]
+
+# Environment variables from secrets
+extraEnvs:
+  - name: SNMP_AUTH_KEY
+    valueFrom:
+      secretKeyRef:
+        name: otelcol-secrets
+        key: snmp-auth-key
+  - name: SNMP_PRIVATE_KEY
+    valueFrom:
+      secretKeyRef:
+        name: otelcol-secrets
+        key: snmp-private-key

@@ -1,0 +1,91 @@
+# ClickHouse StatefulSet deployment
+# ClickHouse doesn't have an official Helm chart, so we deploy as StatefulSet
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse
+  namespace: observability
+  labels:
+    app: clickhouse
+spec:
+  ports:
+    - port: 8123
+      name: http
+      targetPort: 8123
+    - port: 9000
+      name: native
+      targetPort: 9000
+  selector:
+    app: clickhouse
+  clusterIP: None
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+  namespace: observability
+spec:
+  serviceName: clickhouse
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickhouse
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+    spec:
+      containers:
+        - name: clickhouse
+          image: harbor.clusters.zjusct.io/docker.io/clickhouse/clickhouse-server:25.1-alpine
+          ports:
+            - containerPort: 8123
+              name: http
+            - containerPort: 9000
+              name: native
+          env:
+            - name: CLICKHOUSE_SKIP_USER_SETUP
+              value: "1"
+            # Optional: Add proxy settings if needed
+            # - name: http_proxy
+            #   value: "http://172.25.2.253:7890"
+            # - name: https_proxy
+            #   value: "http://172.25.2.253:7890"
+          volumeMounts:
+            - name: clickhouse-data
+              mountPath: /var/lib/clickhouse
+          resources:
+            limits:
+              cpu: 4000m
+              memory: 8Gi
+            requests:
+              cpu: 1000m
+              memory: 4Gi
+          livenessProbe:
+            exec:
+              command:
+                - clickhouse-client
+                - --query
+                - SHOW DATABASES
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+          readinessProbe:
+            exec:
+              command:
+                - clickhouse-client
+                - --query
+                - SHOW DATABASES
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+  volumeClaimTemplates:
+    - metadata:
+        name: clickhouse-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 100Gi

@@ -1,0 +1,43 @@
+# https://github.com/ClickHouse/ClickStack-helm-charts/blob/main/charts/clickstack/values.yaml
+
+global:
+  imageRegistry: "harbor.clusters.zjusct.io"
+  storageClassName: "local-path"
+  keepPVC: false
+
+hyperdx:
+  image:
+    repository: harbor.clusters.zjusct.io/docker.hyperdx.io/hyperdx/hyperdx
+  waitForMongodb:
+    # Image used by the init container that waits for MongoDB to be reachable.
+    image: "harbor.clusters.zjusct.io/hub.docker.com/library/busybox@sha256:1fcf5df59121b92d61e066df1788e8df0cc35623f5d62d9679a41e163b6a0cdb"
+  apiKey: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  frontendUrl: "https://hyperdx.clusters.zjusct.io"
+
+  ingress:
+    enabled: false
+    ingressClassName: nginx
+    host: "hyperdx.clusters.zjusct.io"
+
+mongodb:
+  image: "harbor.clusters.zjusct.io/hub.docker.com/library/mongo:5.0.32-focal"
+  enabled: true
+
+clickhouse:
+  image: "harbor.clusters.zjusct.io/hub.docker.com/clickhouse/clickhouse-server:25.7-alpine"
+  enabled: true
+  config:
+    users:
+      appUserPassword: "hyperdx"
+      otelUserPassword: "otelcollectorpass"
+      otelUserName: "otelcollector"
+    # Network CIDRs for Kubernetes cluster access control
+    # These CIDRs ensure ClickHouse connections are locked down to intra-cluster only
+    # For PRODUCTION: Remove development CIDRs and keep only your cluster's specific CIDR
+    # For DEVELOPMENT: Multiple common CIDRs are included for convenience
+    clusterCidrs:
+      - "10.0.0.0/8" # Most Kubernetes clusters (including GKE, EKS, AKS)
+      - "172.16.0.0/12" # Some cloud providers and Docker Desktop
+
+otel:
+  enabled: false
