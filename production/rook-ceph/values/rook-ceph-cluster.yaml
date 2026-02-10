@@ -17,6 +17,8 @@ route:
     parentRefs:
       - name: envoy-gateway
         namespace: default
+        group: gateway.networking.k8s.io
+        kind: Gateway
 
 monitoring:
   enabled: true
@@ -275,6 +277,8 @@ cephObjectStores:
       parentRefs:
         - name: envoy-gateway
           namespace: default
+          group: gateway.networking.k8s.io
+          kind: Gateway
 
 cephFileSystems:
   - name: cephfs
