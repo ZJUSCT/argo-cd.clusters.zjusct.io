@@ -4,8 +4,8 @@ kind: Kustomization
 
 namespace: freeipa
 
-#resources:
-#  - resources/freeipa-sealedsecret.yaml
+resources:
+  - resources/freeipa-sealedsecret.yaml
 
 helmCharts:
 - name: freeipa
