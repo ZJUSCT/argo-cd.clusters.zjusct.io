@@ -17,10 +17,17 @@ data:
         command: [sh, -c]
         args:
           - |
-            if [ -f "Chart.yaml" ] || [ -f "*/Chart.yaml" ]; then
-              echo "Running helm dependency build..."
-              find . -name Chart.yaml -execdir sh -c 'echo "Building dependencies in $(pwd)" && helm dependency build' \;
-            fi
+            echo "Searching for Helm charts with dependencies..."
+            find . -name Chart.yaml -type f | while read chart; do
+              chartdir=$(dirname "$chart")
+              echo "Found chart at: $chartdir"
+              if grep -q "^dependencies:" "$chart"; then
+                echo "Building dependencies for chart in $chartdir"
+                (cd "$chartdir" && helm dependency build)
+              else
+                echo "No dependencies in $chartdir"
+              fi
+            done
       generate:
         command: [sh, -c]
         args:
