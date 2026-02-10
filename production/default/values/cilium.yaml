@@ -1,0 +1,8 @@
+# https://github.com/cilium/cilium/blob/main/install/kubernetes/cilium/values.yaml
+
+# https://docs.cilium.io/en/stable/network/kubernetes/ipam-cluster-pool/
+ipam:
+  mode: kubernetes
+kubeProxyReplacement: false
+k8s:
+  requireIPv4PodCIDR: true

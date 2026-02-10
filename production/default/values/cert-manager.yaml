@@ -1,0 +1,8 @@
+# https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
+crds:
+  enabled: true
+# force use public dns to resolve ACME because we use split horizon DNS
+# https://cert-manager.io/docs/configuration/acme/dns01/
+extraArgs:
+  - "--dns01-recursive-nameservers-only"
+  - "--dns01-recursive-nameservers=10.10.0.21:53,223.6.6.6:53"

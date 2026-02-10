@@ -1,0 +1,65 @@
+# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - resources/metallb.yaml
+  - resources/cert-manager.yaml
+  - resources/envoy-gateway.yaml
+
+helmCharts:
+- name: cilium
+  repo: https://helm.cilium.io/
+  includeCRDs: true
+  releaseName: cilium
+  valuesFile: values/cilium.yaml
+- name: kubelet-csr-approver
+  repo: https://postfinance.github.io/kubelet-csr-approver
+  includeCRDs: true
+  releaseName: kubelet-csr-approver
+  valuesFile: values/kubelet-csr-approver.yaml
+- name: metallb
+  repo: https://metallb.github.io/metallb
+  includeCRDs: true
+  releaseName: metallb
+- name: gateway-helm # envoy-gateway
+  repo: oci://docker.io/envoyproxy/
+  includeCRDs: true
+  releaseName: envoy-gateway
+  valuesFile: values/envoy-gateway.yaml
+- name: ingress-nginx
+  repo: https://kubernetes.github.io/ingress-nginx
+  includeCRDs: true
+  releaseName: ingress-nginx
+  valuesFile: values/ingress-nginx.yaml
+- name: headlamp
+  repo: https://kubernetes-sigs.github.io/headlamp/
+  includeCRDs: true
+  releaseName: headlamp
+  valuesFile: values/headlamp.yaml
+- name: metrics-server
+  repo: https://kubernetes-sigs.github.io/metrics-server/
+  includeCRDs: true
+  releaseName: metrics-server
+- name: cert-manager
+  repo: https://charts.jetstack.io
+  includeCRDs: true
+  releaseName: cert-manager
+  valuesFile: values/cert-manager.yaml
+# - name: openebs
+#   repo: https://openebs.github.io/openebs
+#   includeCRDs: true
+#   releaseName: openebs
+#   valuesFile: values/openebs.yaml
+- name: harbor
+  repo: https://helm.goharbor.io
+  includeCRDs: true
+  releaseName: harbor
+  valuesFile: values/harbor.yaml
+- name: dragonfly
+  repo: https://dragonflyoss.github.io/helm-charts/
+  includeCRDs: true
+  releaseName: dragonfly
+  valuesFile: values/dragonfly.yaml

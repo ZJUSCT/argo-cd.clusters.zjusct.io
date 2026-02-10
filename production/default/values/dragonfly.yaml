@@ -1,0 +1,39 @@
+# https://github.com/dragonflyoss/helm-charts/blob/main/charts/dragonfly/values.yaml
+manager:
+  ingress:
+    enable: true
+    className: nginx
+    hosts:
+      - dragonfly.clusters.zjusct.io
+      - dragonfly.s.zjusct.io
+client:
+  dfinit:
+    enable: true
+    config:
+      containerRuntime:
+        containerd:
+          configPath: /etc/containerd/config.toml
+          registries:
+            - hostNamespace: harbor.clusters.zjusct.io
+              serverAddr: https://harbor.clusters.zjusct.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+            - hostNamespace: docker.io
+              serverAddr: https://index.docker.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+            - hostNamespace: ghcr.io
+              serverAddr: https://ghcr.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+            - hostNamespace: quay.io
+              serverAddr: https://quay.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+            - hostNamespace: registry.k8s.io
+              serverAddr: https://registry.k8s.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+        docker:
+          configPath: /etc/docker/daemon.json
+

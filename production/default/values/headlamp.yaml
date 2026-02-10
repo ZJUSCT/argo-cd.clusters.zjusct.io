@@ -1,0 +1,27 @@
+# https://github.com/kubernetes-sigs/headlamp/blob/main/charts/headlamp/values.yaml
+
+# HTTPRoute configuration for Gateway API
+# Please refer to https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io/v1.HTTPRoute
+# TODO: gateway should be available in v0.40.0
+#httpRoute:
+#  # -- Enable HTTPRoute resource for Gateway API
+#  enabled: true
+#  parentRefs:
+#    - name: envoy-gateway
+#      namespace: default
+#  hostnames:
+#    - headlamp.clusters.zjusct.io
+#    - headlamp.s.zjusct.io
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  hosts:
+    - host: headlamp.clusters.zjusct.io
+      paths:
+      - path: /
+        type: Prefix
+    - host: headlamp.s.zjusct.io
+      paths:
+      - path: /
+        type: Prefix

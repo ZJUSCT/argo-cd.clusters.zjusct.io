@@ -1,0 +1,28 @@
+# https://metallb.universe.tf/configuration/
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: pool
+  namespace: default
+spec:
+  addresses:
+  - 172.28.0.0/16
+---
+apiVersion: metallb.io/v1beta2
+kind: BGPPeer
+metadata:
+  name: router
+  namespace: default
+spec:
+  myASN: 64513
+  peerASN: 64512
+  peerAddress: 172.25.4.254
+---
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata:
+  name: pool
+  namespace: default
+spec:
+  ipAddressPools:
+  - pool

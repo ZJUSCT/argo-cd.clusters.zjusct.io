@@ -1,0 +1,7 @@
+# https://github.com/envoyproxy/gateway/blob/main/charts/gateway-helm/values.tmpl.yaml
+
+config:
+# -- EnvoyGateway configuration. Visit https://gateway.envoyproxy.io/docs/api/extension_types/#envoygateway to view all options.
+  envoyGateway:
+    extensionApis:
+      enableBackend: true

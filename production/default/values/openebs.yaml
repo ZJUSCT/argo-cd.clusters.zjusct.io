@@ -1,0 +1,10 @@
+# https://github.com/openebs/openebs/blob/develop/charts/values.yaml
+engines:
+  local:
+    lvm:
+      enabled: false
+    zfs:
+      enabled: false
+  replicated:
+    mayastor:
+      enabled: false
