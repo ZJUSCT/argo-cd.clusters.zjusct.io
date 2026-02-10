@@ -1,0 +1,303 @@
+# https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+
+# Global defaults
+defaultRules:
+  create: true
+  rules:
+    alertmanager: false  # Alertmanager disabled
+    etcd: true
+    configReloaders: true
+    general: true
+    k8s: true
+    kubeApiserverAvailability: true
+    kubeApiserverBurnrate: true
+    kubeApiserverHistogram: true
+    kubeApiserverSlos: true
+    kubeControllerManager: true
+    kubelet: true
+    kubeProxy: true
+    kubePrometheusGeneral: true
+    kubePrometheusNodeRecording: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeSchedulerAlerting: true
+    kubeSchedulerRecording: true
+    kubeStateMetrics: true
+    network: true
+    node: true
+    nodeExporterAlerting: true
+    nodeExporterRecording: true
+    prometheus: true
+    prometheusOperator: true
+
+# Prometheus Operator Configuration
+prometheusOperator:
+  enabled: true
+
+  # Operator image with Harbor prefix
+  image:
+    registry: harbor.clusters.zjusct.io/quay.io
+    repository: prometheus-operator/prometheus-operator
+    pullPolicy: IfNotPresent
+
+  # Admission webhooks configuration
+  admissionWebhooks:
+    enabled: true
+    deployment:
+      enabled: true
+      image:
+        registry: harbor.clusters.zjusct.io/quay.io
+        repository: prometheus-operator/admission-webhook
+        pullPolicy: IfNotPresent
+    patch:
+      enabled: true
+      image:
+        registry: harbor.clusters.zjusct.io/registry.k8s.io
+        repository: ingress-nginx/kube-webhook-certgen
+        pullPolicy: IfNotPresent
+
+  # Prometheus config reloader sidecar
+  prometheusConfigReloader:
+    image:
+      registry: harbor.clusters.zjusct.io/quay.io
+      repository: prometheus-operator/prometheus-config-reloader
+      pullPolicy: IfNotPresent
+
+  # Service monitor selector - discover all ServiceMonitors
+  prometheusInstanceNamespaces: []
+  serviceMonitorSelectorNilUsesHelmValues: false
+  podMonitorSelectorNilUsesHelmValues: false
+
+# Prometheus Configuration
+prometheus:
+  enabled: true
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 9090
+
+  # Gateway API HTTPRoute configuration
+  route:
+    main:
+      enabled: true
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      parentRefs:
+        - name: envoy-gateway
+          namespace: default
+      hostnames:
+        - prometheus.clusters.zjusct.io
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+  # Prometheus instance specification
+  prometheusSpec:
+    # High Availability configuration
+    replicas: 2
+
+    # Anti-affinity for HA
+    podAntiAffinity: "hard"
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+
+    # Prometheus image with Harbor prefix
+    image:
+      registry: harbor.clusters.zjusct.io/quay.io
+      repository: prometheus/prometheus
+      pullPolicy: IfNotPresent
+
+    # Retention configuration
+    retention: 180d
+    retentionSize: ""
+
+    # Storage configuration
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: ""  # Use default storage class
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+    # Resource limits
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+
+    # Enable remote write receiver
+    enableRemoteWriteReceiver: true
+
+    # Enable admin API
+    enableAdminAPI: true
+
+    # Service discovery configuration
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+    # External labels for HA setup
+    externalLabels:
+      cluster: production
+      region: zjusct
+
+# Alertmanager - Disabled
+alertmanager:
+  enabled: false
+
+# Grafana Configuration
+grafana:
+  enabled: true
+
+  # Image configuration with Harbor prefix
+  image:
+    registry: harbor.clusters.zjusct.io/docker.io
+    repository: grafana/grafana
+    pullPolicy: IfNotPresent
+
+  # Admin credentials from existing sealed secret
+  admin:
+    existingSecret: grafana-secrets
+    userKey: admin-user
+    passwordKey: admin-password
+
+  # Persistence for Grafana data
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: ""  # Use default storage class
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+
+  # Ingress - disabled, using Gateway API instead
+  ingress:
+    enabled: false
+
+  # Gateway API HTTPRoute configuration
+  route:
+    main:
+      enabled: true
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      parentRefs:
+        - name: envoy-gateway
+          namespace: default
+      hostnames:
+        - grafana.clusters.zjusct.io
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+  # Environment variables for plugins
+  env:
+    GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+
+  # Environment variables from secrets
+  envFromSecrets:
+    - name: grafana-secrets
+
+  # Sidecar configuration for dashboards and datasources
+  sidecar:
+    image:
+      registry: harbor.clusters.zjusct.io/quay.io
+      repository: kiwigrid/k8s-sidecar
+      pullPolicy: IfNotPresent
+    dashboards:
+      enabled: true
+      folder: /tmp/dashboards
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+      searchNamespace: ALL
+    notifiers:
+      enabled: true
+      searchNamespace: ALL
+
+  # Download dashboards image with Harbor prefix
+  downloadDashboardsImage:
+    registry: harbor.clusters.zjusct.io/docker.io
+    repository: curlimages/curl
+    pullPolicy: IfNotPresent
+
+  # Init chown data image with Harbor prefix
+  initChownData:
+    enabled: true
+    image:
+      registry: harbor.clusters.zjusct.io/docker.io
+      repository: library/busybox
+      pullPolicy: IfNotPresent
+
+  # Resource limits
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  # Grafana configuration from grafana.ini
+  grafana.ini:
+    server:
+      root_url: https://grafana.clusters.zjusct.io
+    users:
+      default_theme: system
+      home_page: /dashboards
+    security:
+      allow_embedding: true
+      disable_gravatar: true
+    log:
+      level: warn
+    tracing.opentelemetry:
+      custom_attributes: service.name:grafana
+    tracing.opentelemetry.otlp:
+      address: otelcol-gateway:4317
+
+# Kube State Metrics Configuration
+kube-state-metrics:
+  enabled: true
+  releaseLabel: true
+
+  # Image with Harbor prefix
+  image:
+    registry: harbor.clusters.zjusct.io/registry.k8s.io
+    repository: kube-state-metrics/kube-state-metrics
+    pullPolicy: IfNotPresent
+
+  prometheus:
+    monitor:
+      enabled: true
+
+# Prometheus Node Exporter Configuration
+prometheus-node-exporter:
+  enabled: true
+  releaseLabel: true
+
+  # Image with Harbor prefix
+  image:
+    registry: harbor.clusters.zjusct.io/quay.io
+    repository: prometheus/node-exporter
+    pullPolicy: IfNotPresent
+
+  prometheus:
+    monitor:
+      enabled: true
+
+# Note: Prometheus Pushgateway is NOT included in kube-prometheus-stack by default.
+# If pushgateway is required, it needs to be deployed separately using the
+# prometheus-pushgateway chart or added as a subchart dependency.

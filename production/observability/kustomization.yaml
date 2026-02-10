@@ -14,21 +14,13 @@ resources:
   # - resources/influxdb-sealedsecret.yaml
 
 helmCharts:
-# Grafana for visualization and alerting
-- name: grafana
-  repo: https://grafana-community.github.io/helm-charts
-  includeCRDs: true
-  releaseName: grafana
-  namespace: observability
-  valuesFile: values/grafana.yaml
-
-# Prometheus for metrics storage
-- name: prometheus
+# Kube Prometheus Stack - includes Prometheus Operator, Prometheus, Grafana, and exporters
+- name: kube-prometheus-stack
   repo: https://prometheus-community.github.io/helm-charts
   includeCRDs: true
-  releaseName: prometheus
+  releaseName: kube-prometheus-stack
   namespace: observability
-  valuesFile: values/prometheus.yaml
+  valuesFile: values/kube-prometheus-stack.yaml
 
 # Thanos - Disabled for now, will enable later with rook-ceph ObjectBucketClaim
 # - name: thanos
