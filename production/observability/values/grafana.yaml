@@ -2,7 +2,8 @@
 
 # Image configuration
 image:
-  repository: harbor.clusters.zjusct.io/docker.io/grafana/grafana
+  registry: harbor.clusters.zjusct.io/docker.io
+  repository: grafana/grafana
   pullPolicy: IfNotPresent
 
 # Admin credentials
@@ -50,7 +51,8 @@ envFromSecrets:
 # Mount existing provisioning configs from ConfigMaps
 sidecar:
   image:
-    repository: harbor.clusters.zjusct.io/quay.io/kiwigrid/k8s-sidecar
+    registry: harbor.clusters.zjusct.io/quay.io
+    repository: kiwigrid/k8s-sidecar
   dashboards:
     enabled: true
     folder: /tmp/dashboards
@@ -64,12 +66,14 @@ sidecar:
 
 # Download dashboards image
 downloadDashboardsImage:
-  repository: harbor.clusters.zjusct.io/docker.io/curlimages/curl
+  registry: harbor.clusters.zjusct.io/docker.io
+  repository: curlimages/curl
 
 # Init chown data image
 initChownData:
   image:
-    repository: harbor.clusters.zjusct.io/docker.io/library/busybox
+    registry: harbor.clusters.zjusct.io/docker.io
+    repository: library/busybox
 
 # Resource limits
 resources:
