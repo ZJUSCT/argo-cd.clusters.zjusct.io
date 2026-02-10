@@ -45,6 +45,13 @@ database:
   podSecurityContext:
     fsGroup: 10001
     fsGroupChangePolicy: "OnRootMismatch"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 2Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
   volume:
     backups:
       annotations:
