@@ -70,7 +70,7 @@ metadata:
 spec:
   generators:
     - git:
-        repoURL: https://git.zju.edu.cn/zjusct/ops/argo.clusters.zjusct.io.git
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git
         revision: HEAD
         directories:
           - path: dev/*
@@ -81,7 +81,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://git.zju.edu.cn/zjusct/ops/argo.clusters.zjusct.io.git
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git
         targetRevision: HEAD
         path: '{{path}}'
         # Use kustomized-helm plugin for applications with Helm dependencies
