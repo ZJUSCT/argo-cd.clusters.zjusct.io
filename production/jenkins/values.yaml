@@ -50,28 +50,15 @@ controller:
     paths:
       - "/"
 
+  # existing secret "secret-credentials" and a key inside it named "github-username" should be used in JCasC as ${github-username}
+  # we can use existing secret to avoid hardcoding sensitive data in JCasC yaml
   # existingSecret: jenkins-jcasc
 
+  # notice: Helm Chart has already prepared a default config named jcasc-default-config.yaml
+  # which is defined in template helpers: https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/templates/_helpers.tpl
+  # it contains kubernetes, urls and etc, so no need to configure it again
   JCasC:
     enabled: true
     overwriteConfigurration: true
-    configScripts:
+    configScripts: {}
       # reference https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos
-      kubernetes: | # https://plugins.jenkins.io/kubernetes/
-        jenkins:
-          clouds:
-            - kubernetes:
-                containerCap: 10
-                containerCapStr: "10"
-                jenkinsTunnel: "jenkins-agent.jenkins.svc.cluster.local:50000"
-                jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080"
-                name: "kubernetes"
-                namespace: "jenkins"
-                podLabels:
-                  - key: "jenkins/jenkins-jenkins-agent"
-                    value: "true"
-                serverUrl: "https://kubernetes.default"
-      misc: |
-        unclassified:
-          location:
-            url: "http://jenkins.clusters.zjusct.io/"
