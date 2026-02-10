@@ -6,3 +6,21 @@ ipam:
 kubeProxyReplacement: false
 k8s:
   requireIPv4PodCIDR: true
+
+hubble:
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+  backend:
+    image:
+      repository: harbor.clusters.zjusct.io/quay.io/cilium/hubble-ui-backend
+  frontend:
+    image:
+      repository: harbor.clusters.zjusct.io/quay.io/cilium/hubble-ui
+  ingress:
+    enabled: true
+    className: "nginx"
+    hosts:
+      - hubble.clusters.zjusct.io
+      - hubble.s.zjusct.io
