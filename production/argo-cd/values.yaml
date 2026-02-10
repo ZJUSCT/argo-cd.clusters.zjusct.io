@@ -60,6 +60,33 @@ server:
 repoServer:
   replicas: 2
 
+  # Config Management Plugin sidecar for Helm + Kustomize
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/config-management-plugins/
+  volumes:
+    - name: cmp-plugin
+      configMap:
+        name: cmp-plugin
+    - name: cmp-tmp
+      emptyDir: {}
+
+  extraContainers:
+    - name: kustomized-helm
+      command: [/var/run/argocd/argocd-cmp-server]
+      image: harbor.clusters.zjusct.io/quay.io/argoproj/argocd:v3.3.0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+          subPath: plugin.yaml
+          name: cmp-plugin
+        - mountPath: /tmp
+          name: cmp-tmp
+
 applicationSet:
   replicas: 2
   allowAnyNamespace: true

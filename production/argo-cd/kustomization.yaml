@@ -5,7 +5,8 @@ kind: Kustomization
 namespace: argo-cd
 
 resources:
-  - resources.yaml
+  - apps.yaml
+  - plugin.yaml
   - sealedsecret.yaml
 
 helmCharts:
