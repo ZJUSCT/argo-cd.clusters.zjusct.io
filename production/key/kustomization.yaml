@@ -6,6 +6,7 @@ namespace: key
 
 resources:
   - sealedsecret.yaml
+  - namespace.yaml
 
 helmCharts:
   - name: self-host
