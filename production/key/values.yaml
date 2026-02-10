@@ -42,6 +42,9 @@ database:
   enabled: true
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
+  podSecurityContext:
+    fsGroup: 10001
+    fsGroupChangePolicy: "OnRootMismatch"
   volume:
     backups:
       annotations:
