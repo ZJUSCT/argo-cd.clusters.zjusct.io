@@ -5,6 +5,11 @@ global:
     allowInsecureImages: true
 
 gzctf:
+  # Use SealedSecret instead of auto-generated secret
+  secret:
+    create: false
+    existingSecret: gzctf-secret
+
   image:
     repository: harbor.clusters.zjusct.io/ghcr.io/gztimewalker/gzctf/gzctf
 

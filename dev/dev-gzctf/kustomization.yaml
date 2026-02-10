@@ -12,3 +12,6 @@ helmCharts:
     includeCRDs: true
     releaseName: gzctf
     valuesFile: values.yaml
+
+resources:
+  - gzctf-sealed-secret.yaml
