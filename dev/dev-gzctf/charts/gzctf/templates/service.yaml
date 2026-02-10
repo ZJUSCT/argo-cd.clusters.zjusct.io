@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gzctf.fullname" . }}
+  labels:
+    {{- include "gzctf.labels" . | nindent 4 }}
+    app.kubernetes.io/component: application
+  {{- with .Values.gzctf.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.gzctf.service.type }}
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.gzctf.service.httpPort }}
+      targetPort: http
+    - name: metrics
+      protocol: TCP
+      port: {{ .Values.gzctf.service.metricsPort }}
+      targetPort: metrics
+  selector:
+    {{- include "gzctf.selectorLabels" . | nindent 4 }}
+---
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gzctf.postgresql.fullname" . }}
+  labels:
+    {{- include "gzctf.postgresql.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.postgresql.service.type }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.postgresql.service.port }}
+      targetPort: postgresql
+  selector:
+    {{- include "gzctf.postgresql.selectorLabels" . | nindent 4 }}
+{{- end }}
+---
+{{- if .Values.garnet.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gzctf.garnet.fullname" . }}
+  labels:
+    {{- include "gzctf.garnet.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.garnet.service.type }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.garnet.service.port }}
+      targetPort: garnet
+  selector:
+    {{- include "gzctf.garnet.selectorLabels" . | nindent 4 }}
+{{- end }}

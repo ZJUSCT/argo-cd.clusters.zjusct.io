@@ -60,3 +60,38 @@ spec:
           # https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#manage-argo-cd-using-argo-cd
           # must use ServerSideApply
           - ServerSideApply=true
+---
+# https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/applicationset-specification/
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev
+spec:
+  generators:
+    - git:
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo.clusters.zjusct.io.git
+        revision: HEAD
+        directories:
+          - path: dev/*
+  template:
+    metadata:
+      name: '{{path.basename}}'
+      namespace: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo.clusters.zjusct.io.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        name: in-cluster
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          # https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#manage-argo-cd-using-argo-cd
+          # must use ServerSideApply
+          - ServerSideApply=true

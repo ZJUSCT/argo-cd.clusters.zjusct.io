@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gzctf.fullname" . }}-config
+  labels:
+    {{- include "gzctf.labels" . | nindent 4 }}
+data:
+  appsettings.json: |
+    {
+      "AllowedHosts": {{ .Values.gzctf.config.allowedHosts | quote }},
+      "ConnectionStrings": {
+        "Database": {{ include "gzctf.databaseConnectionString" . | quote }},
+        "RedisCache": {{ include "gzctf.redisConnectionString" . | quote }}
+      },
+      "Logging": {
+        "LogLevel": {
+          "Default": {{ .Values.gzctf.config.logging.logLevel.default | quote }},
+          "Microsoft": {{ .Values.gzctf.config.logging.logLevel.microsoft | quote }},
+          "Microsoft.AspNetCore.HttpOverrides": {{ .Values.gzctf.config.logging.logLevel.microsoftAspNetCoreHttpOverrides | quote }}
+        }
+      },
+      "XorKey": {{ .Values.gzctf.config.xorKey | quote }},
+      "EmailConfig": {
+        "SenderAddress": {{ .Values.gzctf.config.email.senderAddress | quote }},
+        "UserName": {{ .Values.gzctf.config.email.userName | quote }},
+        "Password": {{ .Values.gzctf.config.email.password | quote }},
+        "Smtp": {
+          "Host": {{ .Values.gzctf.config.email.smtp.host | quote }},
+          "Port": {{ .Values.gzctf.config.email.smtp.port }}
+        }
+      },
+      "ContainerProvider": {
+        "Type": {{ .Values.gzctf.config.containerProvider.type | quote }},
+        "PortMappingType": {{ .Values.gzctf.config.containerProvider.portMappingType | quote }},
+        "EnableTrafficCapture": {{ .Values.gzctf.config.containerProvider.enableTrafficCapture }},
+        "PublicEntry": {{ .Values.gzctf.config.containerProvider.publicEntry | quote }}
+      },
+      "RequestLogging": {{ .Values.gzctf.config.requestLogging }},
+      "DisableRateLimit": {{ .Values.gzctf.config.disableRateLimit }},
+      "CaptchaConfig": {
+        "Provider": {{ .Values.gzctf.config.captcha.provider | quote }},
+        "SiteKey": {{ .Values.gzctf.config.captcha.siteKey | quote }},
+        "SecretKey": {{ .Values.gzctf.config.captcha.secretKey | quote }}
+      },
+      {{- if .Values.gzctf.config.registries }}
+      "Registries": {{- .Values.gzctf.config.registries | toJson | nindent 8 }},
+      {{- else }}
+      "Registries": {},
+      {{- end }}
+      "ForwardedOptions": {
+        "ForwardedHeaders": {{ .Values.gzctf.config.forwardedOptions.forwardedHeaders }},
+        "ForwardLimit": {{ .Values.gzctf.config.forwardedOptions.forwardLimit }},
+        "TrustedNetworks": {{- .Values.gzctf.config.forwardedOptions.trustedNetworks | toJson | nindent 10 }}
+      },
+      "Telemetry": {
+        "Enable": {{ .Values.gzctf.config.telemetry.enable }},
+        "Prometheus": {
+          "Enable": {{ .Values.gzctf.config.telemetry.prometheus.enable }}
+        },
+        "OpenTelemetry": {
+          "Enable": {{ .Values.gzctf.config.telemetry.openTelemetry.enable }},
+          "Protocol": {{ .Values.gzctf.config.telemetry.openTelemetry.protocol | quote }},
+          "EndpointUri": {{ .Values.gzctf.config.telemetry.openTelemetry.endpointUri | quote }}
+        }
+      },
+      "Kestrel": {
+        "Limits": {
+          "MaxResponseBufferSize": {{ .Values.gzctf.config.kestrel.limits.maxResponseBufferSize }},
+          "MaxRequestBufferSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestBufferSize }},
+          "MaxRequestLineSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestLineSize }},
+          "MaxRequestHeadersTotalSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestHeadersTotalSize }},
+          "MaxRequestHeaderCount": {{ .Values.gzctf.config.kestrel.limits.maxRequestHeaderCount }},
+          "MaxRequestBodySize": {{ .Values.gzctf.config.kestrel.limits.maxRequestBodySize }}
+        }
+      }
+    }

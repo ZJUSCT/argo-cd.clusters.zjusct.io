@@ -1,0 +1,76 @@
+# Example values for deploying GZCTF with Gateway API (HTTPRoute)
+# This example assumes you have:
+# 1. Gateway API CRDs installed in your cluster
+# 2. A Gateway controller deployed (e.g., Istio, Envoy Gateway, Cilium)
+# 3. A Gateway resource created
+
+# GZCTF configuration
+gzctf:
+  config:
+    # IMPORTANT: Change these values before deployment
+    database:
+      password: "your-strong-password-here"
+    xorKey: "your-random-string-here"
+    email:
+      senderAddress: "noreply@yourdomain.com"
+      password: "your-email-password"
+      smtp:
+        host: smtp.gmail.com
+        port: 587
+    containerProvider:
+      publicEntry: "ctf.yourdomain.com"
+    captcha:
+      provider: "None"  # or "CloudflareTurnstile" or "HashPow"
+
+  persistence:
+    storageClassName: "standard"  # Change to your storage class
+    size: 10Gi
+
+postgresql:
+  persistence:
+    storageClassName: "standard"  # Change to your storage class
+    size: 2Gi
+
+# HTTPRoute configuration (Gateway API)
+httpRoute:
+  enabled: true
+
+  # Reference to your Gateway
+  parentRefs:
+    - name: my-gateway           # Name of your Gateway resource
+      namespace: gateway-system   # Namespace where Gateway is deployed
+      # Optional: specify a listener name if your Gateway has multiple listeners
+      # sectionName: https
+
+  # Hostnames that this HTTPRoute will match
+  hostnames:
+    - ctf.yourdomain.com
+
+  # Optional: Custom routing rules
+  # If not specified, all traffic will be routed to GZCTF service
+  # Uncomment and customize as needed:
+  # rules:
+  #   - matches:
+  #       - path:
+  #           type: PathPrefix
+  #           value: /
+  #     # Optional: Add request header modification
+  #     filters:
+  #       - type: RequestHeaderModifier
+  #         requestHeaderModifier:
+  #           set:
+  #             - name: X-Forwarded-Proto
+  #               value: https
+  #     backendRefs:
+  #       - name: gzctf  # Service name (will be prefixed with release name)
+  #         port: 8080
+
+# Disable traditional Ingress since we're using HTTPRoute
+ingress:
+  enabled: false
+
+# Optional: Enable Prometheus monitoring
+serviceMonitor:
+  enabled: false
+  labels:
+    release: kube-prometheus

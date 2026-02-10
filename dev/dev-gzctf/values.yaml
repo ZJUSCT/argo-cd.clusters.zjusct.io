@@ -1,0 +1,33 @@
+gzctf:
+  image:
+    repository: harbor.clusters.zjusct.io/hub.docker.com/gztime/gzctf
+  
+  config:
+    database:
+      password: "testing"
+    xorKey: "testing"
+    containerProvider:
+      publicEntry: "gzctf.clusters.zjusct.io"
+    forwardedOptions:
+      trustedNetworks:
+        - "10.0.0.0/8"
+        - "172.26.0.0/16"
+        - "172.27.0.0/16"
+        - "172.28.0.0/16"
+
+postgresql:
+  image:
+    repository: harbor.clusters.zjusct.io/hub.docker.com/library/postgres
+
+garnet:
+  image:
+    repository: harbor.clusters.zjusct.io/ghcr.io/microsoft/garnet-alpine
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: envoy-gateway
+      namespace: default
+  hostnames:
+    - gzctf.s.zjusct.io
+    - gzctf.clusters.zjusct.io
