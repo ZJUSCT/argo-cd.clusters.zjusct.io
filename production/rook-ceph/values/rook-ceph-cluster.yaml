@@ -293,6 +293,13 @@ cephFileSystems:
           pg_autoscale_mode: "off"
 
       dataPools:
+        - name: cephfs-data
+          failureDomain: host
+          replicated:
+            size: 2
+          parameters:
+            pg_autoscale_mode: "off"
+
         - name: cephfs-hdd-data
           failureDomain: host
           deviceClass: hdd
@@ -336,7 +343,7 @@ cephFileSystems:
       enabled: true
       isDefault: true
       name: cephfs
-      # pool: # do not specify pool
+      pool: cephfs-data
       reclaimPolicy: Delete
       allowVolumeExpansion: true
       volumeBindingMode: "Immediate"
