@@ -65,12 +65,12 @@ data:
       },
       "Kestrel": {
         "Limits": {
-          "MaxResponseBufferSize": {{ .Values.gzctf.config.kestrel.limits.maxResponseBufferSize }},
-          "MaxRequestBufferSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestBufferSize }},
-          "MaxRequestLineSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestLineSize }},
-          "MaxRequestHeadersTotalSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestHeadersTotalSize }},
-          "MaxRequestHeaderCount": {{ .Values.gzctf.config.kestrel.limits.maxRequestHeaderCount }},
-          "MaxRequestBodySize": {{ .Values.gzctf.config.kestrel.limits.maxRequestBodySize }}
+          "MaxResponseBufferSize": {{ .Values.gzctf.config.kestrel.limits.maxResponseBufferSize | int }},
+          "MaxRequestBufferSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestBufferSize | int }},
+          "MaxRequestLineSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestLineSize | int }},
+          "MaxRequestHeadersTotalSize": {{ .Values.gzctf.config.kestrel.limits.maxRequestHeadersTotalSize | int }},
+          "MaxRequestHeaderCount": {{ .Values.gzctf.config.kestrel.limits.maxRequestHeaderCount | int }},
+          "MaxRequestBodySize": {{ .Values.gzctf.config.kestrel.limits.maxRequestBodySize | int }}
         }
       }
     }

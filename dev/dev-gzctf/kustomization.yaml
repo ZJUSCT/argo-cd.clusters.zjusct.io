@@ -4,6 +4,9 @@ kind: Kustomization
 
 namespace: dev-gzctf
 
+helmGlobals:
+  chartHome: charts/gzctf-helm
+
 helmCharts:
   - name: gzctf
     includeCRDs: true
