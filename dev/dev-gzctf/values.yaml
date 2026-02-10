@@ -83,3 +83,7 @@ minio:
 
   image:
     repository: harbor.clusters.zjusct.io/quay.io/minio/minio
+
+  # MinIO root credentials
+  rootUser: "minioadmin"
+  rootPassword: "minioadmin123"
