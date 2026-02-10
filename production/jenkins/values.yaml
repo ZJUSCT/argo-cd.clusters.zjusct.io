@@ -50,7 +50,7 @@ controller:
     paths:
       - "/"
 
-  existingSecret: jenkins-jcasc
+  # existingSecret: jenkins-jcasc
 
   JCasC:
     enabled: true
