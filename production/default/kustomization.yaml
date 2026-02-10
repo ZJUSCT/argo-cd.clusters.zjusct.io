@@ -9,6 +9,9 @@ resources:
   - resources/cert-manager.yaml
   - resources/envoy-gateway.yaml
   - resources/headlamp-token.yaml
+  - resources/harbor-core-sealedsecret.yaml
+  - resources/harbor-jobservice-sealedsecret.yaml
+  - resources/harbor-registry-sealedsecret.yaml
 
 helmCharts:
 - name: cilium
