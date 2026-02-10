@@ -36,7 +36,11 @@ gzctf:
       - gzctf.clusters.zjusct.io
 
   pvc:
+    # When using MinIO (enabled above), set create to false
+    # MinIO will be used for S3 storage, emptyDir for /app/files
+    create: false
     storageClassName: "ceph-block"
+    accessMode: ReadWriteOnce
     size: "10Gi"
 
 # https://github.com/microsoft/garnet/blob/main/charts/garnet/values.yaml
@@ -88,3 +92,9 @@ minio:
   # MinIO root credentials
   rootUser: "minioadmin"
   rootPassword: "minioadmin123"
+
+  # MinIO buckets to create
+  buckets:
+    - name: gzctf-bucket
+      policy: none
+      purge: false
