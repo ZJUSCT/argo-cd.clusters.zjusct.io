@@ -33,7 +33,7 @@ configs:
   # repositories:
   #   argo-private:
   #     type: git
-  #     url: https://git.zju.edu.cn/zjusct/ops/argo.clusters.zjusct.io.git
+  #     url: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git
   #     name: argo-private
   #     password: <sealed>
   #     username: not-used
