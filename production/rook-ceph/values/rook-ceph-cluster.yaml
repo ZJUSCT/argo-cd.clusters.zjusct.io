@@ -115,7 +115,7 @@ cephClusterSpec:
           - name: "/dev/disk/by-id/wwn-0x5000cca0c3d5a7ee"
             config:
               deviceClass: hdd
-              
+
       - name: m600
         devices:
           - name: /dev/disk/by-id/ata-ST2000DM001-1CH164_Z1E5B3FZ
@@ -334,20 +334,7 @@ cephFileSystems:
         activeStandby: true
         priorityClassName: system-cluster-critical
 
-    # ✅ chart 需要的是 storageClass（单数）
     storageClass:
       enabled: true
-      name: cephfs-nvme
-      isDefault: false
-      reclaimPolicy: Delete
-      allowVolumeExpansion: true
-      volumeBindingMode: "Immediate"
-      mountOptions: []
-      pool: cephfs-nvme-data
-      parameters:
-        csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
-        csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
-        csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
-        csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
-        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
-        csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+      isDefault: true
+      name: cephfs

@@ -4,9 +4,6 @@ kind: Kustomization
 
 namespace: rook-ceph
 
-resources:
-- storageclass.yaml
-
 helmCharts:
   - name: rook-ceph
     repo: https://charts.rook.io/release
