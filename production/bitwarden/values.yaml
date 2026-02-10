@@ -4,7 +4,7 @@ secrets:
   secretName: custom-secret
 
 general:
-  domain: "key.clusters.zjusct.io"
+  domain: "bitwarden.clusters.zjusct.io"
 
   disableUserRegistration: "true"
 
