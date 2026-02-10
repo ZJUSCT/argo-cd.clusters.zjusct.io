@@ -98,6 +98,13 @@ minio:
   rootUser: "minioadmin"
   rootPassword: "minioadmin123"
 
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hosts:
+      - ctf-minio.clusters.zjusct.io
+      - ctf-minio.s.zjusct.io
+
   # MinIO buckets to create
   buckets:
     - name: gzctf-bucket
