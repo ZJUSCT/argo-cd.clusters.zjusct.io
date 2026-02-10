@@ -19,7 +19,7 @@ route:
 
 monitoring:
   enabled: true
-  createPrometheusRules: true
+  # createPrometheusRules: true
 
 cephClusterSpec:
   network:
