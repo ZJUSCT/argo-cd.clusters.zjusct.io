@@ -1,0 +1,26 @@
+# https://github.com/kubernetes-sigs/external-dns/blob/master/charts/external-dns/values.yaml
+
+sources:
+  - service
+  - ingress
+  - gateway
+
+# https://kubernetes-sigs.github.io/external-dns/latest/docs/tutorials/rfc2136/#configuration-steps
+extraArgs:
+  - --rfc2136-host="dns-host-1.yourdomain.com"
+  - --rfc2136-port=53
+  - --rfc2136-zone=example.com
+  - --rfc2136-tsig-secret-alg=hmac-sha256
+  - --rfc2136-tsig-axfr
+
+env:
+  - name: "EXTERNAL_DNS_RFC2136_TSIG_SECRET"
+    valueFrom:
+      secretKeyRef:
+        name: rfc2136-keys
+        key: rfc2136-tsig-secret
+  - name: "EXTERNAL_DNS_RFC2136_TSIG_KEYNAME"
+    valueFrom:
+      secretKeyRef:
+        name: rfc2136-keys
+        key: rfc2136-tsig-keyname

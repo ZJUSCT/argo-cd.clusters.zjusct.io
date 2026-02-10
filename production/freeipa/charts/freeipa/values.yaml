@@ -1,0 +1,33 @@
+ipa:
+  replicas: 1
+  image:
+    repository: quay.io/freeipa/freeipa-server
+    tag: fedora-rawhide-4.13.1
+  server:
+    adminEmail: mail@zjusct.io
+  domain: clusters.zjusct.io
+  timezone: Asia/Shanghai
+
+  # Secret configuration - reference to external secret
+  secrets:
+    name: freeipa-admin-secrets
+    adminPasswordKey: admin-password
+    directoryPasswordKey: directory-password
+
+lan:
+  domain: clusters.zjusct.io
+
+# Storage configuration
+storage:
+  storageClassName: ceph-block
+  size: 10Gi
+
+# Network services configuration for LoadBalancer IPs
+network:
+  services:
+    ipa-01:
+      ipv4: ""  # Configure your IPv4 address here
+      ipv6: ""  # Configure your IPv6 address here
+    ipa-02:
+      ipv4: ""
+      ipv6: ""
