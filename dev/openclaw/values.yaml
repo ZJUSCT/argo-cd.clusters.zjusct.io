@@ -31,9 +31,9 @@ app-template:
             - openrouter/anthropic/claude-haiku-3.5
             - anthropic/claude-sonnet-4-5
         models:
-          - openrouter/openrouter/auto: {}
-          - openrouter/anthropic/claude-haiku-3.5: {}
-          - anthropic/claude-sonnet-4-5: {}
+          openrouter/openrouter/auto: {}
+          openrouter/anthropic/claude-haiku-3.5: {}
+          anthropic/claude-sonnet-4-5: {}
         userTimezone: Asia/Shanghai
         timeoutSeconds: 600
         maxConcurrent: 1
