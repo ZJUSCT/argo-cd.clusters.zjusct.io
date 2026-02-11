@@ -14,3 +14,12 @@ helmCharts:
 
 resources:
   - openclaw-sealed-secret.yaml
+
+patches:
+  - target:
+      kind: HTTPRoute
+      name: dev-openclaw
+    patch: |-
+      - op: replace
+        path: /apiVersion
+        value: gateway.networking.k8s.io/v1
