@@ -21,6 +21,7 @@ configs:
       - '.spec.rules[].backendRefs[].group'
       - '.spec.rules[].backendRefs[].port'
       - '.spec.rules[].backendRefs[].weight'
+      - '.spec.rules[].backendRefs[].kind'
 
   params:
     # https://github.com/argoproj/argo-cd/issues/13578
