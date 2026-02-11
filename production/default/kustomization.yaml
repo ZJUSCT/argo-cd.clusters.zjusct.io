@@ -52,11 +52,6 @@ helmCharts:
   includeCRDs: true
   releaseName: cert-manager
   valuesFile: values/cert-manager.yaml
-# - name: openebs
-#   repo: https://openebs.github.io/openebs
-#   includeCRDs: true
-#   releaseName: openebs
-#   valuesFile: values/openebs.yaml
 - name: harbor
   repo: https://helm.goharbor.io
   includeCRDs: true
