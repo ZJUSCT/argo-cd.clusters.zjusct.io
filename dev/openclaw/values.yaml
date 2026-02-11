@@ -1,6 +1,57 @@
 # https://github.com/serhanekicii/openclaw-helm/blob/main/charts/openclaw/values.yaml
 
 app-template:
+  # OpenClaw configuration in YAML format (will be rendered as JSON)
+  openclawConfig:
+    gateway:
+      port: 18789
+      mode: local
+      trustedProxies:
+        - 10.0.0.1
+    browser:
+      enabled: true
+      defaultProfile: default
+      profiles:
+        default:
+          cdpUrl: http://localhost:9222
+          color: "#4285F4"
+    agents:
+      defaults:
+        workspace: /home/node/.openclaw/workspace
+        model:
+          primary: anthropic/claude-sonnet-4-5
+        userTimezone: Asia/Shanghai
+        timeoutSeconds: 600
+        maxConcurrent: 1
+      list:
+        - id: main
+          default: true
+          identity:
+            name: OpenClaw
+            emoji: 🦞
+    session:
+      scope: per-sender
+      store: /home/node/.openclaw/sessions
+      reset:
+        mode: idle
+        idleMinutes: 60
+    logging:
+      level: info
+      consoleLevel: info
+      consoleStyle: compact
+      redactSensitive: tools
+    tools:
+      profile: full
+      web:
+        search:
+          enabled: false
+        fetch:
+          enabled: true
+    # channels:
+    #   telegram:
+    #     botToken: ${TELEGRAM_BOT_TOKEN}
+    #     enabled: false
+
   # OpenClaw version
   openclawVersion: "2026.2.9"
   chromiumVersion: "124"
@@ -44,76 +95,7 @@ app-template:
     config:
       enabled: true
       data:
-        openclaw.json: |
-          {
-            "gateway": {
-              "port": 18789,
-              "mode": "local",
-              "trustedProxies": ["10.0.0.1"]
-            },
-            "browser": {
-              "enabled": true,
-              "defaultProfile": "default",
-              "profiles": {
-                "default": {
-                  "cdpUrl": "http://localhost:9222",
-                  "color": "#4285F4"
-                }
-              }
-            },
-            "agents": {
-              "defaults": {
-                "workspace": "/home/node/.openclaw/workspace",
-                "model": {
-                  "primary": "anthropic/claude-sonnet-4-5"
-                },
-                "userTimezone": "Asia/Shanghai",
-                "timeoutSeconds": 600,
-                "maxConcurrent": 1
-              },
-              "list": [
-                {
-                  "id": "main",
-                  "default": true,
-                  "identity": {
-                    "name": "OpenClaw",
-                    "emoji": "🦞"
-                  }
-                }
-              ]
-            },
-            "session": {
-              "scope": "per-sender",
-              "store": "/home/node/.openclaw/sessions",
-              "reset": {
-                "mode": "idle",
-                "idleMinutes": 60
-              }
-            },
-            "logging": {
-              "level": "info",
-              "consoleLevel": "info",
-              "consoleStyle": "compact",
-              "redactSensitive": "tools"
-            },
-            "tools": {
-              "profile": "full",
-              "web": {
-                "search": {
-                  "enabled": false
-                },
-                "fetch": {
-                  "enabled": true
-                }
-              }
-            },
-            "channels": {
-              "telegram": {
-                "botToken": "${TELEGRAM_BOT_TOKEN}",
-                "enabled": false
-              }
-            }
-          }
+        openclaw.json: '{{ toJson .Values.openclawConfig }}'
 
   service:
     main:
