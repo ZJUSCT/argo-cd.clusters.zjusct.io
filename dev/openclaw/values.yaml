@@ -26,7 +26,14 @@ app-template:
       defaults:
         workspace: /home/node/.openclaw/workspace
         model:
-          primary: anthropic/claude-sonnet-4-5
+          primary: openrouter/openrouter/auto
+          fallbacks:
+            - openrouter/anthropic/claude-haiku-3.5
+            - anthropic/claude-sonnet-4-5
+        models:
+          - openrouter/openrouter/auto: {}
+          - openrouter/anthropic/claude-haiku-3.5: {}
+          - anthropic/claude-sonnet-4-5: {}
         userTimezone: Asia/Shanghai
         timeoutSeconds: 600
         maxConcurrent: 1
