@@ -1,0 +1,172 @@
+# OpenClaw Helm Chart Values
+# Simplified configuration for dev-openclaw deployment
+
+app-template:
+  # OpenClaw version
+  openclawVersion: "2026.2.9"
+  chromiumVersion: "124"
+  configMode: merge
+
+  controllers:
+    main:
+      replicas: 1
+      strategy: Recreate
+
+      containers:
+        main:
+          # Reference secret for environment variables (API keys)
+          envFrom:
+            - secretRef:
+                name: openclaw-env-secret
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+
+  configMaps:
+    config:
+      enabled: true
+      data:
+        openclaw.json: |
+          {
+            "gateway": {
+              "port": 18789,
+              "mode": "local",
+              "trustedProxies": ["10.0.0.1"]
+            },
+            "browser": {
+              "enabled": true,
+              "defaultProfile": "default",
+              "profiles": {
+                "default": {
+                  "cdpUrl": "http://localhost:9222",
+                  "color": "#4285F4"
+                }
+              }
+            },
+            "agents": {
+              "defaults": {
+                "workspace": "/home/node/.openclaw/workspace",
+                "model": {
+                  "primary": "anthropic/claude-sonnet-4-5"
+                },
+                "userTimezone": "Asia/Shanghai",
+                "timeoutSeconds": 600,
+                "maxConcurrent": 1
+              },
+              "list": [
+                {
+                  "id": "main",
+                  "default": true,
+                  "identity": {
+                    "name": "OpenClaw",
+                    "emoji": "🦞"
+                  }
+                }
+              ]
+            },
+            "session": {
+              "scope": "per-sender",
+              "store": "/home/node/.openclaw/sessions",
+              "reset": {
+                "mode": "idle",
+                "idleMinutes": 60
+              }
+            },
+            "logging": {
+              "level": "info",
+              "consoleLevel": "info",
+              "consoleStyle": "compact",
+              "redactSensitive": "tools"
+            },
+            "tools": {
+              "profile": "full",
+              "web": {
+                "search": {
+                  "enabled": false
+                },
+                "fetch": {
+                  "enabled": true
+                }
+              }
+            },
+            "channels": {
+              "telegram": {
+                "botToken": "${TELEGRAM_BOT_TOKEN}",
+                "enabled": false
+              }
+            }
+          }
+
+  service:
+    main:
+      controller: main
+      ipFamilyPolicy: SingleStack
+      ipFamilies:
+        - IPv4
+      ports:
+        http:
+          port: 18789
+
+  ingress:
+    main:
+      enabled: false
+
+  # Gateway API HTTPRoute configuration
+  route:
+    main:
+      enabled: true
+      kind: HTTPRoute
+      parentRefs:
+        - name: envoy-gateway
+          namespace: default
+          group: gateway.networking.k8s.io
+          kind: Gateway
+      hostnames:
+        - openclaw.clusters.zjusct.io
+      rules:
+        - backendRefs:
+            - name: '{{ include "bjw-s.common.lib.chart.names.fullname" $ }}'
+              port: 18789
+
+  persistence:
+    config:
+      enabled: true
+      type: configMap
+      identifier: config
+      advancedMounts:
+        main:
+          init-config:
+            - path: /config
+              readOnly: true
+
+    data:
+      enabled: true
+      type: persistentVolumeClaim
+      accessMode: ReadWriteOnce
+      size: 5Gi
+      advancedMounts:
+        main:
+          init-config:
+            - path: /home/node/.openclaw
+          init-skills:
+            - path: /home/node/.openclaw
+          main:
+            - path: /home/node/.openclaw
+
+    tmp:
+      enabled: true
+      type: emptyDir
+      advancedMounts:
+        main:
+          init-config:
+            - path: /tmp
+          init-skills:
+            - path: /tmp
+          main:
+            - path: /tmp
+          chromium:
+            - path: /tmp

@@ -1,0 +1,16 @@
+# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev-openclaw
+
+helmCharts:
+  - name: openclaw
+    repo: https://serhanekicii.github.io/openclaw-helm
+    includeCRDs: true
+    releaseName: dev-openclaw
+    namespace: dev-openclaw
+    valuesFile: values.yaml
+
+resources:
+  - openclaw-sealed-secret.yaml
