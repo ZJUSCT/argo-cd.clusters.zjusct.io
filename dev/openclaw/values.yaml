@@ -13,6 +13,8 @@ app-template:
         - 10.0.0.1
       controlUi:
         enabled: true
+        allowInsecureAuth: true
+        # dangerouslyDisableDeviceAuth: false
     browser:
       enabled: true
       defaultProfile: default

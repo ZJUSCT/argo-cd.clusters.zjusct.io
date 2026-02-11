@@ -8,6 +8,9 @@ k8s:
   requireIPv4PodCIDR: true
 
 hubble:
+  metrics:
+    serviceMonitor:
+      enabled: true
   enabled: true
   relay:
     enabled: true
@@ -25,3 +28,10 @@ hubble:
   frontend:
     image:
       repository: harbor.clusters.zjusct.io/quay.io/cilium/hubble-ui
+
+prometheus:
+  metricsService: true
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    trustCRDsExist: true
