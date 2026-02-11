@@ -10,20 +10,5 @@ ipa:
 
   # Secret configuration - reference to SealedSecret
   secrets:
+    create: false
     name: freeipa-admin-secrets
-    adminPasswordKey: admin-password
-    directoryPasswordKey: directory-password
-
-lan:
-  domain: clusters.zjusct.io
-
-# Network services configuration for LoadBalancer IPs (optional)
-# Leave empty to let LoadBalancer assign IPs automatically
-network:
-  services:
-    ipa-01:
-      ipv4: ""  # Example: "10.10.10.10"
-      ipv6: ""  # Example: "2001:db8::1"
-    ipa-02:
-      ipv4: ""
-      ipv6: ""

@@ -4,7 +4,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: ipa-01-data
 spec:
+  {{- if .Values.storage.storageClassName }}
   storageClassName: {{ .Values.storage.storageClassName }}
+  {{- end }}
   accessModes:
     - ReadWriteOnce
   resources:

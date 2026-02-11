@@ -5,7 +5,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: ipa-{{ printf "%02d" (add $i 1) }}-data
 spec:
-  storageClassName: ceph-block
+  {{- if .Values.storage.storageClassName }}
+  storageClassName: {{ .Values.storage.storageClassName }}
+  {{- end }}
   accessModes:
     - ReadWriteOnce
   resources:

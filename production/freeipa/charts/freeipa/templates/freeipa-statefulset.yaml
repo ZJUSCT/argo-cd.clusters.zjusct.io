@@ -23,7 +23,7 @@ spec:
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
-            - "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.lan.domain }}"
+            - "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
       terminationGracePeriodSeconds: 10
       affinity:
         podAntiAffinity:
@@ -70,7 +70,7 @@ spec:
             - name: IPA_SERVER_IP
               value: no-update
             - name: IPA_SERVER_HOSTNAME
-              value: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.lan.domain }}"
+              value: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
             - name: IPA_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -143,7 +143,7 @@ spec:
               mountPath: /run/systemd
             - name: tmp
               mountPath: /tmp
-      hostname: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.lan.domain }}"
+      hostname: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
       volumes:
         - name: ipa-data
           persistentVolumeClaim:
