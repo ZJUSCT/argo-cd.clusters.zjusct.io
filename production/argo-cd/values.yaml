@@ -14,6 +14,13 @@ configs:
     # https://github.com/kubernetes-sigs/kustomize/issues/4658#issuecomment-1815675157
     # enable helm and helm values override for kustomize in argo
     kustomize.buildOptions: "--enable-helm --load-restrictor=LoadRestrictionsNone"
+    # https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/#system-level-configuration
+    # Ignore differences in HTTPRoute resources where K8s Gateway API adds default fields
+    resource.customizations.ignoreDifferences.gateway.networking.k8s.io_HTTPRoute: |
+      jqPathExpressions:
+      - '.spec.rules[].backendRefs[].group'
+      - '.spec.rules[].backendRefs[].port'
+      - '.spec.rules[].backendRefs[].weight'
 
   params:
     # https://github.com/argoproj/argo-cd/issues/13578
