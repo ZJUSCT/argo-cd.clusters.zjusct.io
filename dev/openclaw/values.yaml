@@ -1,5 +1,4 @@
-# OpenClaw Helm Chart Values
-# Simplified configuration for dev-openclaw deployment
+# https://github.com/serhanekicii/openclaw-helm/blob/main/charts/openclaw/values.yaml
 
 app-template:
   # OpenClaw version
@@ -12,8 +11,23 @@ app-template:
       replicas: 1
       strategy: Recreate
 
+      initContainers:
+        init-config:
+          image:
+            repository: harbor.clusters.zjusct.io/ghcr.io/openclaw/openclaw
+
+        init-skills:
+          image:
+            repository: harbor.clusters.zjusct.io/ghcr.io/openclaw/openclaw
+
       containers:
+        chromium:
+          image:
+            repository: harbor.clusters.zjusct.io/hub.docker.com/zenika/alpine-chrome
+
         main:
+          image:
+            repository: harbor.clusters.zjusct.io/ghcr.io/openclaw/openclaw
           # Reference secret for environment variables (API keys)
           envFrom:
             - secretRef:
