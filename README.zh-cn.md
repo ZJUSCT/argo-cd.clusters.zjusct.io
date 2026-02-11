@@ -4,7 +4,7 @@
 
 ## 设计理念
 
-本项目的设计理念可以用一句话概括：**让 AI 接管耗时巨大的信息处理工作**，从而使人类工程师能聚焦于系统的逻辑设计与架构决策。。
+本项目的设计理念可以用一句话概括：**让 AI 接管耗时巨大的信息处理工作**，从而使人类工程师能聚焦于系统的逻辑设计与架构决策。
 
 传统运维工作的核心挑战，源于系统不断演进中积累的**固有复杂性**，以及随之而来的**信息传递与处理的高昂成本**。配置的意图、服务间的依赖、历史决策的上下文等信息，往往隐没在命令行历史、临时的环境变量或不完整的文档中，使得维护、排障与知识传承变得异常困难，系统状态也变得脆弱而模糊。
 
@@ -101,12 +101,23 @@ namespace-name/
 
 ### 网络
 
-CNI 插件：cilium，启用 Hubble 提供网络可观测性
+- CNI 插件：cilium，启用 Hubble 提供网络可观测性。
+- IngressClasses：`nginx`，虽然使用广泛但已进入维护状态，建议使用更新的 Gateway API。
+- Gateway：`envoy-gateway`，已配置下列 Listener
+    - 80：HTTP
+    - 443：HTTPS，已配置 TLS 泛域名证书
+    - 444：TLS Passthrough，适用于需要直接暴露 TLS 服务的应用
+- LoadBalancer：metallb，地址段 `172.28.0.0/16`。
+- 域名：`*.clusters.zjusct.io`、`*.s.zjusct.io`。如果应用支持多 Host 则前述域名均应当配置，否则仅配置第一个。
 
-入站：
+### 镜像服务
 
-- IngressClasses：`nginx`，虽然使用广泛但已进入维护状态，建议使用更新的 Gateway API
-- Gateway：`envoy-gateway`，监听 80（HTTP）、443（HTTPS，已配置 TLS 泛域名证书）和 444（TLS Passthrough，适用于需要直接暴露 TLS 服务的应用）
+集群搭建 Harbor 用于内网镜像服务，域名 `harbor.clusters.zjusct.io`。配置了知名 Registry 的 Pull Through Cache，将其添加为前缀即可。例如：
+
+- `ubuntu` -> `harbor.clusters.zjusct.io/hub.docker.com/library/ubuntu`
+- `quay.io/minio/minio` -> `harbor.clusters.zjusct.io/quay.io/minio/minio`
+
+如果 Helm Chart 允许配置 imageRepository，则应添加集群内镜像服务的前缀。
 
 ### 应用部署
 
