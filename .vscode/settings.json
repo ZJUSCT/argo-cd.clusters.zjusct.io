@@ -1,5 +1,8 @@
 {
-    "[yaml]": {
-        "editor.defaultFormatter": "redhat.vscode-yaml"
-    }
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.associations": {
+    "**/templates/**/*.yaml": "go-template", // Helm templates
+  },
 }

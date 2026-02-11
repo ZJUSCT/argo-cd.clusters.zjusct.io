@@ -10,10 +10,10 @@ helmCharts:
     releaseName: rook-ceph
     namespace: rook-ceph
     valuesFile: values/rook-ceph.yaml
-    includeCRDs: true 
+    includeCRDs: true
   - name: rook-ceph-cluster
     repo: https://charts.rook.io/release
     releaseName: rook-ceph-cluster
     namespace: rook-ceph
     valuesFile: values/rook-ceph-cluster.yaml
-    includeCRDs: true 
+    includeCRDs: true

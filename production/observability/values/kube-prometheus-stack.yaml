@@ -41,7 +41,7 @@ prometheusOperator:
     registry: harbor.clusters.zjusct.io/quay.io
     repository: prometheus-operator/prometheus-operator
     pullPolicy: IfNotPresent
-  
+
   prometheusDefaultBaseImageRegistry: harbor.clusters.zjusct.io/quay.io
 
   alertmanagerDefaultBaseImageRegistry: harbor.clusters.zjusct.io/quay.io
@@ -62,7 +62,7 @@ prometheusOperator:
   prometheusConfigReloader:
     image:
       registry: harbor.clusters.zjusct.io/quay.io
-  
+
   thanosImage:
     registry: harbor.clusters.zjusct.io/quay.io
 

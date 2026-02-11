@@ -36,4 +36,3 @@ client:
               skipVerify: true
         docker:
           configPath: /etc/docker/daemon.json
-
