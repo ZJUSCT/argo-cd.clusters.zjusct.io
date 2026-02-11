@@ -55,7 +55,7 @@ app-template:
   # OpenClaw version
   openclawVersion: "2026.2.9"
   chromiumVersion: "124"
-  configMode: merge
+  configMode: overwrite
 
   controllers:
     main:
