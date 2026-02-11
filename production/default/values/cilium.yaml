@@ -8,19 +8,20 @@ k8s:
   requireIPv4PodCIDR: true
 
 hubble:
+  enabled: true
   relay:
     enabled: true
   ui:
     enabled: true
+    ingress:
+      enabled: true
+      className: "nginx"
+      hosts:
+        - hubble.clusters.zjusct.io
+        - hubble.s.zjusct.io
   backend:
     image:
       repository: harbor.clusters.zjusct.io/quay.io/cilium/hubble-ui-backend
   frontend:
     image:
       repository: harbor.clusters.zjusct.io/quay.io/cilium/hubble-ui
-  ingress:
-    enabled: true
-    className: "nginx"
-    hosts:
-      - hubble.clusters.zjusct.io
-      - hubble.s.zjusct.io
