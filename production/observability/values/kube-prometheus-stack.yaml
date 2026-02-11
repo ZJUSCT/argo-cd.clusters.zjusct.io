@@ -41,6 +41,10 @@ prometheusOperator:
     registry: harbor.clusters.zjusct.io/quay.io
     repository: prometheus-operator/prometheus-operator
     pullPolicy: IfNotPresent
+  
+  prometheusDefaultBaseImageRegistry: harbor.clusters.zjusct.io/quay.io
+
+  alertmanagerDefaultBaseImageRegistry: harbor.clusters.zjusct.io/quay.io
 
   # Admission webhooks configuration
   admissionWebhooks:
@@ -49,21 +53,18 @@ prometheusOperator:
       enabled: true
       image:
         registry: harbor.clusters.zjusct.io/quay.io
-        repository: prometheus-operator/admission-webhook
-        pullPolicy: IfNotPresent
     patch:
       enabled: true
       image:
-        registry: harbor.clusters.zjusct.io/registry.k8s.io
-        repository: ingress-nginx/kube-webhook-certgen
-        pullPolicy: IfNotPresent
+        registry: harbor.clusters.zjusct.io/ghcr.io
 
   # Prometheus config reloader sidecar
   prometheusConfigReloader:
     image:
       registry: harbor.clusters.zjusct.io/quay.io
-      repository: prometheus-operator/prometheus-config-reloader
-      pullPolicy: IfNotPresent
+  
+  thanosImage:
+    registry: harbor.clusters.zjusct.io/quay.io
 
   # Service monitor selector - discover all ServiceMonitors
   prometheusInstanceNamespaces: []
@@ -107,8 +108,6 @@ prometheus:
     # Prometheus image with Harbor prefix
     image:
       registry: harbor.clusters.zjusct.io/quay.io
-      repository: prometheus/prometheus
-      pullPolicy: IfNotPresent
 
     # Retention configuration
     retention: 180d
@@ -152,6 +151,9 @@ prometheus:
 # Alertmanager - Disabled
 alertmanager:
   enabled: false
+  alertmanagerSpec:
+    image:
+      registry: harbor.clusters.zjusct.io/quay.io
 
 # Grafana Configuration
 grafana:
