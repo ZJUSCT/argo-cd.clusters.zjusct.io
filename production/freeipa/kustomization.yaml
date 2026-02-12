@@ -1,21 +1,17 @@
-# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: freeipa
-
 resources:
-  - resources/freeipa-sealedsecret.yaml
-
+- resources/freeipa-sealedsecret.yaml
 helmCharts:
 - name: freeipa
   includeCRDs: true
   releaseName: freeipa
   valuesFile: values/freeipa.yaml
-
-# - name: external-dns
-#   repo: https://kubernetes-sigs.github.io/external-dns/
-#   releaseName: external-dns
-#   valuesFile: values/external-dns.yaml
-# - name: keycloak
-#   chart: oci://registry-1.docker.io/cloudpirates/keycloak
+  namespace: freeipa
+#- name: external-dns
+#  repo: https://kubernetes-sigs.github.io/external-dns/
+#  releaseName: external-dns
+#  valuesFile: values/external-dns.yaml
+#- name: keycloak
+#  chart: oci://registry-1.docker.io/cloudpirates/keycloak
