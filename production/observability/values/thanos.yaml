@@ -1,7 +1,7 @@
 # https://github.com/bitnami/charts/blob/main/bitnami/thanos/values.yaml
 
 image:
-  registry: harbor.clusters.zjusct.io/docker.io
+  registry: docker.io
   repository: bitnami/thanos
   tag: 0.39.2 # 建议锁定版本，避免漂移
 
