@@ -19,4 +19,4 @@ helmCharts:
     includeCRDs: true
 
 resources:
-  - ./resources/mgr-servicemonitor.yaml
+  - /resources/mgr-servicemonitor.yaml
