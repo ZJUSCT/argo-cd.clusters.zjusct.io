@@ -1,0 +1,40 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: thanos-bucket
+provisioner: rook-ceph.ceph.rook.io/bucket
+reclaimPolicy: Delete
+parameters:
+  objectStoreName: default
+  objectStoreNamespace: rook-ceph
+
+---
+
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: thanos-bucket
+  namespace: observability
+spec:
+  generateBucketName: thanos-data
+  storageClassName: thanos-bucket
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: thanos-objstore-config
+  namespace: observability
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+type: Opaque
+stringData:
+  objstore.yml: |
+    type: S3
+    config:
+      bucket: thanos-data-d41d804f-7eed-47f8-b130-57de2cc70871
+      endpoint: rook-ceph-rgw-default.rook-ceph.svc:8080
+      access_key: L92812WF3B2VZA5BPZRG
+      secret_key: oTgcjZknGnf0UNxjtkDLUPlzSApZbWj0nGVyib1f
+      insecure: true

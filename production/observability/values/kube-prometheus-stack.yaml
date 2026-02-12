@@ -110,7 +110,7 @@ prometheus:
       registry: harbor.clusters.zjusct.io/quay.io
 
     # Retention configuration
-    retention: 180d
+    retention: 30d
     retentionSize: ""
 
     # Storage configuration
@@ -122,6 +122,12 @@ prometheus:
           resources:
             requests:
               storage: 50Gi
+
+    thanos:
+      image: "harbor.clusters.zjusct.io/quay.io/thanos/thanos:v0.31.0"
+      objectStorageConfig:
+        name: thanos-objstore-config
+        key: objstore.yml
 
     # Resource limits
     resources:

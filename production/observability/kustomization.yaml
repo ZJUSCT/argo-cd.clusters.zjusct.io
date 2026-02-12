@@ -12,6 +12,7 @@ resources:
   # After creating sealed secrets, uncomment:
   # - resources/otelcol-sealedsecret.yaml
   # - resources/influxdb-sealedsecret.yaml
+  - resources/thanos-obc.yaml
 
 helmCharts:
 # Kube Prometheus Stack - includes Prometheus Operator, Prometheus, Grafana, and exporters
@@ -23,12 +24,12 @@ helmCharts:
   valuesFile: values/kube-prometheus-stack.yaml
 
 # Thanos - Disabled for now, will enable later with rook-ceph ObjectBucketClaim
-# - name: thanos
-#   repo: https://charts.bitnami.com/bitnami
-#   includeCRDs: true
-#   releaseName: thanos
-#   namespace: observability
-#   valuesFile: values/thanos.yaml
+- name: thanos
+  repo: https://charts.bitnami.com/bitnami
+  includeCRDs: true
+  releaseName: thanos
+  namespace: observability
+  valuesFile: values/thanos.yaml
 
 # ClickHouse for logs and traces storage
 # - name: clickstack
