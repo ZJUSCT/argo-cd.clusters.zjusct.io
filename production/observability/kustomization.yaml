@@ -30,6 +30,7 @@ helmCharts:
   releaseName: thanos
   namespace: observability
   valuesFile: values/thanos.yaml
+  version: 17.3.1
 
 # ClickHouse for logs and traces storage
 # - name: clickstack

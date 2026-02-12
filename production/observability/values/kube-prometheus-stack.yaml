@@ -124,7 +124,7 @@ prometheus:
               storage: 50Gi
 
     thanos:
-      image: "harbor.clusters.zjusct.io/quay.io/thanos/thanos:v0.31.0"
+      image: "harbor.clusters.zjusct.io/quay.io/thanos/thanos:v0.39.2"
       objectStorageConfig:
         name: thanos-objstore-config
         key: objstore.yml

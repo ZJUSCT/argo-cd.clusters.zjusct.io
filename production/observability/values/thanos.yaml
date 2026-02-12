@@ -3,11 +3,26 @@
 image:
   registry: harbor.clusters.zjusct.io/docker.io
   repository: bitnami/thanos
+  tag: 0.39.2 # 建议锁定版本，避免漂移
+
+existingObjstoreSecret: thanos-objstore-config
+objstoreConfig: "objstore.yml"
+
+minio:
+  enabled: false
 
 # Query component - provides a unified query API
 query:
   enabled: true
   replicaCount: 1
+
+  dnsDiscovery:
+    enabled: true
+    sidecarsService: "prometheus-operated"
+    sidecarsNamespace: "observability"
+
+  stores:
+    - "thanos-storegateway:10901"
 
   resources:
     limits:
@@ -17,7 +32,6 @@ query:
       cpu: 100m
       memory: 256Mi
 
-  # Expose query via service
   service:
     type: ClusterIP
     ports:
@@ -27,11 +41,10 @@ query:
 storegateway:
   enabled: true
   replicaCount: 1
-
   persistence:
     enabled: true
     size: 8Gi
-
+  
   resources:
     limits:
       cpu: 500m
@@ -43,10 +56,13 @@ storegateway:
 # Compactor - compacts and downsamples data in object storage
 compactor:
   enabled: true
-
   persistence:
     enabled: true
-    size: 8Gi
+    size: 8Gi # 临时工作盘，数据量大时建议给 20Gi+
+
+  retentionResolutionRaw: 30d  # 原始数据保留 30 天
+  retentionResolution5m: 180d # 5分钟精度保留半年
+  retentionResolution1h: 10y  # 1小时精度保留10年
 
   resources:
     limits:
@@ -60,7 +76,7 @@ compactor:
 ruler:
   enabled: false
 
-# Receive - for remote write (optional, can use Prometheus remote write receiver instead)
+# Receive - for remote write
 receive:
   enabled: false
 
@@ -68,12 +84,9 @@ receive:
 metrics:
   enabled: true
   serviceMonitor:
-    enabled: false
+    enabled: true # 建议开启，这样 Prometheus 也能监控 Thanos 自己
+    labels:
+      release: prometheus # 确保这个标签和你的 Prometheus 匹配
 
-# Object storage configuration
-# For now, using local storage. In production, configure S3-compatible storage
-objstoreConfig: ""
-
-# Query Frontend (optional, for query caching and splitting)
 queryFrontend:
   enabled: false
