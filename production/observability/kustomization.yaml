@@ -1,70 +1,15 @@
-# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: observability
-
 resources:
-  - resources/namespace.yaml
-  - resources/grafana-sealedsecret.yaml
-  - resources/clickhouse-statefulset.yaml
-  # - resources/grafana-datasources.yaml
-  # After creating sealed secrets, uncomment:
-  # - resources/otelcol-sealedsecret.yaml
-  # - resources/influxdb-sealedsecret.yaml
-
+- resources/namespace.yaml
+- resources/grafana-sealedsecret.yaml
+- resources/clickhouse-statefulset.yaml
 helmCharts:
-# Kube Prometheus Stack - includes Prometheus Operator, Prometheus, Grafana, and exporters
 - name: kube-prometheus-stack
   repo: https://prometheus-community.github.io/helm-charts
   includeCRDs: true
   releaseName: kube-prometheus-stack
   namespace: observability
-  valuesFile: values/kube-prometheus-stack.yaml
-
-# Thanos - Disabled for now, will enable later with rook-ceph ObjectBucketClaim
-# - name: thanos
-#   repo: https://charts.bitnami.com/bitnami
-#   includeCRDs: true
-#   releaseName: thanos
-#   namespace: observability
-#   valuesFile: values/thanos.yaml
-
-# ClickHouse for logs and traces storage
-# - name: clickstack
-#   repo: https://clickhouse.github.io/ClickStack-helm-charts
-#   includeCRDs: true
-#   releaseName: clickstack
-#   valuesFile: values/clickstack.yaml
-
-# InfluxDB for time series data
-# - name: influxdb2
-#   repo: https://helm.influxdata.com/
-#   includeCRDs: true
-#   releaseName: influxdb
-#   namespace: observability
-#   valuesFile: values/influxdb.yaml
-
-# OpenTelemetry Collector for data collection
-# - name: opentelemetry-collector
-#   repo: https://open-telemetry.github.io/opentelemetry-helm-charts
-#   includeCRDs: true
-#   releaseName: otelcol-gateway
-#   namespace: observability
-#   valuesFile: values/otelcol-gateway.yaml
-
-# Additional SNMP collector instance
-# - name: opentelemetry-collector
-#   repo: https://open-telemetry.github.io/opentelemetry-helm-charts
-#   includeCRDs: true
-#   releaseName: otelcol-snmp
-#   namespace: observability
-#   valuesFile: values/otelcol-snmp.yaml
-
-# Additional check collector instance
-# - name: opentelemetry-collector
-#   repo: https://open-telemetry.github.io/opentelemetry-helm-charts
-#   includeCRDs: true
-#   releaseName: otelcol-check
-#   namespace: observability
-#   valuesFile: values/otelcol-check.yaml
+  valuesFile: values/kube-prometheus-stack-81.6.3.yaml
+  version: 81.6.3
