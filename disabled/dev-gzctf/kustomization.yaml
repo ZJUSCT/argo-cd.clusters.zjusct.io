@@ -9,8 +9,9 @@ helmGlobals:
 
 helmCharts:
   - name: gzctf
-    includeCRDs: true
     releaseName: gzctf
+    namespace: dev-gzctf
+    includeCRDs: true
     valuesFile: values.yaml
 
 resources:

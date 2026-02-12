@@ -1,46 +1,53 @@
 # argo-cd.clusters.zjusct.io
 
-This repository is the Kubernetes cluster GitOps configuration center for [Zhejiang University Supercomputing Team (ZJUSCT)](https://www.zjusct.io), implementing declarative management and continuous synchronization of cluster state. **This project is an exploration and practice of a new paradigm for AI-assisted Operations (AIOps).**
+本仓库是[浙江大学超算队（ZJUSCT）](https://www.zjusct.io)的 Kubernetes 集群 GitOps 配置中心，实现集群状态的声明式管理与持续同步。**本项目是一次面向 AI 辅助运维（AIOps）新范式的探索与实践。**
 
-## Design Philosophy
+## 设计理念
 
-The design philosophy of this project can be summarized in one sentence: **Let AI take over the time-consuming information processing work**, allowing human engineers to focus on system logic design and architectural decisions.
+本项目的设计理念可以用一句话概括：**让 AI 接管耗时巨大的信息处理工作**，从而使人类工程师能聚焦于系统的逻辑设计与架构决策。
 
-The core challenge of traditional operations work stems from the **inherent complexity** accumulated in continuously evolving systems, and the resulting **high cost of information transmission and processing**. Information such as configuration intent, service dependencies, and historical decision context is often buried in command history, temporary environment variables, or incomplete documentation, making maintenance, troubleshooting, and knowledge transfer extremely difficult, and system state fragile and ambiguous.
+传统运维工作的核心挑战，源于系统不断演进中积累的**固有复杂性**，以及随之而来的**信息传递与处理的高昂成本**。配置的意图、服务间的依赖、历史决策的上下文等信息，往往隐没在命令行历史、临时的环境变量或不完整的文档中，使得维护、排障与知识传承变得异常困难，系统状态也变得脆弱而模糊。
 
-We believe that AI technologies represented by Large Language Models (LLMs) provide new tools to change this situation. The key is to **clearly define the different roles of AI and humans in operations work**:
+我们认为，以大型语言模型（LLM）为代表的 AI 技术，为改变这一现状提供了新的工具。其关键在于**明确划分 AI 与人类在运维工作中的不同角色**：
 
-- **AI should serve as a powerful information processor and aggregator**: LLMs excel at quickly retrieving, extracting, and summarizing information from massive, multi-source text (code, configuration, logs, documentation). This means they can efficiently replace humans in information gathering, organization, and preliminary attribution, freeing operations personnel from tedious "information archaeology."
-- **Humans must always maintain control over system logic thinking and design authority**: We must clearly recognize that **current probability-statistics-based LLMs do not possess true system logic capabilities**. They cannot understand the deep intent of architectural design, cannot make responsible trade-offs in ambiguous areas, and cannot perform truly creative abstract design. For core questions requiring logical reasoning, value judgment, and creative thinking—such as "How should system boundaries be defined," "Is the service abstraction reasonable," and "What are the long-term impacts of changes"—the role of human engineers is irreplaceable.
+- **AI 应作为强大的信息处理器与聚合器**：LLM 擅长从海量、多源的文本（代码、配置、日志、文档）中快速检索、提取和总结信息。这意味着，它可以高效地替人类完成信息搜集、整理与初步归因等工作，将运维人员从繁琐的“信息考古”中解放出来。
+- **人类必须始终掌控系统的逻辑思考与设计权**：必须清醒认识到，当前**基于概率统计的 LLM 并不具备真正的系统逻辑能力**。它无法理解架构设计的深层意图，无法在模糊地带做出负责任的权衡，也无法进行真正的创造性的抽象设计。对于“系统边界应如何划定”、“服务抽象是否合理”、“变更的长远影响是什么”这类需要逻辑推演、价值判断和创造性思维的核心问题，人类工程师的角色不可替代。
 
-Therefore, the paradigm we explore is: **Humans are responsible for defining system logic and architecture (What & Why), AI assists humans in efficiently processing implementation and state information (How & Current Status), with both parties working collaboratively within clear boundaries.**
+因此，我们所探索的范式是：**人类负责定义系统逻辑与架构（What & Why），AI 辅助人类高效地处理实现与状态信息（How & Current Status），双方在清晰的边界内协同工作。**
 
-This repository is the initial practical vehicle for this philosophy. We attempt to completely codify and version the expected state of the cluster through the GitOps methodology, aiming to **"make Git the single source of truth for system state."** This practice aims to **reduce** the information gap between the runtime environment and declarative code, thereby providing AI tools with a clear, traceable analysis foundation, enabling them to more reliably assist humans in understanding system state, evaluating changes, and locating problems.
+本仓库是这一理念的初步实践载体。我们尝试通过 GitOps 方法论，将集群的期望状态彻底代码化、版本化，致力于 **“将 Git 打造为系统状态唯一可靠的单一事实来源”**。这一实践旨在**减少**运行环境与声明式代码之间的信息差，从而为 AI 工具提供一个结构清晰、可追溯的分析基座，使其能够更可靠地辅助人类洞察系统状态、评估变更和定位问题。
 
-Within this framework, AI will be encouraged to serve as the primary daily operator of this repository, completing cluster operations work under the logical framework and supervision set by humans.
+在此框架下，AI 将被鼓励作为本仓库的主要日常操作者，在人类设定的逻辑框架与监督下，完成集群的运维工作。
 
-## Documentation
+## 文档
 
-- Language: The operations team primarily communicates in Chinese and is mainly responsible for writing Chinese documentation ending with `.zh-cn.md`. AI is responsible for translating the content of `.zh-cn.md` files into corresponding `.md` files for reference by the international open source community, etc.
-- `AGENTS.zh-cn.md`: Reference [AGENTS.md](https://agents.md/). This contains overall constraints and guiding principles for AI, clarifying AI's role positioning, capability boundaries, and behavioral norms in this project.
-- Content: Avoid piling up documentation; for example, self-evident facts in service Git configuration files should not be restated in documentation. Documentation should only record **information that is not easily obtained directly from code but is critical for understanding system state and design decisions**, such as background and trade-offs of design decisions, explanations of complex dependency relationships between services, context of historical changes, etc.
+- `README.md`：AI 和人类工程师都应当阅读的总体介绍。
+- `AGENTS.md`：参考 [AGENTS.md](https://agents.md/)。这里放置对 AI 的总体约束与指导原则，明确 AI 在本项目中的角色定位、能力边界与行为规范。
+- 内容：注意不要堆砌文档，比如服务的 Git 配置文件中显而易见的事实不应当在文档中再次陈述。文档仅记录那些**不易从代码中直接获取、但对理解系统状态与设计决策至关重要的信息**，如设计决策的背景与权衡、服务间复杂依赖关系的解释、历史变更的上下文等。
 
-## Constraints
+## 仓库布局
 
-This Git repository enforces the following constraints through pre-commit hooks and CI pipelines:
+- **`production/`** — 已经在生产环境中稳定部署的应用
+- **`dev/`** — 用于开发/测试应用
+- **`scripts/`** — 辅助脚本，如验证、部署等工具脚本`
 
-- Folders under `dev/` and `production/` directories cannot have duplicate names to avoid naming conflicts in ApplicationSet templates.
-- All Applications must pass rendering tests with kustomize build or similar tools before pushing to ensure valid Kubernetes resource manifests can be generated.
-- Critical credentials are not allowed to appear in plain text in code; encryption tools (such as Sealed Secrets) must be used for encryption before storage.
+## 应用部署
 
-## Repository Layout
+我们的 K8S 应用部署方法经过了四个阶段的迭代：
 
-### Top-level Directories
+- [kubectl](https://kubernetes.io/docs/reference/kubectl/)：手动管理资源，缺乏版本控制和自动化
+- [Helm](https://helm.sh/)：引入 Helm chart，提升了模板化和参数化能力，但难以管理模板以外的资源
+- [Kustomize](https://kustomize.io/)：补足 Helm 的短板，实现所有 K8S 资源的声明式管理
+- [Argo CD](https://argo-cd.readthedocs.io/)：实现了 GitOps 模式，自动同步 Git 仓库与集群状态
 
-- **`production/`** — Applications already stably deployed in the production environment
-- **`dev/`** — For development/testing applications
+### Argo CD
 
-The `dev/` and `production/` directories are each automatically managed by an Argo CD ApplicationSet, whose core mechanism is to map each subdirectory to an Application through a Git generator. See specific configuration in [production/argo-cd/apps.yaml](production/argo-cd/apps.yaml), with the key rules as follows:
+- Argo CD 管理一个个 Application，它们可以是 Helm Chart、Kustomize 应用等
+- Application 属于特定的 Project
+- Application 可以由 ApplicationSet 自动生成
+- 我们配置了 Application 和 ApplicationSet 的 Any Namespace 功能，以方便部署任意命名空间的应用
+
+`dev/` 和 `production/` 目录各由一个 Argo CD ApplicationSet 管理，其核心机制是通过 Git 生成器将每个子目录映射为一个 Application，使用文件夹名作为名称和目标命名空间。具体配置见 [production/argo-cd/apps.yaml](production/argo-cd/apps.yaml)，其中的关键规则如下：
 
 ```yaml
 generators:
@@ -58,61 +65,109 @@ template:
         namespace: '{{path.basename}}'
 ```
 
-Therefore, each folder will be treated as an Application, using the folder name as the name and target namespace.
-
-- **`scripts/`** — Auxiliary scripts, such as validation and deployment tool scripts
-
-### Application Layout
-
-Each application (`production/*` or `dev/*`) follows this pattern:
+每个应用文件夹（`production/*` 或 `dev/*`）遵循此模式：
 
 ```text
 namespace-name/
 ├── .gitignore
-├── kustomization.yaml          # Main Kustomize configuration
-├── values/                      # Helm chart value overrides
+├── kustomization.yaml          # 主 Kustomize 配置
+├── values/                      # Helm chart 值覆盖
 │   ├── chart1.yaml
 │   └── chart2.yaml
-├── resources/                   # Custom Kubernetes resources
+├── resources/                   # 自定义 Kubernetes 资源
 │   ├── namespace.yaml
 │   ├── configmaps.yaml
-│   └── *-sealedsecret.yaml     # Encrypted secrets
-└── charts/                      # Local Helm charts (if needed)
+│   └── *-sealedsecret.yaml     # 加密密钥
+└── charts/                      # 本地 Helm charts（如果需要）
     └── chart-name/
 ```
 
-- If there are many services in a namespace, you can create subdirectories (such as `values` and `resources`) under the namespace folder to organize Helm chart value overrides and Kubernetes resource definitions.
-- `.gitignore` is generally used to exclude Helm Charts automatically pulled by `kustomize` builds, which do not need to be version controlled. The exception is some custom Helm Charts that may need to be version controlled, for example:
+### Kustomize
 
-    ```text
-    charts/*
-    !charts/freeipa
+Kustomize 通过 [HelmChartInflationGenerator](https://kubectl.docs.kubernetes.io/references/kustomize/builtins/#_helmchartinflationgenerator_) 管理 Helm Chart，但有不少缺点，我们采取了相应措施：
+
+- 缺点：Kustomize 只会 Pull 一次 Chart 到 `charts/`（默认的 `chartHome` 目录），然后反复使用该本地副本进行渲染。未指定 `version` 时目录名为 `name`，指定 `version` 时目录名为 `name-version/name`。
+
+    措施：
+
+    - 通过 `version` 字段明确指定 Chart 的版本，否则本地渲染和 Argo CD 渲染时的版本可能不同。
+    - `.gitignore` 排除 Kustomize 自动拉取的 Helm Chart，避免将其纳入版本控制。例外是一些自定义的 Helm Chart 可能需要被版本控制，举例：
+
+        ```text
+        charts/*
+        !charts/freeipa
+        ```
+
+- 缺点：Kustomize 不会预先运行 `helm dependency build`，导致如果 Chart 有依赖关系时渲染失败。见 [Allow building helm dependencies when dealing with local charts · Issue #5851 · kubernetes-sigs/kustomize](https://github.com/kubernetes-sigs/kustomize/issues/5851)。
+
+    措施：
+
+    - Argo CD 需要使用 [Config Management Plugins - Argo CD - Declarative GitOps CD for Kubernetes](https://argo-cd.readthedocs.io/en/stable/operator-manual/config-management-plugins/)，相关配置见 `production/argo-cd/plugin.yaml`。参考 [You may need to run `helm dependency build` to fetch missing dependencies: · Issue #11564 · argoproj/argo-cd](https://github.com/argoproj/argo-cd/issues/11564)。
+
+- 缺点：不支持 overlays 方式覆盖 Helm Chart 的 values
+，见 [How to properly override helmChart values using overlays?](https://github.com/kubernetes-sigs/kustomize/issues/4658)
+
+    我们暂时没有使用 Overlay 功能，不考虑这个问题。
+
+### Helm
+
+起初我们仅在 Value 文件中放置需要覆盖的值，但遇到了下列问题：
+
+- 默认值变更：Helm Chart 默认值会随着版本更新而变化，仅覆盖部分值难以发现和适配这些变更。
+- 比对困难：常常需要拿着 Chart 的默认值与覆盖值进行对比，心智负担较重。
+- AI 幻觉：如果不提供完整的默认值，AI 可能会编造配置导致错误。
+
+为了解决上述问题，`values/<name>-<version>.yaml` 均复制自相应版本 Helm Chart 的默认值 `charts/<name>-<version>/<name>/values.yaml`，修改后可使用 [dyff](https://github.com/homeport/dyff) 与默认值清晰比对。
+
+**命名规范**：values 文件必须命名为 `values/<chart-name>-<version>.yaml` 格式，以明确对应的 Chart 版本。
+
+### pre-commit
+
+pre-commit 将对本节前述内容进行检查，步骤如下：
+
+- 检查 `kustomization.yaml` 中 `helmCharts` 字段：
+
+    ```yaml
+    # repo 和 version 要么同时存在，要么都不存在（本地 Chart）
+    repo:
+    version:
+    # 必须
+    name:
+    releaseName:
+    namespace: # 与目录名相同
+    includeCRDs: true
+    valuesFile: values/<name>-<version>.yaml
     ```
 
-## K8S Cluster Status and Deployment Guide
+- 检查 Helm Chart 是否有新版本，若有则提示更新。
+- 本地构建 Kustomize 确保能成功渲染。
 
-### Storage
+## K8S 集群现状和部署指南
 
-Existing StorageClasses and their applicable scenarios:
+### 存储
 
-- `openebs-hostpath`: OpenEBS-based local storage, suitable for applications with high read/write performance requirements such as databases
-- `ceph-block`: Suitable for applications requiring high availability and elastic scaling
-- `cephfs`: Suitable for applications requiring shared access
+现有 StorageClass 及其适用场景：
 
-### Network
+- `openebs-hostpath`：基于 OpenEBS 的本地存储，适用于数据库等对读写性能有较高要求的应用
+- `ceph-block`：适用于需要高可用和弹性扩展的应用
+- `cephfs`：适用于需要共享访问的应用
 
-CNI plugin: cilium, with Hubble enabled for network observability
+### 网络
 
-Ingress:
+- CNI 插件：Cilium，启用 Hubble 提供网络可观测性。
+- IngressClasses：`nginx`，虽然使用广泛但已进入维护状态，建议使用更新的 Gateway API。
+- Gateway：`envoy-gateway`，已配置下列 Listener
+    - 80：HTTP
+    - 443：HTTPS，已配置 TLS 泛域名证书
+    - 444：TLS Passthrough，适用于需要直接暴露 TLS 服务的应用
+- LoadBalancer：metallb，地址段 `172.28.0.0/16`。
+- 域名：`*.clusters.zjusct.io`、`*.s.zjusct.io`。如果应用支持多 Host 则前述域名均应当配置，否则仅配置第一个。
 
-- IngressClasses: `nginx`, although widely used, it has entered maintenance status, and it is recommended to use the newer Gateway API
-- Gateway: `envoy-gateway`, listening on 80 (HTTP), 443 (HTTPS, with TLS wildcard certificate configured), and 444 (TLS Passthrough, suitable for applications that need to directly expose TLS services)
+### 镜像服务
 
-### Application Deployment
+集群搭建 Harbor 用于内网镜像服务，域名 `harbor.clusters.zjusct.io`。配置了知名 Registry 的 Pull Through Cache，将其添加为前缀即可。例如：
 
-Our K8S application deployment method has gone through four iterations:
+- `ubuntu` -> `harbor.clusters.zjusct.io/hub.docker.com/library/ubuntu`
+- `quay.io/minio/minio` -> `harbor.clusters.zjusct.io/quay.io/minio/minio`
 
-- [kubectl](https://kubernetes.io/docs/reference/kubectl/): Manual resource management, lacking version control and automation
-- [Helm](https://helm.sh/): Introduced Helm charts, improving templating and parameterization capabilities, but difficult to manage resources outside templates
-- [Kustomize](https://kustomize.io/): Compensates for Helm's shortcomings, enabling declarative management of all K8S resources
-- [Argo CD](https://argo-cd.readthedocs.io/): Implements the GitOps pattern, automatically synchronizing Git repository and cluster state
+如果 Helm Chart 允许配置 imageRepository，则应添加集群内镜像服务的前缀。
