@@ -19,4 +19,4 @@ helmCharts:
     includeCRDs: true
 
 resources:
-  - /resources/mgr-servicemonitor.yaml
+  - resources/rook-ceph-mgr-monitor.yaml
