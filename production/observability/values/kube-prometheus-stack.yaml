@@ -204,7 +204,7 @@ grafana:
 
   # Environment variables for plugins
   env:
-    GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+    GF_INSTALL_PLUGINS: grafana-clickhouse-datasource,vonage-status-panel,grafana-piechart-panel
 
   # Environment variables from secrets
   envFromSecrets:
