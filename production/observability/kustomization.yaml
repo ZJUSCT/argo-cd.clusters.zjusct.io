@@ -31,10 +31,6 @@ helmCharts:
   namespace: observability
   valuesFile: values/thanos.yaml
   version: 17.3.1
-  valuesInline:
-    global:
-      security:
-        allowInsecureImages: true
 
 # ClickHouse for logs and traces storage
 # - name: clickstack

@@ -1,5 +1,9 @@
 # https://github.com/bitnami/charts/blob/main/bitnami/thanos/values.yaml
 
+global:
+  security:
+    allowInsecureImages: true
+
 image:
   registry: docker.io
   repository: bitnami/thanos
