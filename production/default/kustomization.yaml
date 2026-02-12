@@ -1,64 +1,82 @@
-# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: default
-
 resources:
-  - resources/metallb.yaml
-  - resources/cert-manager.yaml
-  - resources/envoy-gateway.yaml
-  - resources/headlamp-token.yaml
-  - resources/harbor-core-sealedsecret.yaml
-  - resources/harbor-jobservice-sealedsecret.yaml
-  - resources/harbor-registry-sealedsecret.yaml
-
+- resources/metallb.yaml
+- resources/cert-manager.yaml
+- resources/envoy-gateway.yaml
+- resources/headlamp-token.yaml
+- resources/harbor-core-sealedsecret.yaml
+- resources/harbor-jobservice-sealedsecret.yaml
+- resources/harbor-registry-sealedsecret.yaml
 helmCharts:
 - name: cilium
   repo: https://helm.cilium.io/
   includeCRDs: true
   releaseName: cilium
-  valuesFile: values/cilium.yaml
+  valuesFile: values/cilium-1.19.0.yaml
+  version: 1.19.0
+  namespace: default
 - name: kubelet-csr-approver
   repo: https://postfinance.github.io/kubelet-csr-approver
   includeCRDs: true
   releaseName: kubelet-csr-approver
-  valuesFile: values/kubelet-csr-approver.yaml
+  valuesFile: values/kubelet-csr-approver-1.2.13.yaml
+  version: 1.2.13
+  namespace: default
 - name: metallb
   repo: https://metallb.github.io/metallb
   includeCRDs: true
   releaseName: metallb
-- name: gateway-helm # envoy-gateway
+  version: 0.15.3
+  namespace: default
+  valuesFile: values/metallb-0.15.3.yaml
+- name: gateway-helm
   repo: oci://docker.io/envoyproxy/
   includeCRDs: true
   releaseName: envoy-gateway
-  valuesFile: values/envoy-gateway.yaml
+  valuesFile: values/gateway-helm-1.7.0.yaml
+  namespace: default
+  version: 1.7.0
 - name: ingress-nginx
   repo: https://kubernetes.github.io/ingress-nginx
   includeCRDs: true
   releaseName: ingress-nginx
-  valuesFile: values/ingress-nginx.yaml
+  valuesFile: values/ingress-nginx-4.14.3.yaml
+  version: 4.14.3
+  namespace: default
 - name: headlamp
   repo: https://kubernetes-sigs.github.io/headlamp/
   includeCRDs: true
   releaseName: headlamp
-  valuesFile: values/headlamp.yaml
+  valuesFile: values/headlamp-0.40.0.yaml
+  version: 0.40.0
+  namespace: default
 - name: metrics-server
   repo: https://kubernetes-sigs.github.io/metrics-server/
   includeCRDs: true
   releaseName: metrics-server
+  version: 3.13.0
+  namespace: default
+  valuesFile: values/metrics-server-3.13.0.yaml
 - name: cert-manager
   repo: https://charts.jetstack.io
   includeCRDs: true
   releaseName: cert-manager
-  valuesFile: values/cert-manager.yaml
+  valuesFile: values/cert-manager-v1.19.3.yaml
+  namespace: default
+  version: v1.19.3
 - name: harbor
   repo: https://helm.goharbor.io
   includeCRDs: true
   releaseName: harbor
-  valuesFile: values/harbor.yaml
+  valuesFile: values/harbor-1.18.2.yaml
+  version: 1.18.2
+  namespace: default
 - name: dragonfly
   repo: https://dragonflyoss.github.io/helm-charts/
   includeCRDs: true
   releaseName: dragonfly
-  valuesFile: values/dragonfly.yaml
+  valuesFile: values/dragonfly-1.6.13.yaml
+  version: 1.6.13
+  namespace: default

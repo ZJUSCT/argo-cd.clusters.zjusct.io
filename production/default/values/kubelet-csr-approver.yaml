@@ -1,5 +1,0 @@
-# https://github.com/postfinance/kubelet-csr-approver/blob/main/charts/kubelet-csr-approver/values.yaml
-providerRegex: ""
-providerIpPrefixes: "172.25.4.0/24"
-maxExpirationSeconds: 86400
-bypassDnsResolution: false
