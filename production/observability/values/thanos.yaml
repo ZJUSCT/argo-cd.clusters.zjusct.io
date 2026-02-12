@@ -3,7 +3,7 @@
 image:
   registry: docker.io
   repository: bitnami/thanos
-  tag: 0.39.2 # 建议锁定版本，避免漂移
+  tag: v0.39.2 # 建议锁定版本，避免漂移
 
 existingObjstoreSecret: thanos-objstore-config
 objstoreConfig: "objstore.yml"
