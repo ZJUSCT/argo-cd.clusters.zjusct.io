@@ -17,3 +17,6 @@ helmCharts:
     namespace: rook-ceph
     valuesFile: values/rook-ceph-cluster.yaml
     includeCRDs: true
+
+resources:
+  - ./resources/mgr-servicemonitor.yaml

@@ -4,13 +4,12 @@ metadata:
   name: rook-ceph-mgr
   namespace: rook-ceph
   labels:
+    # 必须包含这个标签，Prometheus 才会抓取它
     team: rook
-    app: rook-ceph-mgr
-    rook_cluster: rook-ceph
 spec:
   namespaceSelector:
     matchNames:
-    - rook-ceph
+      - rook-ceph
   selector:
     matchLabels:
       app: rook-ceph-mgr
@@ -18,4 +17,4 @@ spec:
   endpoints:
   - port: http-metrics
     path: /metrics
-    interval: 30s
+    interval: 15s
