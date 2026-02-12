@@ -1,17 +1,15 @@
-# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: argo-cd
-
 resources:
-  - apps.yaml
-  - plugin.yaml
-  - sealedsecret.yaml
-
+- apps.yaml
+- plugin.yaml
+- sealedsecret.yaml
 helmCharts:
-  - name: argo-cd
-    repo: https://argoproj.github.io/argo-helm
-    includeCRDs: true
-    releaseName: argo-cd
-    valuesFile: values.yaml
+- name: argo-cd
+  repo: https://argoproj.github.io/argo-helm
+  includeCRDs: true
+  releaseName: argo-cd
+  namespace: argo-cd
+  valuesFile: values/argo-cd-9.4.1.yaml
+  version: 9.4.1
