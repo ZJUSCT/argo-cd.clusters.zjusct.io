@@ -1,7 +1,0 @@
-# https://github.com/rook/rook/blob/master/deploy/charts/rook-ceph/values.yaml
-
-# https://rook.github.io/docs/rook/latest-release/Storage-Configuration/Monitoring/ceph-dashboard/?h=disk+information#visualization-of-physical-disks-section-in-the-dashboard
-enableDiscoveryDaemon: true
-
-monitoring:
-  enabled: true
