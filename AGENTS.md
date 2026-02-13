@@ -91,7 +91,7 @@
 
     ```bash
     helm dependency build
-    kubectl kustomize --enable-helm production/<namespace>
+    kubectl kustomize --enable-helm --load-restrictor=LoadRestrictionsNone production/<namespace>
     ```
 
 - 应用变更：

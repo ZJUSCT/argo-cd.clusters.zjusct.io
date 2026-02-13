@@ -144,15 +144,13 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
 
 ## K8S 集群现状和部署指南
 
-### 存储
+本节记录 `production/` 目录下部署的服务及其配置要点。
 
-现有 StorageClass 及其适用场景：
+### production/argo-cd
 
-- `openebs-hostpath`：基于 OpenEBS 的本地存储，适用于数据库等对读写性能有较高要求的应用
-- `ceph-block`：适用于需要高可用和弹性扩展的应用
-- `cephfs`：适用于需要共享访问的应用
+### production/default
 
-### 网络
+集群搭初期基础设施都堆在这了，之后最好还是拆分到单独的 Application。
 
 - CNI 插件：Cilium，启用 Hubble 提供网络可观测性。
 - IngressClasses：`nginx`，虽然使用广泛但已进入维护状态，建议使用更新的 Gateway API。
@@ -162,12 +160,51 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
     - 444：TLS Passthrough，适用于需要直接暴露 TLS 服务的应用
 - LoadBalancer：metallb，地址段 `172.28.0.0/16`。
 - 域名：`*.clusters.zjusct.io`、`*.s.zjusct.io`。如果应用支持多 Host 则前述域名均应当配置，否则仅配置第一个。
+- 证书：已配置 cert-manager，建议内部服务自行创建 `Issuer` 配置自签名证书。
+- 镜像：
 
-### 镜像服务
+    集群搭建 Harbor 用于内网镜像服务，域名 `harbor.clusters.zjusct.io`。配置了知名 Registry 的 Pull Through Cache，将其添加为前缀即可。例如：
 
-集群搭建 Harbor 用于内网镜像服务，域名 `harbor.clusters.zjusct.io`。配置了知名 Registry 的 Pull Through Cache，将其添加为前缀即可。例如：
+    - `ubuntu` -> `harbor.clusters.zjusct.io/hub.docker.com/library/ubuntu`
+    - `quay.io/minio/minio` -> `harbor.clusters.zjusct.io/quay.io/minio/minio`
 
-- `ubuntu` -> `harbor.clusters.zjusct.io/hub.docker.com/library/ubuntu`
-- `quay.io/minio/minio` -> `harbor.clusters.zjusct.io/quay.io/minio/minio`
+    如果 Helm Chart 允许配置 imageRepository，则应添加集群内镜像服务的前缀。
 
-如果 Helm Chart 允许配置 imageRepository，则应添加集群内镜像服务的前缀。
+- P2P 文件分发：Dragonfly。containerd 已启用集成，节点间 K8S 镜像将通过 P2P 方式分发。
+
+### production/freeipa
+
+FreeIPA 作为集群域控，提供 LDAP、DNS、Automount 等服务。
+
+### production/gitlab
+
+GitLab Runner
+
+### production/jenkins
+
+CI 服务
+
+### production/kube-system
+
+seald secret
+
+### production/metal3
+
+裸金属节点管理。
+
+TODO：命名空间迁移。目前 metal3 占据独立的 3 个命名空间，与仓库中其他应用不一致。
+
+### production/openebs
+
+提供本地存储 `openebs-hostpath`，适用于数据库等自身具有 Replica 功能、对读写性能有较高要求的应用。
+
+### production/reflector
+
+用于在命名空间间同步资源，参考 [Syncing Secrets Across Namespaces - cert-manager Documentation](https://cert-manager.io/docs/devops-tips/syncing-secrets-across-namespaces/)。
+
+### production/rook-ceph
+
+提供分布式存储：
+
+- `ceph-block`：适用于需要高可用和弹性扩展的应用
+- `cephfs`：适用于需要共享访问的应用

@@ -10,5 +10,6 @@
       "*.yml",
       "*.yaml"
     ],
+    "https://www.schemastore.org/kustomization.json": "**/kustomization.yaml"
   },
 }
