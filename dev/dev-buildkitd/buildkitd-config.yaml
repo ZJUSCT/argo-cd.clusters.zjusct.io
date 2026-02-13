@@ -7,7 +7,5 @@ data:
   buildkitd.toml: |
     debug = true
 
-    # Allow insecure (HTTP) registries
-    [registry."harbor-core.default.svc.cluster.local:80"]
-      http = true
-      insecure = true
+    # No insecure registry config needed for harbor.clusters.zjusct.io
+    # It uses proper TLS certificates
