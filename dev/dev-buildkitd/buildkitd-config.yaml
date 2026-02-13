@@ -8,6 +8,6 @@ data:
     debug = true
 
     # Allow insecure (HTTP) registries
-    [registry."harbor-core.default.svc.cluster.local"]
+    [registry."harbor-core.default.svc.cluster.local:80"]
       http = true
       insecure = true
