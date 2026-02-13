@@ -1,0 +1,142 @@
+{{- range .Values.nodes }}
+---
+# https://book.metal3.io/bmo/introduction.html
+# https://github.com/metal3-io/baremetal-operator/blob/main/docs/api.md
+# https://doc.crds.dev/github.com/metal3-io/baremetal-operator/metal3.io/BareMetalHost/v1alpha1
+# https://raw.githubusercontent.com/metal3-io/baremetal-operator/refs/heads/main/config/base/crds/bases/metal3.io_baremetalhosts.yaml
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+  annotations: {{- with .annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  online: {{ .online | default true }}
+  bootMACAddress: {{ .mac }}
+  bootMode: {{ .bootMode | default $.Values.default.bootMode }}
+  {{- with .description }}
+  description: {{ . }}
+  {{- end }}
+  {{- with .architecture }}
+  architecture: {{ . }}
+  {{- end }}
+  {{- if hasKey . "automatedCleaningMode" }}
+  automatedCleaningMode: {{ .automatedCleaningMode }}
+  {{- else if hasKey $.Values.default "automatedCleaningMode" }}
+  automatedCleaningMode: {{ $.Values.default.automatedCleaningMode }}
+  {{- end }}
+  {{- if hasKey . "externallyProvisioned" }}
+  externallyProvisioned: {{ .externallyProvisioned }}
+  {{- end }}
+  bmc:
+    address: {{ .bmc.address }}
+    {{- $bmcCredentials := "" }}
+    {{- if .bmc.credentialsName }}
+      {{- $bmcCredentials = .bmc.credentialsName }}
+    {{- else if $.Values.default.bmc }}
+      {{- $bmcCredentials = $.Values.default.bmc.credentialsName }}
+    {{- end }}
+    {{- if $bmcCredentials }}
+    credentialsName: {{ $bmcCredentials }}
+    {{- else }}
+    {{- fail "bmc.credentialsName must be specified either per-node or in default.bmc" }}
+    {{- end }}
+    disableCertificateVerification: {{ .bmc.disableCertificateVerification | default true }}
+{{- $imageEnabled := true }}
+{{- if hasKey . "image" }}
+  {{- if hasKey .image "enabled" }}
+    {{- $imageEnabled = .image.enabled }}
+  {{- end }}
+{{- end }}
+{{- if $imageEnabled }}
+  image:
+    {{- $imageConfig := .image | default dict }}
+    {{- $globalImage := $.Values.default.image }}
+    url: {{ $imageConfig.url | default $globalImage.url }}
+    checksumType: {{ $imageConfig.checksumType | default $globalImage.checksumType }}
+    checksum: {{ $imageConfig.checksum | default $globalImage.checksum }}
+    format: {{ $imageConfig.format | default $globalImage.format }}
+{{- end }}
+{{- $rootDeviceHintsEnabled := true }}
+{{- if hasKey . "rootDeviceHints" }}
+  {{- if hasKey .rootDeviceHints "enabled" }}
+    {{- $rootDeviceHintsEnabled = .rootDeviceHints.enabled }}
+  {{- end }}
+{{- end }}
+{{- if $rootDeviceHintsEnabled }}
+  rootDeviceHints:
+    {{- $rootDeviceConfig := .rootDeviceHints | default dict }}
+    {{- $globalRootDevice := $.Values.default.rootDeviceHints }}
+    {{- with $rootDeviceConfig.deviceName | default $globalRootDevice.deviceName }}
+    deviceName: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.hctl | default $globalRootDevice.hctl }}
+    hctl: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.model | default $globalRootDevice.model }}
+    model: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.vendor | default $globalRootDevice.vendor }}
+    vendor: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.serialNumber | default $globalRootDevice.serialNumber }}
+    serialNumber: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.minSizeGigabytes | default $globalRootDevice.minSizeGigabytes }}
+    minSizeGigabytes: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.wwn | default $globalRootDevice.wwn }}
+    wwn: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.wwnWithExtension | default $globalRootDevice.wwnWithExtension }}
+    wwnWithExtension: {{ . }}
+    {{- end }}
+    {{- with $rootDeviceConfig.wwnVendorExtension | default $globalRootDevice.wwnVendorExtension }}
+    wwnVendorExtension: {{ . }}
+    {{- end }}
+    {{- if hasKey $rootDeviceConfig "rotational" }}
+    rotational: {{ $rootDeviceConfig.rotational }}
+    {{- else if hasKey $globalRootDevice "rotational" }}
+    rotational: {{ $globalRootDevice.rotational }}
+    {{- end }}
+{{- end }}
+{{- with .preprovisioningNetworkDataName | default $.Values.default.preprovisioningNetworkDataName }}
+  preprovisioningNetworkDataName: {{ . }}
+{{- end }}
+{{- $networkDataEnabled := true }}
+{{- if hasKey . "networkData" }}
+  {{- if hasKey .networkData "enabled" }}
+    {{- $networkDataEnabled = .networkData.enabled }}
+  {{- end }}
+{{- end }}
+{{- if $networkDataEnabled }}
+  {{- $networkDataConfig := .networkData | default dict }}
+  {{- $globalNetworkData := $.Values.default.networkData }}
+  {{- if or $networkDataConfig.name $globalNetworkData.name }}
+  networkData:
+    name: {{ $networkDataConfig.name | default $globalNetworkData.name }}
+    {{- with $networkDataConfig.namespace | default $globalNetworkData.namespace }}
+    namespace: {{ . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- $userDataEnabled := true }}
+{{- if hasKey . "userData" }}
+  {{- if hasKey .userData "enabled" }}
+    {{- $userDataEnabled = .userData.enabled }}
+  {{- end }}
+{{- end }}
+{{- if $userDataEnabled }}
+  {{- $userDataConfig := .userData | default dict }}
+  {{- $globalUserData := $.Values.default.userData | default dict }}
+  {{- if or $userDataConfig.name $globalUserData.name }}
+  userData:
+    name: {{ $userDataConfig.name | default $globalUserData.name }}
+    {{- with $userDataConfig.namespace | default $globalUserData.namespace }}
+    namespace: {{ . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}
