@@ -5,6 +5,7 @@ resources:
   - https://raw.githubusercontent.com/moby/buildkit/refs/heads/master/examples/kubernetes/deployment%2Bservice.userns.yaml
   - certificate.yaml
   - namespace.yaml
+  - buildkitd-config.yaml
 # Normalize DockerHub images by adding docker.io registry
 images:
   - name: moby/buildkit

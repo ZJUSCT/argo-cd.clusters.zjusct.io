@@ -21,3 +21,13 @@ spec:
             - /certs/tls.crt
             - --tlskey
             - /certs/tls.key
+            - --config
+            - /etc/buildkit/buildkitd.toml
+          volumeMounts:
+            - name: buildkitd-config
+              mountPath: /etc/buildkit
+              readOnly: true
+      volumes:
+        - name: buildkitd-config
+          configMap:
+            name: buildkitd-config
