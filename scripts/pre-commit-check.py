@@ -22,8 +22,9 @@ except ImportError:
 class Checker:
     """Main checker class."""
 
-    def __init__(self, auto_fix: bool = False):
+    def __init__(self, auto_fix: bool = False, update_versions: bool = False):
         self.auto_fix = auto_fix
+        self.update_versions = update_versions
         self.version_cache: Dict[Tuple[str, str], Optional[str]] = {}
         self.errors: List[str] = []
         self.warnings: List[str] = []
@@ -244,6 +245,10 @@ class Checker:
 
     def get_latest_version(self, chart_name: str, repo_url: str) -> Optional[str]:
         """Get latest version of a Helm chart from repository."""
+        # Skip version fetching if update_versions is not enabled
+        if not self.update_versions:
+            return None
+
         cache_key = (chart_name, repo_url)
         if cache_key in self.version_cache:
             return self.version_cache[cache_key]
@@ -396,6 +401,10 @@ class Checker:
 
     def check_version_update(self, chart: Dict, app_name: str) -> None:
         """Check if a newer version is available."""
+        # Skip version update check if not enabled
+        if not self.update_versions:
+            return
+
         name = chart.get("name")
         current_version = chart.get("version")
         repo = chart.get("repo")
@@ -417,7 +426,7 @@ class Checker:
     def check_kustomize_build(self, app_dir: Path, app_name: str) -> None:
         """Test if kustomize can successfully build the manifests."""
         code, _, stderr = self.run_command(
-            ["kustomize", "build", "--enable-helm", str(app_dir)],
+            ["kustomize", "build", "--enable-helm", "--load-restrictor=LoadRestrictionsNone", str(app_dir)],
             timeout=30
         )
         if code != 0:
@@ -547,10 +556,15 @@ def main():
         action="store_true",
         help="Automatically fix issues (add missing fields, fetch versions)"
     )
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Check for helm chart version updates (fetches latest versions from repositories)"
+    )
     args = parser.parse_args()
 
     repo_root = get_git_root()
-    checker = Checker(auto_fix=args.fix)
+    checker = Checker(auto_fix=args.fix, update_versions=args.update)
     return checker.run_checks(repo_root)
 
 
