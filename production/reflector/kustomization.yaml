@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: reflector
+resources:
+  - namespace.yaml
+helmCharts:
+  - name: reflector
+    repo: oci://ghcr.io/emberstack/helm-charts
+    includeCRDs: true
+    releaseName: reflector
+    version: 10.0.8
+    namespace: reflector
+    valuesFile: values/reflector-10.0.8.yaml
+transformers:
+  - ../../image-prefix.yaml
