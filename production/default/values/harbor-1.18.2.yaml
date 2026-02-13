@@ -8,7 +8,7 @@ expose:
     # Note: if the "expose.type" is "ingress" and TLS is disabled,
     # the port must be included in the command when pulling/pushing images.
     # Refer to https://github.com/goharbor/harbor/issues/5291 for details.
-    enabled: true
+    enabled: false
     # The source of the tls certificate. Set as "auto", "secret"
     # or "none" and fill the information in the corresponding section
     # 1) auto: generate the tls certificate automatically
@@ -20,7 +20,7 @@ expose:
     auto:
       # The common name used to generate the certificate, it's necessary
       # when the type isn't "ingress"
-      commonName: "harbor-core.default.svc.cluster.local"
+      commonName: ""
     secret:
       # The name of secret which contains keys named:
       # "tls.crt" - the certificate
@@ -294,7 +294,7 @@ harborAdminPassword: "Harbor12345"
 # in each component tls cert files need to provided in advance.
 internalTLS:
   # If internal TLS enabled
-  enabled: false
+  enabled: true
   # enable strong ssl ciphers (default: false)
   strong_ssl_ciphers: false
   # There are three ways to provide tls
