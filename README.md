@@ -158,7 +158,21 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
     - 80：HTTP
     - 443：HTTPS，已配置 TLS 泛域名证书
     - 444：TLS Passthrough，适用于需要直接暴露 TLS 服务的应用
-- LoadBalancer：metallb，地址段 `172.28.0.0/16`。
+- LoadBalancer：metallb
+    - 地址段 `172.28.0.0/16`，通过 BGP 将路由信息通告到集群主路由。
+    - LoadBalancer IP 不会响应 ICMP，因此无法通过 ping 命令测试连通性。
+    - Pod 内无法访问 LoadBalancer IP，应当通过 K8S 内部 Service 访问。例：
+
+        ```text
+        /tmp $ wget https://harbor.clusters.zjusct.io
+        Connecting to harbor.clusters.zjusct.io (172.28.0.1:443)
+        wget: can't connect to remote host (172.28.0.1): Connection refused
+        /tmp $ wget http://harbor-registry.default.svc.cluster.local:5000
+        Connecting to harbor-registry.default.svc.cluster.local:5000 (172.27.35.176:5000)
+        saving to 'index.html'
+        'index.html' saved
+        ```
+
 - 域名：`*.clusters.zjusct.io`、`*.s.zjusct.io`。如果应用支持多 Host 则前述域名均应当配置，否则仅配置第一个。
 - 证书：已配置 cert-manager，建议内部服务自行创建 `Issuer` 配置自签名证书。
 - 镜像：
