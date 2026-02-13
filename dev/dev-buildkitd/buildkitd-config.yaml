@@ -7,6 +7,6 @@ data:
   buildkitd.toml: |
     debug = true
 
-    # Allow self-signed TLS certificates (internal Harbor core service)
+    # Allow HTTP registries (internal Harbor core service)
     [registry."harbor-core.default.svc.cluster.local"]
-      insecure = true
+      http = true
