@@ -55,10 +55,6 @@ spec:
   issuerRef:
     kind: Issuer
     name: buildkit-ca-issuer
-  # Ensure the CA cert is included in the secret
-  secretTemplate:
-    annotations:
-      cert-manager.io/alt-names: buildkitd.dev-buildkitd.svc
 ---
 # Client certificate
 apiVersion: cert-manager.io/v1
