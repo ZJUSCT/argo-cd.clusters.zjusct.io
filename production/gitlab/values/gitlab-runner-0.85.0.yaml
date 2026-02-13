@@ -18,7 +18,7 @@
 ##       these images run on different user IDs.
 ##
 image:
-  registry: harbor.clusters.zjusct.io/registry.gitlab.com
+  registry: registry.gitlab.com
   image: gitlab-org/gitlab-runner
   # tag: alpine-v{{.Chart.AppVersion}}
 
