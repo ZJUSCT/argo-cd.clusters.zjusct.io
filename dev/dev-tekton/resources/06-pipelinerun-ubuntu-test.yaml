@@ -11,7 +11,7 @@ spec:
 
   params:
   - name: image-reference
-    value: harbor-core.default.svc.cluster.local/library/ubuntu-curl:latest
+    value: harbor-core.default.svc.cluster.local:80/library/ubuntu-curl:latest
 
   workspaces:
   - name: shared-data

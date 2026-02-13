@@ -8,5 +8,6 @@ data:
     debug = true
 
     # Allow HTTP registries (internal Harbor core service)
-    [registry."harbor-core.default.svc.cluster.local"]
+    # Must specify port 80 explicitly to force HTTP protocol
+    [registry."harbor-core.default.svc.cluster.local:80"]
       http = true
