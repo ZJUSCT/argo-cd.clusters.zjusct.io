@@ -80,7 +80,7 @@ spec:
         --opt filename=$(params.DOCKERFILE) \
         --local context=$(params.CONTEXT) \
         --local dockerfile=$(params.CONTEXT) \
-        --output type=image,name=$(params.IMAGE),push=true \
+        --output type=image,name=$(params.IMAGE),push=true,registry.insecure=true \
         --export-cache type=inline \
         --import-cache type=registry,ref=$(params.IMAGE)
 
