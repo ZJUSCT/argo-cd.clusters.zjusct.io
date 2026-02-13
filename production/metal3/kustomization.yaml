@@ -3,10 +3,9 @@ kind: Kustomization
 # namespace: # metal3 currently do not support installing into a specific namespace
 resources:
 - https://github.com/metal3-io/ironic-standalone-operator/releases/download/v0.8.0/install.yaml
-- https://github.com/metal3-io/baremetal-operator/releases/download/v0.12.2/baremetal-operator.yaml
 - resources/sealedsecret-bmc.yaml
-- resources/ironic.yaml
-- resources/certificate.yaml
+- bmo
+
 helmCharts:
 - name: cluster
   includeCRDs: true
