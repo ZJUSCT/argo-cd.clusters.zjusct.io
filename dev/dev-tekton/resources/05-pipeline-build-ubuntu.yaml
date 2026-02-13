@@ -1,0 +1,65 @@
+---
+# Pipeline to build a simple Ubuntu image with BuildKit
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: build-ubuntu-image
+  namespace: dev-tekton
+spec:
+  description: |
+    This pipeline creates a simple Dockerfile and builds it with BuildKit,
+    then pushes to Harbor registry.
+
+  params:
+  - name: image-reference
+    type: string
+    description: The image reference to push to (e.g., harbor.clusters.zjusct.io/library/ubuntu-curl:latest)
+    default: "harbor.clusters.zjusct.io/library/ubuntu-curl:latest"
+
+  workspaces:
+  - name: shared-data
+    description: Workspace for sharing data between tasks
+  - name: docker-credentials
+    description: Docker credentials for Harbor registry
+
+  tasks:
+  - name: create-dockerfile
+    workspaces:
+    - name: source
+      workspace: shared-data
+    taskSpec:
+      workspaces:
+      - name: source
+      steps:
+      - name: write-dockerfile
+        image: busybox
+        script: |
+          #!/bin/sh
+          set -e
+
+          cat > $(workspaces.source.path)/Dockerfile <<'EOF'
+          FROM ubuntu
+
+          RUN sed -i 's/archive.ubuntu.com/mirrors.zju.edu.cn/g' /etc/apt/sources.list.d/ubuntu.sources && \
+              apt-get update && apt-get install -y curl
+          EOF
+
+          echo "Dockerfile created:"
+          cat $(workspaces.source.path)/Dockerfile
+
+  - name: build-and-push
+    runAfter: ["create-dockerfile"]
+    taskRef:
+      name: buildkit
+    workspaces:
+    - name: source
+      workspace: shared-data
+    - name: dockerconfig
+      workspace: docker-credentials
+    params:
+    - name: IMAGE
+      value: $(params.image-reference)
+    - name: DOCKERFILE
+      value: "./Dockerfile"
+    - name: CONTEXT
+      value: "."

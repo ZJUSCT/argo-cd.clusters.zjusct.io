@@ -1,0 +1,71 @@
+---
+# BuildKit Daemon Deployment (Rootless)
+# Reference: https://github.com/tektoncd/catalog/tree/main/task/buildkit/0.1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buildkitd
+  namespace: dev-tekton
+  labels:
+    app: buildkitd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buildkitd
+  template:
+    metadata:
+      labels:
+        app: buildkitd
+    spec:
+      containers:
+      - name: buildkitd
+        image: moby/buildkit:v0.12.5-rootless
+        args:
+        - --addr
+        - unix:///run/user/1000/buildkit/buildkitd.sock
+        - --addr
+        - tcp://0.0.0.0:1234
+        - --tlscacert
+        - /certs/ca.crt
+        - --tlscert
+        - /certs/tls.crt
+        - --tlskey
+        - /certs/tls.key
+        readinessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          tcpSocket:
+            port: 1234
+        livenessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          tcpSocket:
+            port: 1234
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+        ports:
+        - containerPort: 1234
+        volumeMounts:
+        - name: certs
+          readOnly: true
+          mountPath: /certs
+      volumes:
+      - name: certs
+        secret:
+          secretName: buildkit-daemon-certs
+---
+# BuildKit Daemon Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: buildkitd
+  namespace: dev-tekton
+spec:
+  selector:
+    app: buildkitd
+  ports:
+  - protocol: TCP
+    port: 1234
+    targetPort: 1234
