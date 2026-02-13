@@ -59,7 +59,7 @@ spec:
     workingDir: $(workspaces.source.path)
     env:
     - name: DOCKER_CONFIG
-      value: /workspace/dockerconfig
+      value: /tekton/home/.docker
     script: |
       #!/bin/sh
       set -e
@@ -67,6 +67,16 @@ spec:
       echo "Building and pushing image: $(params.IMAGE)"
       echo "Using Dockerfile: $(params.DOCKERFILE)"
       echo "Build context: $(params.CONTEXT)"
+
+      # BuildKit expects config.json, but Kubernetes secret mounts .dockerconfigjson
+      # Create proper docker config directory structure
+      mkdir -p /tekton/home/.docker
+      if [ -f /workspace/dockerconfig/.dockerconfigjson ]; then
+        cp /workspace/dockerconfig/.dockerconfigjson /tekton/home/.docker/config.json
+        echo "Docker config prepared for BuildKit"
+      else
+        echo "Warning: Docker config not found"
+      fi
 
       buildctl \
         --debug \
@@ -80,9 +90,9 @@ spec:
         --opt filename=$(params.DOCKERFILE) \
         --local context=$(params.CONTEXT) \
         --local dockerfile=$(params.CONTEXT) \
-        --output type=image,name=$(params.IMAGE),push=true \
+        --output type=image,name=$(params.IMAGE),push=true,registry.insecure=true \
         --export-cache type=inline \
-        --import-cache type=registry,ref=$(params.IMAGE)
+        --import-cache type=registry,ref=$(params.IMAGE),registry.insecure=true
 
       echo "Image built and pushed successfully: $(params.IMAGE)"
     volumeMounts:

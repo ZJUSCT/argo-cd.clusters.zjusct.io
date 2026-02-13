@@ -8,5 +8,8 @@ data:
     debug = true
 
     # Allow HTTP registries (internal Harbor core service)
+    # Using both http=true and insecure=true enables httpFallback transport
+    # which handles HTTPS->HTTP fallback for token authentication
     [registry."harbor-core.default.svc.cluster.local"]
       http = true
+      insecure = true

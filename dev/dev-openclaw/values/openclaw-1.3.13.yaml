@@ -211,7 +211,9 @@ app-template:
             - "18789"
           # Reference a secret containing environment variables (e.g., API keys)
           # Create this secret manually or via external-secrets/vault-operator
-          envFrom: []
+          envFrom:
+            - secretRef:
+                name: openclaw-env-secret
           # Example:
           # - secretRef:
           #     name: openclaw-env-secret
