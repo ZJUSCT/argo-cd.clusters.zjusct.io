@@ -1,9 +1,3 @@
-# https://github.com/argoproj/argoproj-deployments/tree/master/argocd
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: argo-cd
----
 # https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/
 # https://argo-cd.readthedocs.io/en/stable/user-guide/projects/#the-default-project
 apiVersion: argoproj.io/v1alpha1

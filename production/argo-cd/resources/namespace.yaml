@@ -1,0 +1,5 @@
+# https://github.com/argoproj/argoproj-deployments/tree/master/argocd
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-cd
