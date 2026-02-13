@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: gitlab
 resources:
 - resources/namespace.yaml
+- resources/gitlab-runner-sealedsecret.yaml
 helmCharts:
 # - name: gitlab-agent
 #   repo: https://charts.gitlab.io
