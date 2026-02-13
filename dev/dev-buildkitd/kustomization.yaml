@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dev-buildkitd
+resources:
+  - https://raw.githubusercontent.com/moby/buildkit/refs/heads/master/examples/kubernetes/deployment%2Bservice.userns.yaml
+  - certificate.yaml
+# Normalize DockerHub images by adding docker.io registry
+images:
+  - name: moby/buildkit
+    newName: docker.io/moby/buildkit
+transformers:
+  - ../../image-prefix.yaml
+# Patch deployment to use cert-manager generated certificate key names
+patches:
+  - path: deployment-patch.yaml
