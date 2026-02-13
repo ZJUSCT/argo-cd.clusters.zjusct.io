@@ -20,7 +20,7 @@ patches:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: TEKTON_REGISTRY_OVERRIDE
-          value: harbor.clusters.zjusct.io/ghcr.io/tektoncd
+          value: harbor.clusters.zjusct.io/ghcr.io
 # Normalize DockerHub images by adding docker.io registry
 images:
   - name: moby/buildkit
