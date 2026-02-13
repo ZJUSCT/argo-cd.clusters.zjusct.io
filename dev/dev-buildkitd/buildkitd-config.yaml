@@ -7,7 +7,6 @@ data:
   buildkitd.toml: |
     debug = true
 
-    # Allow HTTP registries (internal Harbor core service)
-    # Must specify port 80 explicitly to force HTTP protocol
-    [registry."harbor-core.default.svc.cluster.local:80"]
-      http = true
+    # Allow self-signed TLS certificates (internal Harbor core service)
+    [registry."harbor-core.default.svc.cluster.local"]
+      insecure = true
