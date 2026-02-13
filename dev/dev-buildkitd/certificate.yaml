@@ -20,6 +20,13 @@ spec:
     kind: Issuer
     name: buildkit-selfsigned-issuer
   secretName: buildkit-ca-secret
+  secretTemplate:
+    annotations:
+      # Enable reflector to sync this CA secret to other namespaces
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "dev-tekton"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "dev-tekton"
 ---
 # CA Issuer (signs server and client certs)
 apiVersion: cert-manager.io/v1

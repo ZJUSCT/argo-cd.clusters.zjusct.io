@@ -4,9 +4,8 @@ namespace: dev-tekton
 resources:
   - https://infra.tekton.dev/tekton-releases/operator/latest/release.yaml
   - resources/00-tekton-config.yaml
-  - resources/01-buildkit-certificates.yaml
+  - resources/01-buildkit-client-cert.yaml
   - resources/sealedsecret-harbor.yaml
-  - resources/02-buildkit-daemon.yaml
   - resources/03-task-buildkit.yaml
   - resources/04-task-git-clone.yaml
   - resources/05-pipeline-build-ubuntu.yaml
@@ -21,9 +20,5 @@ patches:
         value:
           name: TEKTON_REGISTRY_OVERRIDE
           value: harbor.clusters.zjusct.io/ghcr.io
-# Normalize DockerHub images by adding docker.io registry
-images:
-  - name: moby/buildkit
-    newName: docker.io/moby/buildkit
 transformers:
   - ../../image-prefix.yaml
