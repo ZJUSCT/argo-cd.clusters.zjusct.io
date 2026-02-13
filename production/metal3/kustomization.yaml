@@ -5,7 +5,6 @@ resources:
 - https://github.com/metal3-io/ironic-standalone-operator/releases/download/v0.8.0/install.yaml
 - resources/sealedsecret-bmc.yaml
 - bmo
-
 helmCharts:
 - name: cluster
   includeCRDs: true

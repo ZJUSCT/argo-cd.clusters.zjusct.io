@@ -11,3 +11,4 @@ resources:
 - https://github.com/metal3-io/baremetal-operator/config/use-irso?ref=main
 - ironic.yaml
 - certificate.yaml
+- namespace.yaml
