@@ -111,6 +111,7 @@ app-template:
             repository: ghcr.io/openclaw/openclaw
             # @schema type:string
             tag: "{{ .Values.openclawVersion }}"
+            pullPolicy: Always
           # -- Init-config startup script
           # @default -- See values.yaml
           command:
@@ -214,7 +215,7 @@ app-template:
             tag: "{{ .Values.openclawVersion }}"
             # @schema type:string;enum:[Always, IfNotPresent, Never];default:IfNotPresent
             # -- Image pull policy
-            pullPolicy: IfNotPresent
+            pullPolicy: Always
           command:
             - node
             - dist/index.js
