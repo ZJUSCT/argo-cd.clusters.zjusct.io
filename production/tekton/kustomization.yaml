@@ -5,6 +5,7 @@ resources:
   - https://infra.tekton.dev/tekton-releases/operator/latest/release.yaml
   - resources/config.yaml
   - resources/dashboard.yaml
+  - resources/httproute.yaml
   - resources/buildkit-client-cert.yaml
   - resources/sealedsecret-harbor.yaml
   - tasks/buildkit.yaml
