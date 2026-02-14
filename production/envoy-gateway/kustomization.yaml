@@ -12,5 +12,7 @@ helmCharts:
   valuesFile: values/gateway-helm-1.7.0.yaml
   namespace: envoy-gateway
   version: 1.7.0
-transformers:
-  - ../../image-prefix.yaml
+# NOTE: image-prefix transformer removed to break circular dependency
+# envoy-gateway must be able to pull from docker.io even when Harbor is down
+# transformers:
+#   - ../../image-prefix.yaml
