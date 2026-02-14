@@ -10,7 +10,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: envoy-gateway
-  namespace: default
+  namespace: envoy-gateway
 spec:
   gatewayClassName: envoy-gateway
   listeners:
@@ -47,14 +47,14 @@ apiVersion: gateway.networking.k8s.io/v1alpha3
 kind: TLSRoute
 metadata:
   name: apiserver
-  namespace: default
+  namespace: envoy-gateway
 spec:
   hostnames:
   - k8s-api.s.zjusct.io
   - k8s-api.clusters.zjusct.io
   parentRefs:
   - name: envoy-gateway
-    namespace: default
+    namespace: envoy-gateway
     sectionName: tls-passthrough
   rules:
   - backendRefs:

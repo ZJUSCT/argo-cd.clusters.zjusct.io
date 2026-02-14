@@ -1540,7 +1540,7 @@ grafana:
       enabled: true
       parentRefs:
       - name: envoy-gateway
-        namespace: default
+        namespace: envoy-gateway
       hostnames:
       - grafana.clusters.zjusct.io
       - grafana.s.zjusct.io
@@ -3843,7 +3843,7 @@ prometheus:
       # - my-filter.example.com
       parentRefs:
       - name: envoy-gateway
-        namespace: default
+        namespace: envoy-gateway
       # - name: acme-gw
 
       # -- create http route for redirect (https://gateway-api.sigs.k8s.io/guides/http-redirect-rewrite/#http-to-https-redirects)

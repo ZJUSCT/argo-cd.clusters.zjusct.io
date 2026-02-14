@@ -264,7 +264,7 @@ httpRoute:
   #     namespace: gateway-namespace
   parentRefs:
   - name: envoy-gateway
-    namespace: default
+    namespace: envoy-gateway
     group: gateway.networking.k8s.io
     kind: Gateway
   # -- Hostnames for the HTTPRoute

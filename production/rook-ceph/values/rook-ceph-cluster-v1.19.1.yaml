@@ -630,7 +630,7 @@ route:
       name: ceph.clusters.zjusct.io
     parentRefs:
       - name: envoy-gateway
-        namespace: default
+        namespace: envoy-gateway
     # labels:
     #   external-dns/private: "true"
     # annotations:

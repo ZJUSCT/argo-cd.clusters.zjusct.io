@@ -7,7 +7,6 @@ patches:
     kind: ConfigMap
     name: harbor-core
 resources:
-- resources/envoy-gateway.yaml
 - resources/harbor-core-sealedsecret.yaml
 - resources/harbor-jobservice-sealedsecret.yaml
 - resources/harbor-registry-sealedsecret.yaml
@@ -19,13 +18,6 @@ helmCharts:
   valuesFile: values/cilium-1.19.0.yaml
   version: 1.19.0
   namespace: default
-- name: gateway-helm
-  repo: oci://docker.io/envoyproxy/
-  includeCRDs: true
-  releaseName: envoy-gateway
-  valuesFile: values/gateway-helm-1.7.0.yaml
-  namespace: default
-  version: 1.7.0
 - name: harbor
   repo: https://helm.goharbor.io
   includeCRDs: true

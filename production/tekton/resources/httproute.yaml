@@ -7,7 +7,7 @@ metadata:
 spec:
   parentRefs:
     - name: envoy-gateway
-      namespace: default
+      namespace: envoy-gateway
   hostnames:
     - tekton.clusters.zjusct.io
     - tekton.s.zjusct.io

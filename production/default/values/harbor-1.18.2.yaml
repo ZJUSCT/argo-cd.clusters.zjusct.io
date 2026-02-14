@@ -58,7 +58,7 @@ expose:
       #   kind: Gateway
     parentRefs:
     - name: envoy-gateway
-      namespace: default
+      namespace: envoy-gateway
       # - "harbor.example.com"
     hosts:
     - harbor.clusters.zjusct.io
