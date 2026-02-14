@@ -179,6 +179,17 @@ app-template:
                 cp /config/openclaw.json /home/node/.openclaw/openclaw.json
               fi
               log "Config initialization complete"
+
+              # Register QQBot channel with the plugin system
+              log "Registering QQBot channel"
+              if cd /app && node dist/index.js channels add --channel qqbot --token "${QQBOT_APP_ID}:${QQBOT_APP_SECRET}" 2>&1; then
+                log "QQBot channel registered successfully"
+              else
+                log "WARNING: Failed to register QQBot channel, continuing anyway"
+              fi
+          envFrom:
+            - secretRef:
+                name: openclaw-env-secret
           env:
             CONFIG_MODE: "{{ .Values.configMode | default \"merge\" }}"
           securityContext:
