@@ -3,8 +3,7 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: build-ubuntu-image
-  namespace: dev-tekton
+  name: buildkit-ubuntu
 spec:
   description: |
     This pipeline creates a simple Dockerfile and builds it with BuildKit,
@@ -14,7 +13,7 @@ spec:
   - name: image-reference
     type: string
     description: The image reference to push to (e.g., harbor.clusters.zjusct.io/library/ubuntu-curl:latest)
-    default: "harbor.clusters.zjusct.io/library/ubuntu-curl:latest"
+    default: "harbor-core.default.svc.cluster.local/library/ubuntu-curl:latest"
 
   workspaces:
   - name: shared-data

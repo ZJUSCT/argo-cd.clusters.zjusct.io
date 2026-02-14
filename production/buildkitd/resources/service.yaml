@@ -1,0 +1,13 @@
+# https://github.com/moby/buildkit/blob/master/examples/kubernetes/deployment%2Bservice.userns.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: buildkitd
+  name: buildkitd
+spec:
+  ports:
+    - port: 1234
+      protocol: TCP
+  selector:
+    app: buildkitd

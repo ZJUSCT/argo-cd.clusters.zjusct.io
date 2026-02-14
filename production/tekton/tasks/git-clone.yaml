@@ -5,7 +5,6 @@ apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: git-clone
-  namespace: dev-tekton
   labels:
     app.kubernetes.io/version: "0.9"
   annotations:

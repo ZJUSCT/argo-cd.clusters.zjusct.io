@@ -96,6 +96,10 @@
 
 - 应用变更：
 
+    由 Argo CD 管理的资源应当通过 GitOps 流程部署，否则可能导致 Argo CD 同步出现问题。
+
+    非 Argo CD 管理的测试、临时资源可以直接应用：
+
     ```bash
     kubectl apply --server-side -f -
     ```

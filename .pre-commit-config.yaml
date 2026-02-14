@@ -34,16 +34,16 @@ repos:
       - id: mixed-line-ending
 
   # Kustomize + Helm GitOps validation
-  # - repo: local
-  #   hooks:
-  #     - id: kustomize-helm-check
-  #       name: Kustomize + Helm Configuration Check
-  #       entry: scripts/pre-commit-check.py
-  #       language: script
-  #       pass_filenames: false
-  #       always_run: false
-  #       files: (kustomization\.yaml|values/.*\.yaml)$
-  #       require_serial: true
+  - repo: local
+    hooks:
+      - id: kustomize-helm-check
+        name: Kustomize + Helm Configuration Check
+        entry: scripts/pre-commit-check.py
+        language: script
+        pass_filenames: false
+        always_run: false
+        files: (kustomization\.yaml|values/.*\.yaml)$
+        require_serial: true
 
 ci:
   autofix_commit_msg: |

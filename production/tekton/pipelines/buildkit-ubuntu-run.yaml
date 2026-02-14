@@ -3,11 +3,11 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: build-ubuntu-run-
-  namespace: dev-tekton
+  generateName: buildkit-ubuntu-run-
+  namespace: tekton
 spec:
   pipelineRef:
-    name: build-ubuntu-image
+    name: buildkit-ubuntu
 
   params:
   - name: image-reference

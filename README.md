@@ -19,6 +19,8 @@
 
 在此框架下，AI 将被鼓励作为本仓库的主要日常操作者，在人类设定的逻辑框架与监督下，完成集群的运维工作。
 
+那么运维团队要掌握什么呢？运维团队需要掌握系统的 Concept model。例如，运维 Tekton 这个 K8S 原生的 CI/CD 系统，运维只需要阅读 [Concept model | Tekton](https://tekton.dev/docs/concepts/concept-model/) 这一篇文章即可，然后直接指导 AI 来完成具体的配置、排障等工作。
+
 ## 文档
 
 - `README.md`：AI 和人类工程师都应当阅读的总体介绍。
@@ -146,7 +148,27 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
 
 本节记录 `production/` 目录下部署的服务及其配置要点。
 
-### production/argo-cd
+| 项目主页 | 社区 |
+|---|---|
+| [refector](https://github.com/emberstack/kubernetes-reflector) | 未知 |
+| [kubelet-csr-approver](https://github.com/postfinance/kubelet-csr-approver) | 公司：PostFinance |
+| [FreeIPA](https://www.freeipa.org/) | 公司：RedHat |
+| [buildkit](https://buildkit.github.io/) | 公司：Docker |
+| [GitLab Runner](https://docs.gitlab.com/runner/) | 公司：GitLab |
+| [Ingress Nginx](https://kubernetes.github.io/ingress-nginx/) | Kubernetes SIG Network(Deprecated) |
+| [metrics-server](https://kubernetes-sigs.github.io/metrics-server/) | Kubernetes SIG Instrumentation |
+| [Argo CD](https://argo-cd.readthedocs.io/) | Linux Foundation - CNCF |
+| [Jenkins](https://www.jenkins.io/) | Linux Foundation - CD Foundation |
+| [Tekton](https://tekton.dev/) | Linux Foundation - CD Foundation |
+| [Metal3](https://metal3.io/) | Linux Foundation - CNCF |
+| [OpenEBS](https://openebs.io/) | Linux Foundation |
+| [Rook](https://rook.io/) | Linux Foundation - CNCF |
+| [Harbor](https://goharbor.io/) | Linux Foundation - CNCF |
+| [Dragonfly](https://d7y.io/) | Linux Foundation - CNCF |
+| [Cilium](https://cilium.io/) | Linux Foundation - CNCF |
+| [Envoy Gateway](https://www.envoyproxy.io/envoy-gateway) | Linux Foundation - CNCF |
+| [cert-manager](https://cert-manager.io/) | Linux Foundation - CNCF |
+| [Metallb](https://metallb.universe.tf/) | Linux Foundation - CNCF |
 
 ### production/default
 
@@ -189,14 +211,6 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
 ### production/freeipa
 
 FreeIPA 作为集群域控，提供 LDAP、DNS、Automount 等服务。
-
-### production/gitlab
-
-GitLab Runner
-
-### production/jenkins
-
-CI 服务
 
 ### production/kube-system
 
