@@ -94,8 +94,6 @@ spec:
               readOnly: true
             - name: workspace
               mountPath: /home/node/.openclaw/workspace
-            - name: sessions
-              mountPath: /home/node/.openclaw/sessions
             - name: clawd-data
               mountPath: /home/node/clawd
             - name: tmp
@@ -170,8 +168,6 @@ spec:
         - name: workspace
           persistentVolumeClaim:
             claimName: openclaw-workspace
-        - name: sessions
-          emptyDir: {}
         - name: clawd-data
           emptyDir: {}
         - name: tmp
