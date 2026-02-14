@@ -25,7 +25,7 @@ spec:
             - --addr
             - tcp://0.0.0.0:1234
             - --tlscacert
-            - /certs/ca.pem
+            - /certs/ca.crt
             - --tlscert
             - /certs/tls.crt
             - --tlskey
