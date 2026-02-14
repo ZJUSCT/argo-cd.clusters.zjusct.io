@@ -11,3 +11,5 @@ helmCharts:
   namespace: openebs
   valuesFile: values/openebs-4.4.0.yaml
   version: 4.4.0
+transformers:
+  - ../../image-prefix.yaml

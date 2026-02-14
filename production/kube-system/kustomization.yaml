@@ -5,3 +5,5 @@ kind: Kustomization
 # https://github.com/bitnami-labs/sealed-secrets/releases
 resources:
   - https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.34.0/controller.yaml
+transformers:
+  - ../../image-prefix.yaml

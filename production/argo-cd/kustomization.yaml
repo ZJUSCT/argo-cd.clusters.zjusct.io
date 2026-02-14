@@ -15,3 +15,5 @@ helmCharts:
   namespace: argo-cd
   valuesFile: values/argo-cd-9.4.1.yaml
   version: 9.4.1
+transformers:
+  - ../../image-prefix.yaml

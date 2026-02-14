@@ -11,3 +11,8 @@ helmCharts:
   valuesFile: values/kubelet-csr-approver-1.2.13.yaml
   version: 1.2.13
   namespace: kubelet-csr-approver
+images:
+  - name: busybox
+    newName: docker.io/library/busybox
+transformers:
+  - ../../image-prefix.yaml

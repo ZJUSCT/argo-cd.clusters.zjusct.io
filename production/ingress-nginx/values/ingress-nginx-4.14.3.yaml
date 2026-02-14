@@ -499,7 +499,8 @@ controller:
       # -- Labels to be added to the external controller service.
       labels: {}
     # -- Annotations to be added to the external controller service. See `controller.service.internal.annotations` for annotations to be added to the internal controller service.
-    annotations: {}
+    annotations:
+      metallb.io/loadBalancerIPs: "172.28.0.0"
     # -- Labels to be added to both controller services.
     labels: {}
     # -- Type of the external controller service.

@@ -19,3 +19,5 @@ helmCharts:
   valuesFile: values/external-dns-1.20.0.yaml
 #- name: keycloak
 #  chart: oci://registry-1.docker.io/cloudpirates/keycloak
+transformers:
+  - ../../image-prefix.yaml

@@ -11,3 +11,5 @@ helmCharts:
   valuesFile: values/dragonfly-1.6.13.yaml
   version: 1.6.13
   namespace: dragonfly
+transformers:
+  - ../../image-prefix.yaml

@@ -12,3 +12,5 @@ helmCharts:
   version: 0.15.3
   namespace: metallb
   valuesFile: values/metallb-0.15.3.yaml
+transformers:
+  - ../../image-prefix.yaml

@@ -12,3 +12,5 @@ helmCharts:
   valuesFile: values/headlamp-0.40.0.yaml
   version: 0.40.0
   namespace: headlamp
+transformers:
+  - ../../image-prefix.yaml

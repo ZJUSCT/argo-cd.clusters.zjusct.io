@@ -57,7 +57,7 @@ global:
   # Default image used by all components
   image:
     # -- If defined, a repository applied to all Argo CD deployments
-    repository: harbor.clusters.zjusct.io/quay.io/argoproj/argocd
+    repository: quay.io/argoproj/argocd
     # -- Overrides the global Argo CD image tag whose default is the chart appVersion
     tag: ""
     # -- If defined, a imagePullPolicy applied to all Argo CD deployments
@@ -2843,7 +2843,7 @@ repoServer:
   extraContainers:
     - name: kustomized-helm
       command: [/var/run/argocd/argocd-cmp-server]
-      image: harbor.clusters.zjusct.io/quay.io/argoproj/argocd:v3.3.0
+      image: quay.io/argoproj/argocd
       securityContext:
         runAsNonRoot: true
         runAsUser: 999

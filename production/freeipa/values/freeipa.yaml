@@ -1,7 +1,7 @@
 ipa:
   replicas: 1
   image:
-    repository: harbor.clusters.zjusct.io/quay.io/freeipa/freeipa-server
+    repository: quay.io/freeipa/freeipa-server
     tag: fedora-rawhide-4.13.1
   server:
     adminEmail: mail@zjusct.io
@@ -12,3 +12,8 @@ ipa:
   secrets:
     create: false
     name: freeipa-admin-secrets
+
+network:
+  services:
+    ipa-01:
+      ipv4: "172.28.0.2"

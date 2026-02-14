@@ -11,3 +11,5 @@ helmCharts:
   releaseName: cluster
   namespace: zjusct
   valuesFile: values/cluster.yaml
+transformers:
+  - ../../image-prefix.yaml

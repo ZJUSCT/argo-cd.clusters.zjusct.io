@@ -11,3 +11,5 @@ helmCharts:
   version: 3.13.0
   namespace: metrics-server
   valuesFile: values/metrics-server-3.13.0.yaml
+transformers:
+  - ../../image-prefix.yaml

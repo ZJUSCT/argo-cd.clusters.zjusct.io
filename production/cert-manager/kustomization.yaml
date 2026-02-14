@@ -13,3 +13,5 @@ helmCharts:
   valuesFile: values/cert-manager-v1.19.3.yaml
   namespace: cert-manager
   version: v1.19.3
+transformers:
+  - ../../image-prefix.yaml

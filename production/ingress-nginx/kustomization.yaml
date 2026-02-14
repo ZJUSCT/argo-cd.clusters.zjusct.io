@@ -11,3 +11,5 @@ helmCharts:
   valuesFile: values/ingress-nginx-4.14.3.yaml
   version: 4.14.3
   namespace: ingress-nginx
+transformers:
+  - ../../image-prefix.yaml
