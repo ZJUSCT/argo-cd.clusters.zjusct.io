@@ -1,12 +1,3 @@
-# # Create this secret by yourself
-# apiVersion: v1
-# kind: Secret
-# metadata:
-#   name: cloudflare-api-token-secret
-# type: Opaque
-# stringData:
-#   api-token: <API Token>
----
 # https://cert-manager.io/docs/tutorials/acme/nginx-ingress
 # https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
 apiVersion: cert-manager.io/v1
