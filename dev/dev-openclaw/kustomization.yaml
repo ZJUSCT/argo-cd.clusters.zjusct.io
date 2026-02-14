@@ -1,23 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: dev-openclaw
-helmCharts:
-- name: openclaw
-  repo: https://serhanekicii.github.io/openclaw-helm
-  version: 1.3.13
-  includeCRDs: true
-  releaseName: dev-openclaw
-  namespace: dev-openclaw
-  valuesFile: values/openclaw-1.3.13.yaml
 resources:
-- openclaw-sealed-secret.yaml
-- namespace.yaml
-patches:
-- target:
-    kind: HTTPRoute
-    name: dev-openclaw
-  patch: "- op: replace\n  path: /apiVersion\n  value: gateway.networking.k8s.io/v1"
-images:
-  - name: ghcr.io/openclaw/openclaw
-    newName: harbor.clusters.zjusct.io/library/openclaw
-    newTag: latest
+  - namespace.yaml
+  - openclaw-sealed-secret.yaml
+  - resources/configmap.yaml
+  - resources/pvc.yaml
+  - resources/service.yaml
+  - resources/deployment.yaml
+  - resources/httproute.yaml
