@@ -389,6 +389,21 @@ app-template:
     data:
       enabled: false
 
+    # Config file from ConfigMap - mount directly to where OpenClaw expects it
+    config:
+      # @schema type:boolean;default:true
+      enabled: true
+      # @schema type:string;default:configMap
+      type: configMap
+      # @schema type:string;default:config
+      identifier: config
+      advancedMounts:
+        main:
+          main:
+            - path: /home/node/.openclaw/openclaw.json
+              subPath: openclaw.json
+              readOnly: true
+
     # Workspace persistence - only /workspace needs to persist
     # Plugins and skills are in the custom Docker image
     workspace:
