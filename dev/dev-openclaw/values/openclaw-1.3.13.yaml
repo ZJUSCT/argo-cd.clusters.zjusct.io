@@ -66,10 +66,14 @@ app-template:
           enabled: false
         fetch:
           enabled: true
-    # channels:
-    #   telegram:
-    #     botToken: ${TELEGRAM_BOT_TOKEN}
-    #     enabled: false
+    channels:
+      #telegram:
+      #  botToken: ${TELEGRAM_BOT_TOKEN}
+      #  enabled: false
+      qqbot:
+        enabled: true
+        appId: ${QQBOT_APP_ID}
+        clientSecret: ${QQBOT_APP_SECRET}
 
   # @schema type:string;required:true
   # -- OpenClaw image version (used by all OpenClaw containers)
