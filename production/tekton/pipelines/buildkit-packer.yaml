@@ -31,7 +31,7 @@ spec:
           set -e
 
           cat > $(workspaces.source.path)/Dockerfile <<'EOF'
-          FROM harbor-core.default.svc.cluster.local/docker.io/hashicorp/packer:latest
+          FROM harbor.clusters.zjusct.io/docker.io/hashicorp/packer:latest
 
           RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.zju.edu.cn/g' /etc/apk/repositories
           RUN apk add --no-cache \
@@ -57,7 +57,7 @@ spec:
       workspace: docker-credentials
     params:
     - name: IMAGE
-      value: "harbor-core.default.svc.cluster.local/library/packer:latest"
+      value: "harbor.clusters.zjusct.io/library/packer:latest"
     - name: DOCKERFILE
       value: "./Dockerfile"
     - name: CONTEXT
@@ -73,7 +73,7 @@ spec:
 
   params:
   - name: image-reference
-    value: harbor-core.default.svc.cluster.local/library/packer:latest
+    value: harbor.clusters.zjusct.io/library/packer:latest
 
   workspaces:
   - name: shared-data

@@ -2,7 +2,11 @@
 
 **Problem**: Configure BuildKit to use insecure (HTTP) registry for push, pull, and cache operations with Harbor's internal HTTP-only endpoint.
 
-**Status**: ✅ **RESOLVED**
+**Status**: ⚠️ **DEPRECATED** - Migrated to HTTPS via DNS split-horizon
+
+> **Note**: This document describes the HTTP-registry approach which has been deprecated.
+> See [docs/migration-to-https-registry.md](migration-to-https-registry.md) for the current HTTPS-based approach
+> that uses `harbor.clusters.zjusct.io` via envoy-gateway.
 
 ---
 

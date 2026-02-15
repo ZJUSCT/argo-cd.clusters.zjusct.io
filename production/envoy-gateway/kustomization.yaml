@@ -4,6 +4,7 @@ namespace: envoy-gateway
 resources:
 - resources/namespace.yaml
 - resources/envoy-gateway.yaml
+- resources/envoy-proxy-service.yaml
 helmCharts:
 - name: gateway-helm
   repo: oci://docker.io/envoyproxy/

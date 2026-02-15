@@ -13,7 +13,7 @@ spec:
   - name: image-reference
     type: string
     description: The image reference to push to
-    default: "harbor-core.default.svc.cluster.local/library/ubuntu:latest"
+    default: "harbor.clusters.zjusct.io/library/ubuntu:latest"
 
   workspaces:
   - name: shared-data
@@ -73,7 +73,7 @@ spec:
 
   params:
   - name: image-reference
-    value: harbor-core.default.svc.cluster.local/library/ubuntu:latest
+    value: harbor.clusters.zjusct.io/library/ubuntu:latest
 
   workspaces:
   - name: shared-data

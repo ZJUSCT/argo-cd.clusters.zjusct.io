@@ -89,9 +89,9 @@ spec:
         --opt filename=$(params.DOCKERFILE) \
         --local context=$(params.CONTEXT) \
         --local dockerfile=$(params.CONTEXT) \
-        --output type=image,name=$(params.IMAGE),push=true,registry.insecure=true \
+        --output type=image,name=$(params.IMAGE),push=true \
         --export-cache type=inline \
-        --import-cache type=registry,ref=$(params.IMAGE),registry.insecure=true
+        --import-cache type=registry,ref=$(params.IMAGE)
 
       echo "Image built and pushed successfully: $(params.IMAGE)"
     volumeMounts:

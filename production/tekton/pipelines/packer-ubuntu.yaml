@@ -169,7 +169,7 @@ spec:
       - name: source
       steps:
       - name: packer-init
-        image: harbor-core.default.svc.cluster.local/library/packer:latest
+        image: harbor.clusters.zjusct.io/library/packer:latest
         workingDir: $(workspaces.source.path)
         script: |
           #!/bin/bash
@@ -179,7 +179,7 @@ spec:
           packer init ubuntu-simple.pkr.hcl
 
       - name: packer-build
-        image: harbor-core.default.svc.cluster.local/library/packer:latest
+        image: harbor.clusters.zjusct.io/library/packer:latest
         workingDir: $(workspaces.source.path)
         securityContext:
           privileged: true

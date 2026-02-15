@@ -124,13 +124,13 @@ servers:
       lameduck 5s
   # Serves a /ready endpoint on :8181, required for readinessProbe
   - name: ready
-  # Hairpin fix: Resolve harbor.clusters.zjusct.io to envoy-gateway ClusterIP
+  # Hairpin fix: Resolve harbor.clusters.zjusct.io to envoy-proxy ClusterIP
   # This allows pods to reach LoadBalancer services affected by Cilium DSR limitation
   # See: https://github.com/cilium/cilium/issues/39198
   - name: rewrite
     parameters: stop
     configBlock: |-
-      name exact harbor.clusters.zjusct.io envoy-gateway.envoy-gateway.svc.cluster.local answer auto
+      name exact harbor.clusters.zjusct.io envoy-proxy.envoy-gateway.svc.cluster.local answer auto
   # Required to query kubernetes API for data
   - name: kubernetes
     parameters: cluster.local in-addr.arpa ip6.arpa

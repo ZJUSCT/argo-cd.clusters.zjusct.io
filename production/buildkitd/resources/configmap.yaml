@@ -5,7 +5,3 @@ metadata:
 data:
   buildkitd.toml: |
     debug = true
-
-    # Allow HTTP registries (internal Harbor core service)
-    [registry."harbor-core.default.svc.cluster.local"]
-      http = true
