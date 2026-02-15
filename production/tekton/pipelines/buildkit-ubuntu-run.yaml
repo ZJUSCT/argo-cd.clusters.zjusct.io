@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generatename: buildkit-ubuntu-run-
+  generateName: buildkit-ubuntu-run-
   namespace: tekton
 spec:
   pipelineRef:
