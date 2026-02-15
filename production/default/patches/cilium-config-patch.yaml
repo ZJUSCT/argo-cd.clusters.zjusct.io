@@ -1,0 +1,13 @@
+# Patch Cilium to allow pods to reach LoadBalancer IPs
+# By adding the MetalLB LoadBalancer subnet to ipv4NativeRoutingCIDR,
+# Cilium will let the Linux network stack handle routing to those IPs
+# instead of dropping them at the BPF layer.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cilium-config
+  namespace: default
+data:
+  # MetalLB LoadBalancer IP pool: 172.28.0.0/16
+  # This allows pods to connect to LoadBalancer services from within the cluster
+  ipv4NativeRoutingCIDR: "172.28.0.0/16"

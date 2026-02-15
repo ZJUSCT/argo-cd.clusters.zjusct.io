@@ -12,17 +12,8 @@ spec:
   workspaces:
   - name: shared-data
     description: Workspace for sharing data between tasks
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
   - name: docker-credentials
     description: Docker credentials for Harbor registry
-    secret:
-      secretName: harbor-credentials
 
   tasks:
   - name: create-dockerfile
@@ -40,7 +31,7 @@ spec:
           set -e
 
           cat > $(workspaces.source.path)/Dockerfile <<'EOF'
-          FROM harbor.clusters.zjusct.io/docker.io/hashicorp/packer:latest
+          FROM harbor-core.default.svc.cluster.local/docker.io/hashicorp/packer:latest
 
           RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.zju.edu.cn/g' /etc/apk/repositories
           RUN apk add --no-cache \
