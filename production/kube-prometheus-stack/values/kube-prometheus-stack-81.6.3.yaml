@@ -911,7 +911,7 @@ alertmanager:
     ## Image of Alertmanager
     ##
     image:
-      registry: harbor.clusters.zjusct.io/quay.io
+      registry: quay.io
       repository: prometheus/alertmanager
       tag: v0.31.0
       sha: ""
@@ -1501,8 +1501,6 @@ grafana:
     ipFamilies: []
     ipFamilyPolicy: ""
 
-    type: ClusterIP
-    port: 80
   serviceMonitor:
     # If true, a ServiceMonitor CRD is created for a prometheus operator
     # https://github.com/prometheus-operator/prometheus-operator
@@ -1529,10 +1527,6 @@ grafana:
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
     ##
     relabelings: []
-  image:
-    registry: harbor.clusters.zjusct.io/docker.io
-    repository: grafana/grafana
-    pullPolicy: IfNotPresent
 
   # Service configuration
   route:
@@ -1544,24 +1538,6 @@ grafana:
       hostnames:
       - grafana.clusters.zjusct.io
       - grafana.s.zjusct.io
-
-  # Environment variables for plugins
-  env:
-    GF_INSTALL_PLUGINS: grafana-clickhouse-datasource,vonage-status-panel,grafana-piechart-panel
-
-  # Environment variables from secrets
-  envFromSecrets:
-  - name: grafana-secrets
-
-  # Sidecar configuration for dashboards and datasources
-  downloadDashboardsImage:
-    registry: harbor.clusters.zjusct.io/docker.io
-
-  # Init chown data image with Harbor prefix
-  initChownData:
-    enabled: true
-    image:
-      registry: harbor.clusters.zjusct.io/docker.io
 
   # Grafana configuration from grafana.ini
   grafana.ini:
@@ -2570,12 +2546,8 @@ kube-state-metrics:
         ## Keep labels from scraped data, overriding server-side labels
         honorLabels: true
 
-  image:
-    registry: harbor.clusters.zjusct.io/registry.k8s.io
-
 ## Deploy node exporter as a daemonset to all nodes
 ##
-
 nodeExporter:
   enabled: true
   operatingSystems:
@@ -2873,7 +2845,7 @@ prometheusOperator:
       ## Prometheus-operator webhook image
       ##
       image:
-        registry: harbor.clusters.zjusct.io/quay.io
+        registry: quay.io
         repository: prometheus-operator/admission-webhook
         # if not set appVersion field from Chart.yaml is used
         tag: ""
@@ -2985,7 +2957,7 @@ prometheusOperator:
     patch:
       enabled: true
       image:
-        registry: harbor.clusters.zjusct.io/ghcr.io
+        registry: ghcr.io
         repository: jkroepke/kube-webhook-certgen
         tag: 1.7.6
         sha: ""
@@ -3379,7 +3351,7 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    registry: harbor.clusters.zjusct.io/quay.io
+    registry: quay.io
     repository: prometheus-operator/prometheus-operator
     # if not set appVersion field from Chart.yaml is used
     tag: ""
@@ -3393,7 +3365,6 @@ prometheusOperator:
   ## Prometheus image registry to use for prometheuses managed by the operator
   ##
   # prometheusDefaultBaseImageRegistry: quay.io
-  prometheusDefaultBaseImageRegistry: harbor.clusters.zjusct.io/quay.io
 
   ## Alertmanager image to use for alertmanagers managed by the operator
   ##
@@ -3402,13 +3373,12 @@ prometheusOperator:
   ## Alertmanager image registry to use for alertmanagers managed by the operator
   ##
   # alertmanagerDefaultBaseImageRegistry: quay.io
-  alertmanagerDefaultBaseImageRegistry: harbor.clusters.zjusct.io/quay.io
 
   ## Prometheus-config-reloader
   ##
   prometheusConfigReloader:
     image:
-      registry: harbor.clusters.zjusct.io/quay.io
+      registry: quay.io
       repository: prometheus-operator/prometheus-config-reloader
       # if not set appVersion field from Chart.yaml is used
       tag: ""
@@ -3429,7 +3399,7 @@ prometheusOperator:
   ## Thanos side-car image when configured
   ##
   thanosImage:
-    registry: harbor.clusters.zjusct.io/quay.io
+    registry: quay.io
     repository: thanos/thanos
     tag: v0.40.1
     sha: ""
@@ -3852,11 +3822,11 @@ prometheus:
       httpsRedirect: false
 
       matches:
-      - path:
-          type: PathPrefix
-          value: /
+        - path:
+            type: PathPrefix
+            value: /
 
-  # Prometheus instance specification
+      ## Filters define the filters that are applied to requests that match this rule.
       filters: []
 
       ## Additional custom rules that can be added to the route
@@ -4101,7 +4071,7 @@ prometheus:
     ## Image of Prometheus.
     ##
     image:
-      registry: harbor.clusters.zjusct.io/quay.io
+      registry: quay.io
       repository: prometheus/prometheus
       tag: v3.9.1
       sha: ""
