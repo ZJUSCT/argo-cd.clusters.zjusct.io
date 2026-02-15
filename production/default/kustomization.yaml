@@ -2,6 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: default
 patches:
+- path: patches/cilium-config-patch.yaml
+  target:
+    kind: ConfigMap
+    name: cilium-config
 - path: patches/harbor-core-cm-patch.yaml
   target:
     kind: ConfigMap
@@ -10,6 +14,10 @@ resources:
 - resources/harbor-core-sealedsecret.yaml
 - resources/harbor-jobservice-sealedsecret.yaml
 - resources/harbor-registry-sealedsecret.yaml
+- resources/cilium-lb-ipam-pool.yaml
+- resources/cilium-bgp-cluster-config.yaml
+- resources/cilium-bgp-peer-config.yaml
+- resources/cilium-bgp-advertisement.yaml
 helmCharts:
 - name: cilium
   repo: https://helm.cilium.io/
