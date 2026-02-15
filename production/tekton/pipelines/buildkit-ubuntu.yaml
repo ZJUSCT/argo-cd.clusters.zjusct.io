@@ -62,29 +62,3 @@ spec:
       value: "./Dockerfile"
     - name: CONTEXT
       value: "."
----
-apiVersion: tekton.dev/v1
-kind: PipelineRun
-metadata:
-  name: buildkit-ubuntu-run
-spec:
-  pipelineRef:
-    name: buildkit-ubuntu
-
-  params:
-  - name: image-reference
-    value: harbor.clusters.zjusct.io/library/ubuntu:latest
-
-  workspaces:
-  - name: shared-data
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
-
-  - name: docker-credentials
-    secret:
-      secretName: harbor-credentials

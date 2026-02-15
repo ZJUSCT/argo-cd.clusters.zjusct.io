@@ -197,20 +197,3 @@ spec:
           if [ -f output/ubuntu-simple.qcow2 ]; then
             qemu-img info output/ubuntu-simple.qcow2
           fi
----
-apiVersion: tekton.dev/v1
-kind: PipelineRun
-metadata:
-  name: packer-ubuntu-run
-spec:
-  pipelineRef:
-    name: packer-ubuntu
-  workspaces:
-  - name: shared-data
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 20Gi

@@ -142,9 +142,7 @@ servers:
   - name: prometheus
     parameters: 0.0.0.0:9153
   - name: forward
-    parameters: . 172.25.4.1
-    configBlock: |-
-      max_concurrent 1000
+    parameters: . /etc/resolv.conf
   - name: cache
     parameters: 30
     configBlock: |-
@@ -240,8 +238,7 @@ topologySpreadConstraints: []
 
 # Node labels for pod assignment
 # Ref: https://kubernetes.io/docs/user-guide/node-selection/
-nodeSelector:
-  kubernetes.io/os: linux
+nodeSelector: {}
 
 # expects input structure as per specification https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#toleration-v1-core
 # for example:

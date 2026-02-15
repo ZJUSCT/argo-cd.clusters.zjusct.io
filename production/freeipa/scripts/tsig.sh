@@ -61,6 +61,44 @@ else
     fi
 fi
 
+# Enable AXFR (zone transfer) for the TSIG key
+# This is required for external-dns sync policy to work properly
+# Note: FreeIPA's 'ipa dnszone-mod --allow-transfer' doesn't support TSIG keys,
+# so we use ldapmodify directly to set the idnsAllowTransfer attribute
+echo "Enabling AXFR for TSIG key..."
+
+# Get LDAP suffix from FreeIPA realm
+LDAP_SUFFIX=$(kubectl -n "$NAMESPACE" exec "$POD_NAME" -- bash -c "cat /etc/ipa/default.conf | grep -oP 'basedn = \K.*' | tr ',' '/' | sed 's/dc=/dc=/g'" 2>/dev/null || echo "dc=clusters,dc=zjusct,dc=io")
+LDAP_DN="idnsname=$ZONE.,cn=dns,$LDAP_SUFFIX"
+
+if [ -n "$IPA_PASSWORD" ]; then
+    if ! kubectl -n "$NAMESPACE" exec "$POD_NAME" -- bash -c "echo '$IPA_PASSWORD' | kinit '$IPA_USER' && ldapmodify -Y EXTERNAL -H ldapi://%2fvar%2frun%2fslapd-CLUSTERS-ZJUSCT-IO.socket <<< \"dn: $LDAP_DN
+changetype: modify
+replace: idnsAllowTransfer
+idnsAllowTransfer: key $KEY_NAME
+\""; then
+        echo "WARNING: Failed to enable AXFR. You may need to configure it manually."
+        echo "Run in FreeIPA pod:"
+        echo "  kinit admin"
+        echo "  ldapmodify -Y EXTERNAL -H ldapi://%2fvar%2frun%2fslapd-CLUSTERS-ZJUSCT-IO.socket"
+        echo "  dn: $LDAP_DN"
+        echo "  changetype: modify"
+        echo "  replace: idnsAllowTransfer"
+        echo "  idnsAllowTransfer: key $KEY_NAME"
+    else
+        echo "AXFR enabled for key '$KEY_NAME' on zone '$ZONE'"
+    fi
+else
+    echo "WARNING: IPA_PASSWORD not available. Skipping AXFR configuration."
+    echo "To enable AXFR manually, run in FreeIPA pod:"
+    echo "  kinit admin"
+    echo "  ldapmodify -Y EXTERNAL -H ldapi://%2fvar%2frun%2fslapd-CLUSTERS-ZJUSCT-IO.socket"
+    echo "  dn: $LDAP_DN"
+    echo "  changetype: modify"
+    echo "  replace: idnsAllowTransfer"
+    echo "  idnsAllowTransfer: key $KEY_NAME"
+fi
+
 if [ -z "$TSIG_SECRET" ]; then
     echo "ERROR: Failed to extract TSIG secret"
     exit 1
