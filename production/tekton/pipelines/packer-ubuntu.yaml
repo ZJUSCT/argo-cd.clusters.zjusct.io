@@ -1,0 +1,206 @@
+---
+# Pipeline to build Ubuntu QCOW2 image with Packer
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: packer-ubuntu
+spec:
+  description: |
+    This pipeline uses Packer to build a Ubuntu QCOW2 image.
+
+  workspaces:
+  - name: shared-data
+    description: Workspace for sharing data between tasks
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+
+  tasks:
+  - name: setup-packer-files
+    workspaces:
+    - name: source
+      workspace: shared-data
+    taskSpec:
+      workspaces:
+      - name: source
+      steps:
+      - name: create-packer-config
+        image: busybox
+        script: |
+          #!/bin/sh
+          set -e
+
+          # Create packer configuration
+          cat > $(workspaces.source.path)/ubuntu-simple.pkr.hcl <<'EOF'
+          packer {
+            required_plugins {
+              qemu = {
+                version = "~> 1"
+                source  = "github.com/hashicorp/qemu"
+              }
+            }
+          }
+
+          source "qemu" "ubuntu" {
+            # Use Ubuntu 22.04 LTS (Jammy) cloud image
+            iso_url      = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+            iso_checksum = "file:https://cloud-images.ubuntu.com/jammy/current/SHA256SUMS"
+            disk_image   = true
+
+            # VM Configuration
+            cpus            = 2
+            memory          = 2048
+            disk_size       = "10G"
+            format          = "qcow2"
+            accelerator     = "kvm"
+            headless        = true
+
+            # Network and display
+            net_device       = "virtio-net"
+            disk_interface   = "virtio"
+            vnc_bind_address = "127.0.0.1"
+
+            # Boot configuration
+            boot_wait = "10s"
+
+            # SSH Configuration
+            ssh_username = "ubuntu"
+            ssh_password = "ubuntu"
+            ssh_timeout  = "20m"
+
+            # HTTP server for cloud-init files
+            http_directory = "."
+
+            # Output
+            output_directory = "output"
+            vm_name          = "ubuntu-simple.qcow2"
+
+            # QEMU arguments for cloud-init
+            qemuargs = [
+              ["-smbios", "type=1,serial=ds=nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/"]
+            ]
+
+            # Shutdown
+            shutdown_command = "echo 'ubuntu' | sudo -S shutdown -P now"
+          }
+
+          build {
+            sources = ["source.qemu.ubuntu"]
+
+            # Wait for system to be ready
+            provisioner "shell" {
+              inline = [
+                "echo 'Waiting for cloud-init to complete...'",
+                "cloud-init status --wait",
+                "echo 'System is ready!'"
+              ]
+            }
+
+            # Update system
+            provisioner "shell" {
+              inline = [
+                "echo 'ubuntu' | sudo -S apt-get update",
+                "echo 'ubuntu' | sudo -S apt-get upgrade -y"
+              ]
+            }
+
+            # Install any additional packages (example)
+            provisioner "shell" {
+              inline = [
+                "echo 'ubuntu' | sudo -S apt-get install -y curl wget vim"
+              ]
+            }
+
+            # Cleanup
+            provisioner "shell" {
+              inline = [
+                "echo 'Cleaning up...'",
+                "echo 'ubuntu' | sudo -S apt-get autoremove -y",
+                "echo 'ubuntu' | sudo -S apt-get clean",
+                "echo 'ubuntu' | sudo -S cloud-init clean --logs",
+                "echo 'ubuntu' | sudo -S rm -f /etc/ssh/ssh_host_*",
+                "echo 'ubuntu' | sudo -S truncate -s 0 /etc/machine-id",
+                "echo 'ubuntu' | sudo -S sync"
+              ]
+            }
+          }
+          EOF
+
+          # Create cloud-init meta-data
+          cat > $(workspaces.source.path)/meta-data <<'EOF'
+          instance-id: iid-local01
+          local-hostname: ubuntu-packer
+          EOF
+
+          # Create cloud-init user-data
+          cat > $(workspaces.source.path)/user-data <<'EOF'
+          #cloud-config
+          users:
+            - name: ubuntu
+              passwd: $6$rounds=4096$saltsaltsalt$L7/HNeqZ0b7Bl9P9YJZpF7MPOQ9wxYN0j.2J8G8Y7kNqH3w5fF2b9w3kH8rD8mJ9n2Y8vN6lC4rT5sE3xL1qR0
+              lock_passwd: false
+              sudo: ALL=(ALL) NOPASSWD:ALL
+              shell: /bin/bash
+              ssh_authorized_keys: []
+
+          # Enable password authentication for SSH
+          ssh_pwauth: true
+
+          # Disable cloud-init after first boot for the build
+          runcmd:
+            - echo "Cloud-init completed"
+          EOF
+
+          # Create network-config
+          cat > $(workspaces.source.path)/network-config <<'EOF'
+          version: 2
+          ethernets:
+            ens3:
+              dhcp4: true
+          EOF
+
+          echo "Packer configuration files created:"
+          ls -la $(workspaces.source.path)/
+
+  - name: build-ubuntu-image
+    runAfter: ["setup-packer-files"]
+    workspaces:
+    - name: source
+      workspace: shared-data
+    taskSpec:
+      workspaces:
+      - name: source
+      steps:
+      - name: packer-init
+        image: harbor-core.default.svc.cluster.loal/library/packer:latest
+        workingDir: $(workspaces.source.path)
+        script: |
+          #!/bin/bash
+          set -e
+
+          echo "Initializing Packer plugins..."
+          packer init ubuntu-simple.pkr.hcl
+
+      - name: packer-build
+        image: harbor-core.default.svc.cluster.loal/library/packer:latest
+        workingDir: $(workspaces.source.path)
+        securityContext:
+          privileged: true
+        script: |
+          #!/bin/bash
+          set -e
+
+          echo "Building Ubuntu image with Packer..."
+          packer build ubuntu-simple.pkr.hcl
+
+          echo "Build complete! Output:"
+          ls -lh output/
+
+          # Display qcow2 info
+          if [ -f output/ubuntu-simple.qcow2 ]; then
+            qemu-img info output/ubuntu-simple.qcow2
+          fi

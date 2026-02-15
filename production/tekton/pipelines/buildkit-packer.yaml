@@ -1,19 +1,13 @@
 ---
-# Pipeline to build a simple Ubuntu image with BuildKit
+# Pipeline to build Packer image with BuildKit
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: buildkit-ubuntu
+  name: buildkit-packer
 spec:
   description: |
-    This pipeline creates a simple Dockerfile and builds it with BuildKit,
+    This pipeline builds a Packer image with QEMU support using BuildKit,
     then pushes to Harbor registry.
-
-  params:
-  - name: image-reference
-    type: string
-    description: The image reference to push to
-    default: "harbor-core.default.svc.cluster.loal/library/ubuntu:latest"
 
   workspaces:
   - name: shared-data
@@ -46,10 +40,16 @@ spec:
           set -e
 
           cat > $(workspaces.source.path)/Dockerfile <<'EOF'
-          FROM ubuntu
+          FROM harbor.clusters.zjusct.io/docker.io/hashicorp/packer:latest
 
-          RUN sed -i 's/archive.ubuntu.com/mirrors.zju.edu.cn/g' /etc/apt/sources.list.d/ubuntu.sources && \
-              apt-get update && apt-get install -y curl
+          RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.zju.edu.cn/g' /etc/apk/repositories
+          RUN apk add --no-cache \
+              qemu-system-x86_64 \
+              qemu-img \
+              qemu-ui-gtk \
+              ovmf \
+              curl \
+              bash
           EOF
 
           echo "Dockerfile created:"
@@ -66,7 +66,7 @@ spec:
       workspace: docker-credentials
     params:
     - name: IMAGE
-      value: $(params.image-reference)
+      value: "harbor-core.default.svc.cluster.loal/library/packer:latest"
     - name: DOCKERFILE
       value: "./Dockerfile"
     - name: CONTEXT
