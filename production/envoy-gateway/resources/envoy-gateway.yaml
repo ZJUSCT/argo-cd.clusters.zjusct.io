@@ -11,8 +11,13 @@ kind: Gateway
 metadata:
   name: envoy-gateway
   namespace: envoy-gateway
+  annotations:
+    lbipam.cilium.io/ips: "172.28.0.1"
 spec:
   gatewayClassName: envoy-gateway
+  infrastructure:
+    annotations:
+      lbipam.cilium.io/ips: "172.28.0.1"
   listeners:
     - name: http
       protocol: HTTP

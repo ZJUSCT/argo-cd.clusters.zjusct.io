@@ -8,7 +8,7 @@ metadata:
     app: freeipa
   {{- if or (index $.Values.network.services (printf "ipa-%02d" (add $i 1)) "ipv4") (index $.Values.network.services (printf "ipa-%02d" (add $i 1)) "ipv6") }}
   annotations:
-    metallb.io/loadBalancerIPs: |-
+    lbipam.cilium.io/ips: |-
       {{- $ipv4 := index $.Values.network.services (printf "ipa-%02d" (add $i 1)) "ipv4" }}
       {{- $ipv6 := index $.Values.network.services (printf "ipa-%02d" (add $i 1)) "ipv6" }}
       {{- if and $ipv4 $ipv6 }}
