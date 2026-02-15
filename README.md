@@ -177,29 +177,45 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
 
 ### production/default
 
-集群搭初期基础设施都堆在这了，之后最好还是拆分到单独的 Application。
+#### cilium
 
 - CNI 插件：Cilium，启用 Hubble 提供网络可观测性。
-- 镜像：
 
-    集群搭建 Harbor 用于内网镜像服务，域名 `harbor.clusters.zjusct.io`。配置了知名 Registry 的 Pull Through Cache，将其添加为前缀即可。例如：
+- 地址段 `172.28.0.0/16`，通过 BGP 将路由信息通告到集群主路由。
+- LoadBalancer IP 不会响应 ICMP，因此无法通过 ping 命令测试连通性。
+- Pod 内无法访问 LoadBalancer IP。两种解决办法：
 
-    - `ubuntu` -> `harbor.clusters.zjusct.io/hub.docker.com/library/ubuntu`
-    - `quay.io/minio/minio` -> `harbor.clusters.zjusct.io/quay.io/minio/minio`
+    - K8S 内应当通过 Service IP/DNS 访问相应服务，但内部往往没有 TLS（TLS 配置在 Gateway/Ingress 上），不适用于需要 TLS 的服务。
+    - 使用 DNS Split Horizon 方法，通过 CoreDNS rewrite 将解析结果指向 Service IP，例：
 
-    K8S 上部署的服务均应使用 Harbor 作为镜像前缀。`kustomization.yaml` 中使用 `image-prefix.yaml` 配置集群内镜像服务的前缀。
+        ```yaml
+        - name: rewrite
+          parameters: stop
+          configBlock: |-
+            name exact harbor.clusters.zjusct.io envoy-gateway.envoy-gateway.svc.cluster.local answer auto
+        ```
 
-    ```yaml
-    transformers:
-    - ../../image-prefix.yaml
-    ```
+#### harbor
 
-    对于 Docker Hub 上的短镜像名，需要先通过 `images` 字段将其转换为完整镜像名，例如：
+集群搭建 Harbor 用于内网镜像服务，域名 `harbor.clusters.zjusct.io`。配置了知名 Registry 的 Pull Through Cache，将其添加为前缀即可。例如：
 
-    ```yaml
-    images:
-    - name: ubuntu
-      newName: docker.io/library/ubuntu
+- `ubuntu` -> `harbor.clusters.zjusct.io/hub.docker.com/library/ubuntu`
+- `quay.io/minio/minio` -> `harbor.clusters.zjusct.io/quay.io/minio/minio`
+
+K8S 上部署的服务均应使用 Harbor 作为镜像前缀。`kustomization.yaml` 中使用 `image-prefix.yaml` 配置集群内镜像服务的前缀。
+
+```yaml
+transformers:
+- ../../image-prefix.yaml
+```
+
+对于 Docker Hub 上的短镜像名，需要先通过 `images` 字段将其转换为完整镜像名，例如：
+
+```yaml
+images:
+- name: ubuntu
+    newName: docker.io/library/ubuntu
+```
 
 ### production/ingress-nginx
 
@@ -213,21 +229,7 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
 - 443：HTTPS，已配置 TLS 泛域名证书
 - 444：TLS Passthrough，适用于需要直接暴露 TLS 服务的应用
 
-### production/metallb
 
-- 地址段 `172.28.0.0/16`，通过 BGP 将路由信息通告到集群主路由。
-- LoadBalancer IP 不会响应 ICMP，因此无法通过 ping 命令测试连通性。
-- Pod 内无法访问 LoadBalancer IP，应当通过 K8S 内部 Service 访问。例：
-
-    ```text
-    /tmp $ wget https://harbor.clusters.zjusct.io
-    Connecting to harbor.clusters.zjusct.io (172.28.0.1:443)
-    wget: can't connect to remote host (172.28.0.1): Connection refused
-    /tmp $ wget http://harbor-registry.default.svc.cluster.local:5000
-    Connecting to harbor-registry.default.svc.cluster.local:5000 (172.27.35.176:5000)
-    saving to 'index.html'
-    'index.html' saved
-    ```
 
 ### production/dragonfly
 
