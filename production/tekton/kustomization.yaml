@@ -11,6 +11,8 @@ resources:
   - tasks/buildkit.yaml
   # - tasks/git-clone.yaml
   - pipelines/buildkit-ubuntu.yaml
+  - pipelines/buildkit-packer.yaml
+  - pipelines/packer-ubuntu.yaml
 patches:
   # https://github.com/tektoncd/operator/blob/main/docs/AirGapImageConfiguration.md
   - target:
