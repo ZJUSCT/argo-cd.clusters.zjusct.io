@@ -2,10 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: default
 patches:
-- path: patches/cilium-config-patch.yaml
-  target:
-    kind: ConfigMap
-    name: cilium-config
 - path: patches/harbor-core-cm-patch.yaml
   target:
     kind: ConfigMap
