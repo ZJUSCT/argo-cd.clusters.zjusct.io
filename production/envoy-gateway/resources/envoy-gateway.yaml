@@ -28,6 +28,7 @@ spec:
         certificateRefs:
         - kind: Secret
           name: clusters-zjusct-io-cert
+          namespace: cert-manager
       allowedRoutes:
         namespaces:
           from: All

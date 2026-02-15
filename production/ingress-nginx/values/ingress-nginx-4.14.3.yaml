@@ -207,7 +207,7 @@ controller:
   # -- Additional command line arguments to pass to Ingress-Nginx Controller
   # E.g. to specify the default SSL certificate you can use
   extraArgs:
-    default-ssl-certificate: "default/clusters-zjusct-io-cert"
+    default-ssl-certificate: "cert-manager/clusters-zjusct-io-cert"
   ## extraArgs:
   ##   default-ssl-certificate: "<namespace>/<secret_name>"
   ##   time-buckets: "0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5,10"

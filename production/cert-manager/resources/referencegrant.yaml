@@ -1,0 +1,15 @@
+# Allow Gateway in envoy-gateway namespace to reference secrets in cert-manager namespace
+# This enables cross-namespace secret references without needing to copy secrets
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-envoy-gateway-tls
+  namespace: cert-manager
+spec:
+  from:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    namespace: envoy-gateway
+  to:
+  - group: ""
+    kind: Secret

@@ -5,6 +5,7 @@ resources:
 - resources/namespace.yaml
 - resources/sealedsecret.yaml
 - resources/clusterissuers.yaml
+- resources/referencegrant.yaml
 helmCharts:
 - name: cert-manager
   repo: https://charts.jetstack.io
