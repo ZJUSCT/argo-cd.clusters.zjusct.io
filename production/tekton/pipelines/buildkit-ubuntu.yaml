@@ -13,22 +13,13 @@ spec:
   - name: image-reference
     type: string
     description: The image reference to push to
-    default: "harbor-core.default.svc.cluster.loal/library/ubuntu:latest"
+    default: "harbor-core.default.svc.cluster.local/library/ubuntu:latest"
 
   workspaces:
   - name: shared-data
     description: Workspace for sharing data between tasks
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
   - name: docker-credentials
     description: Docker credentials for Harbor registry
-    secret:
-      secretName: harbor-credentials
 
   tasks:
   - name: create-dockerfile
@@ -71,3 +62,29 @@ spec:
       value: "./Dockerfile"
     - name: CONTEXT
       value: "."
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: buildkit-ubuntu-run
+spec:
+  pipelineRef:
+    name: buildkit-ubuntu
+
+  params:
+  - name: image-reference
+    value: harbor-core.default.svc.cluster.local/library/ubuntu:latest
+
+  workspaces:
+  - name: shared-data
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+
+  - name: docker-credentials
+    secret:
+      secretName: harbor-credentials

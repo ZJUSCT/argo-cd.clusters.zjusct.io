@@ -66,8 +66,34 @@ spec:
       workspace: docker-credentials
     params:
     - name: IMAGE
-      value: "harbor-core.default.svc.cluster.loal/library/packer:latest"
+      value: "harbor-core.default.svc.cluster.local/library/packer:latest"
     - name: DOCKERFILE
       value: "./Dockerfile"
     - name: CONTEXT
       value: "."
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: buildkit-packer-run
+spec:
+  pipelineRef:
+    name: buildkit-packer
+
+  params:
+  - name: image-reference
+    value: harbor-core.default.svc.cluster.local/library/packer:latest
+
+  workspaces:
+  - name: shared-data
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+
+  - name: docker-credentials
+    secret:
+      secretName: harbor-credentials
