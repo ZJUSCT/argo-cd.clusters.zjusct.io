@@ -233,7 +233,7 @@ postgresql:
 
     # A secret is created by this chart (litellm-helm) with the credentials that
     #  the new Postgres instance should use.
-    # existingSecret: ""
+    existingSecret: "litellm-dbcredentials" # Created by litellm-helm with the username and password specified above.
     # secretKeys:
     #   userPasswordKey: password
 
