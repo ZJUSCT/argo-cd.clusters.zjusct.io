@@ -18,7 +18,7 @@ spec:
 
   params:
   - name: PACKER_FILE
-    description: Path to the Packer configuration file (.pkr.hcl or .json)
+    description: Path to the Packer configuration file relative to workspace root (.pkr.hcl or .json)
     type: string
   - name: PACKER_IMAGE
     description: The Packer container image to use
@@ -28,10 +28,6 @@ spec:
     description: Additional arguments to pass to packer build
     default: ""
     type: string
-  - name: WORKING_DIR
-    description: Working directory for packer (directory containing the packer file)
-    default: "."
-    type: string
 
   workspaces:
   - name: source
@@ -40,57 +36,75 @@ spec:
   steps:
   - name: packer-init
     image: $(params.PACKER_IMAGE)
-    workingDir: $(workspaces.source.path)/$(params.WORKING_DIR)
+    workingDir: $(workspaces.source.path)
     script: |
       #!/bin/bash
       set -e
+
+      # Extract directory and filename from PACKER_FILE path
+      PACKER_DIR=$(dirname "$(params.PACKER_FILE)")
+      PACKER_FILENAME=$(basename "$(params.PACKER_FILE)")
 
       echo "========================================"
       echo "Initializing Packer plugins..."
       echo "========================================"
       echo "Packer file: $(params.PACKER_FILE)"
-      echo "Working directory: $(workspaces.source.path)/$(params.WORKING_DIR)"
+      echo "Working directory: $(workspaces.source.path)/${PACKER_DIR}"
+      echo "Packer filename: ${PACKER_FILENAME}"
       echo ""
 
-      packer init $(params.PACKER_FILE)
+      cd "${PACKER_DIR}"
+      packer init "${PACKER_FILENAME}"
 
       echo ""
       echo "Packer plugins initialized successfully"
 
   - name: packer-validate
     image: $(params.PACKER_IMAGE)
-    workingDir: $(workspaces.source.path)/$(params.WORKING_DIR)
+    workingDir: $(workspaces.source.path)
     script: |
       #!/bin/bash
       set -e
+
+      # Extract directory and filename from PACKER_FILE path
+      PACKER_DIR=$(dirname "$(params.PACKER_FILE)")
+      PACKER_FILENAME=$(basename "$(params.PACKER_FILE)")
 
       echo "========================================"
       echo "Validating Packer configuration..."
       echo "========================================"
       echo ""
 
-      packer validate $(params.PACKER_FILE)
+      cd "${PACKER_DIR}"
+      packer validate "${PACKER_FILENAME}"
 
       echo ""
       echo "Packer configuration is valid"
 
   - name: packer-build
     image: $(params.PACKER_IMAGE)
-    workingDir: $(workspaces.source.path)/$(params.WORKING_DIR)
+    workingDir: $(workspaces.source.path)
     securityContext:
       privileged: true
     script: |
       #!/bin/bash
       set -e
 
+      # Extract directory and filename from PACKER_FILE path
+      PACKER_DIR=$(dirname "$(params.PACKER_FILE)")
+      PACKER_FILENAME=$(basename "$(params.PACKER_FILE)")
+
       echo "========================================"
       echo "Building image with Packer..."
       echo "========================================"
       echo "Packer file: $(params.PACKER_FILE)"
+      echo "Packer directory: ${PACKER_DIR}"
+      echo "Packer filename: ${PACKER_FILENAME}"
       echo "Additional args: $(params.PACKER_ARGS)"
       echo ""
 
-      packer build $(params.PACKER_ARGS) $(params.PACKER_FILE)
+      cd "${PACKER_DIR}"
+      packer build $(params.PACKER_ARGS) "${PACKER_FILENAME}"
 
       echo ""
       echo "========================================"

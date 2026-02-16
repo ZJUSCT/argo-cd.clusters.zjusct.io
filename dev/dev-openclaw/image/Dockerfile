@@ -1,6 +1,6 @@
 # Custom OpenClaw image with pre-installed plugins
 # Base image
-ARG OPENCLAW_VERSION=2026.2.9
+ARG OPENCLAW_VERSION=latest
 FROM harbor.clusters.zjusct.io/ghcr.io/openclaw/openclaw:${OPENCLAW_VERSION}
 
 # Switch to root to create directories and set permissions

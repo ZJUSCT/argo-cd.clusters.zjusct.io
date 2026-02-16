@@ -61,8 +61,6 @@ spec:
       workspace: shared-data
     params:
     - name: PACKER_FILE
-      value: "$(basename $(params.packer-file))"
+      value: $(params.packer-file)
     - name: PACKER_IMAGE
       value: $(params.packer-image)
-    - name: WORKING_DIR
-      value: "$(dirname $(params.packer-file))"
