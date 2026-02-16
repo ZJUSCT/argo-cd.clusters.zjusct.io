@@ -1,11 +1,20 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: packer-ubuntu-run
+  generateName: packer-run-ubuntu-
   namespace: tekton
 spec:
   pipelineRef:
-    name: packer-ubuntu
+    name: packer
+  params:
+  - name: git-url
+    value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+  - name: git-revision
+    value: "master"
+  - name: packer-file
+    value: "packer/ubuntu-simple.pkr.hcl"
+  - name: packer-image
+    value: "harbor.clusters.zjusct.io/library/packer:latest"
   workspaces:
   - name: shared-data
     volumeClaimTemplate:

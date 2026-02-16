@@ -12,7 +12,7 @@ resources:
   # - tasks/git-clone.yaml
   - pipelines/buildkit-ubuntu.yaml
   - pipelines/buildkit-packer.yaml
-  - pipelines/packer-ubuntu.yaml
+  - pipelines/packer.yaml
 patches:
   # https://github.com/tektoncd/operator/blob/main/docs/AirGapImageConfiguration.md
   - target:

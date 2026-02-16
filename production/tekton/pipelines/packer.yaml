@@ -1,0 +1,61 @@
+---
+# Pipeline to build Ubuntu QCOW2 image with Packer
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: packer
+spec:
+  description: |
+    This pipeline clones a git repository and uses Packer to build a Ubuntu QCOW2 image.
+
+  params:
+  - name: git-url
+    description: Git repository URL
+    type: string
+    default: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+  - name: git-revision
+    description: Git revision to checkout
+    type: string
+    default: "master"
+  - name: packer-file
+    description: Path to the Packer configuration file relative to repo root
+    type: string
+    default: "packer/ubuntu-simple.pkr.hcl"
+  - name: packer-image
+    description: Packer container image to use
+    type: string
+    default: "harbor.clusters.zjusct.io/library/packer:latest"
+
+  workspaces:
+  - name: shared-data
+    description: Workspace for sharing data between tasks
+
+  tasks:
+  - name: fetch-repository
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-data
+    params:
+    - name: url
+      value: $(params.git-url)
+    - name: revision
+      value: $(params.git-revision)
+    - name: deleteExisting
+      value: "true"
+
+  - name: build-image
+    runAfter: ["fetch-repository"]
+    taskRef:
+      name: packer
+    workspaces:
+    - name: source
+      workspace: shared-data
+    params:
+    - name: PACKER_FILE
+      value: "$(basename $(params.packer-file))"
+    - name: PACKER_IMAGE
+      value: $(params.packer-image)
+    - name: WORKING_DIR
+      value: "$(dirname $(params.packer-file))"

@@ -1,24 +1,20 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: buildkit-packer-run-
+  generateName: packer-run-alpine-
   namespace: tekton
 spec:
   pipelineRef:
-    name: buildkit-packer
-
+    name: packer
   params:
   - name: git-url
     value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
   - name: git-revision
     value: "master"
-  - name: image-reference
+  - name: packer-file
+    value: "packer/alpine-simple.pkr.hcl"  # Change this to your Alpine packer file
+  - name: packer-image
     value: "harbor.clusters.zjusct.io/library/packer:latest"
-  - name: dockerfile-path
-    value: "packer/Dockerfile"
-  - name: context-dir
-    value: "packer"
-
   workspaces:
   - name: shared-data
     volumeClaimTemplate:
@@ -27,8 +23,4 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 1Gi
-
-  - name: docker-credentials
-    secret:
-      secretName: harbor-credentials
+            storage: 20Gi

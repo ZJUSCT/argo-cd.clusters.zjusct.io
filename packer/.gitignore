@@ -1,0 +1,11 @@
+# Packer build artifacts
+output/
+packer_cache/
+*.qcow2
+crash.log
+
+# Cloud-init ISO (if generated)
+*.iso
+
+# Packer logs
+packer.log

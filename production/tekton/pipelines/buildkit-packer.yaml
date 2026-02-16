@@ -6,8 +6,30 @@ metadata:
   name: buildkit-packer
 spec:
   description: |
-    This pipeline builds a Packer image with QEMU support using BuildKit,
+    This pipeline clones the git repository and builds a Packer image with QEMU support using BuildKit,
     then pushes to Harbor registry.
+
+  params:
+  - name: git-url
+    description: Git repository URL
+    type: string
+    default: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+  - name: git-revision
+    description: Git revision to checkout
+    type: string
+    default: "master"
+  - name: image-reference
+    description: Reference of the image BuildKit will produce
+    type: string
+    default: "harbor.clusters.zjusct.io/library/packer:latest"
+  - name: dockerfile-path
+    description: Path to the Dockerfile relative to repo root
+    type: string
+    default: "packer/Dockerfile"
+  - name: context-dir
+    description: Build context directory relative to repo root
+    type: string
+    default: "packer"
 
   workspaces:
   - name: shared-data
@@ -16,38 +38,22 @@ spec:
     description: Docker credentials for Harbor registry
 
   tasks:
-  - name: create-dockerfile
+  - name: fetch-repository
+    taskRef:
+      name: git-clone
     workspaces:
-    - name: source
+    - name: output
       workspace: shared-data
-    taskSpec:
-      workspaces:
-      - name: source
-      steps:
-      - name: write-dockerfile
-        image: busybox
-        script: |
-          #!/bin/sh
-          set -e
-
-          cat > $(workspaces.source.path)/Dockerfile <<'EOF'
-          FROM harbor.clusters.zjusct.io/docker.io/hashicorp/packer:latest
-
-          RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.zju.edu.cn/g' /etc/apk/repositories
-          RUN apk add --no-cache \
-              qemu-system-x86_64 \
-              qemu-img \
-              qemu-ui-gtk \
-              ovmf \
-              curl \
-              bash
-          EOF
-
-          echo "Dockerfile created:"
-          cat $(workspaces.source.path)/Dockerfile
+    params:
+    - name: url
+      value: $(params.git-url)
+    - name: revision
+      value: $(params.git-revision)
+    - name: deleteExisting
+      value: "true"
 
   - name: build-and-push
-    runAfter: ["create-dockerfile"]
+    runAfter: ["fetch-repository"]
     taskRef:
       name: buildkit
     workspaces:
@@ -57,8 +63,8 @@ spec:
       workspace: docker-credentials
     params:
     - name: IMAGE
-      value: "harbor.clusters.zjusct.io/library/packer:latest"
+      value: $(params.image-reference)
     - name: DOCKERFILE
-      value: "./Dockerfile"
+      value: $(params.dockerfile-path)
     - name: CONTEXT
-      value: "."
+      value: $(params.context-dir)
