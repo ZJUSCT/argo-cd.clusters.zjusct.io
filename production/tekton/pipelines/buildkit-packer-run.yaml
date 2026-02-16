@@ -7,6 +7,11 @@ spec:
   pipelineRef:
     name: buildkit-packer
 
+  taskRunTemplate:
+    podTemplate:
+      securityContext:
+        fsGroup: 65532
+
   params:
   - name: git-url
     value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
@@ -15,7 +20,7 @@ spec:
   - name: image-reference
     value: "harbor.clusters.zjusct.io/library/packer:latest"
   - name: dockerfile-path
-    value: "packer/Dockerfile"
+    value: "Dockerfile"
   - name: context-dir
     value: "packer"
 

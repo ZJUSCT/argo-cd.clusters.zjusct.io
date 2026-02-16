@@ -6,6 +6,12 @@ metadata:
 spec:
   pipelineRef:
     name: packer
+
+  taskRunTemplate:
+    podTemplate:
+      securityContext:
+        fsGroup: 65532
+
   params:
   - name: git-url
     value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"

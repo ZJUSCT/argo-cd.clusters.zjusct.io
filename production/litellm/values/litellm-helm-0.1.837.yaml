@@ -23,7 +23,9 @@ serviceAccount:
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
-  annotations: {}
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
@@ -223,10 +225,17 @@ postgresql:
   auth:
     username: litellm
     database: litellm
-    existingSecret: litellm-postgresql
-    secretKeys:
-      userPasswordKey: password
-      adminPasswordKey: postgres-password
+
+    # You should override these on the helm command line with
+    #  `--set postgresql.auth.postgres-password=<some good password>,postgresql.auth.password=<some good password>`
+    password: NoTaGrEaTpAsSwOrD
+    postgres-password: NoTaGrEaTpAsSwOrD
+
+    # A secret is created by this chart (litellm-helm) with the credentials that
+    #  the new Postgres instance should use.
+    # existingSecret: ""
+    # secretKeys:
+    #   userPasswordKey: password
 
   primary:
     persistence:

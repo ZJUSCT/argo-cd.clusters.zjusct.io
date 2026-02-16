@@ -9,7 +9,7 @@ resources:
   - resources/buildkit-client-cert.yaml
   - resources/sealedsecret-harbor.yaml
   - tasks/buildkit.yaml
-  # - tasks/git-clone.yaml
+  - tasks/packer.yaml
   - pipelines/buildkit-ubuntu.yaml
   - pipelines/buildkit-packer.yaml
   - pipelines/packer.yaml

@@ -5,6 +5,8 @@ metadata:
 spec:
   profile: all
   targetNamespace: tekton
+  pipeline:
+    enable-api-fields: "beta"
   pruner:
     resources:
     - pipelinerun

@@ -5,7 +5,6 @@ resources:
 - resources/namespace.yaml
 - resources/httproute.yaml
 - resources/sealedsecret-masterkey.yaml
-- resources/sealedsecret-postgresql.yaml
 - resources/sealedsecret-api-keys.yaml
 
 helmCharts:
@@ -16,5 +15,6 @@ helmCharts:
   namespace: litellm
   includeCRDs: true
   valuesFile: values/litellm-helm-0.1.837.yaml
+
 transformers:
   - ../../image-prefix.yaml

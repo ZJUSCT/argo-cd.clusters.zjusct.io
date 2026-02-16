@@ -33,7 +33,14 @@ spec:
   tasks:
   - name: fetch-repository
     taskRef:
-      name: git-clone
+      resolver: bundles
+      params:
+      - name: bundle
+        value: ghcr.io/tektoncd/catalog/upstream/tasks/git-clone:0.9
+      - name: name
+        value: git-clone
+      - name: kind
+        value: Task
     workspaces:
     - name: output
       workspace: shared-data

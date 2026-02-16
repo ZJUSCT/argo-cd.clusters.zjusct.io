@@ -23,9 +23,9 @@ spec:
     type: string
     default: "harbor.clusters.zjusct.io/library/packer:latest"
   - name: dockerfile-path
-    description: Path to the Dockerfile relative to repo root
+    description: Path to the Dockerfile relative to context-dir
     type: string
-    default: "packer/Dockerfile"
+    default: "Dockerfile"
   - name: context-dir
     description: Build context directory relative to repo root
     type: string
@@ -40,7 +40,14 @@ spec:
   tasks:
   - name: fetch-repository
     taskRef:
-      name: git-clone
+      resolver: bundles
+      params:
+      - name: bundle
+        value: ghcr.io/tektoncd/catalog/upstream/tasks/git-clone:0.9
+      - name: name
+        value: git-clone
+      - name: kind
+        value: Task
     workspaces:
     - name: output
       workspace: shared-data
