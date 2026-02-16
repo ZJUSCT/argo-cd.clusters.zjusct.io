@@ -29,6 +29,8 @@ spec:
   workspaces:
   - name: shared-data
     description: Workspace for sharing data between tasks
+  - name: packer-cache
+    description: Workspace for Packer plugins cache
 
   tasks:
   - name: fetch-repository
@@ -59,6 +61,8 @@ spec:
     workspaces:
     - name: source
       workspace: shared-data
+    - name: packer-cache
+      workspace: packer-cache
     params:
     - name: PACKER_FILE
       value: $(params.packer-file)

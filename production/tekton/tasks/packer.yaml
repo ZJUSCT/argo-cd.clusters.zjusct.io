@@ -32,11 +32,17 @@ spec:
   workspaces:
   - name: source
     description: Workspace containing the Packer configuration and any required files
+  - name: packer-cache
+    description: Workspace for Packer plugins cache (shared across steps)
+    optional: true
 
   steps:
   - name: packer-init
     image: $(params.PACKER_IMAGE)
     workingDir: $(workspaces.source.path)
+    env:
+    - name: PACKER_CONFIG_DIR
+      value: $(workspaces.packer-cache.path)
     script: |
       #!/bin/bash
       set -e
@@ -51,10 +57,17 @@ spec:
       echo "Packer file: $(params.PACKER_FILE)"
       echo "Working directory: $(workspaces.source.path)/${PACKER_DIR}"
       echo "Packer filename: ${PACKER_FILENAME}"
+      echo "Packer config dir: ${PACKER_CONFIG_DIR}"
+      echo "Environment variables:"
+      env | grep PACKER || true
       echo ""
 
       cd "${PACKER_DIR}"
       packer init "${PACKER_FILENAME}"
+
+      echo ""
+      echo "Verifying plugin installation:"
+      ls -la "${PACKER_CONFIG_DIR}/plugins" || echo "Plugin directory not found at ${PACKER_CONFIG_DIR}/plugins"
 
       echo ""
       echo "Packer plugins initialized successfully"
@@ -62,6 +75,9 @@ spec:
   - name: packer-validate
     image: $(params.PACKER_IMAGE)
     workingDir: $(workspaces.source.path)
+    env:
+    - name: PACKER_CONFIG_DIR
+      value: $(workspaces.packer-cache.path)
     script: |
       #!/bin/bash
       set -e
@@ -73,6 +89,12 @@ spec:
       echo "========================================"
       echo "Validating Packer configuration..."
       echo "========================================"
+      echo "Packer config dir: ${PACKER_CONFIG_DIR}"
+      echo "Environment variables:"
+      env | grep PACKER || true
+      echo ""
+      echo "Checking for plugins:"
+      ls -la "${PACKER_CONFIG_DIR}/plugins" || echo "Plugin directory not found at ${PACKER_CONFIG_DIR}/plugins"
       echo ""
 
       cd "${PACKER_DIR}"
@@ -84,6 +106,9 @@ spec:
   - name: packer-build
     image: $(params.PACKER_IMAGE)
     workingDir: $(workspaces.source.path)
+    env:
+    - name: PACKER_CONFIG_DIR
+      value: $(workspaces.packer-cache.path)
     securityContext:
       privileged: true
     script: |
@@ -100,6 +125,7 @@ spec:
       echo "Packer file: $(params.PACKER_FILE)"
       echo "Packer directory: ${PACKER_DIR}"
       echo "Packer filename: ${PACKER_FILENAME}"
+      echo "Packer config dir: ${PACKER_CONFIG_DIR}"
       echo "Additional args: $(params.PACKER_ARGS)"
       echo ""
 
