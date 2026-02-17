@@ -13,3 +13,6 @@ spec:
     - name: proxy
       port: 8080
       targetPort: proxy
+    - name: ssl
+      port: 8443
+      targetPort: ssl

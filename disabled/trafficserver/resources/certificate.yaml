@@ -1,0 +1,42 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: trafficserver
+spec:
+  selfSigned: {}
+---
+# CA used by certifier.so to sign fake TLS certificates for SSL bumping.
+# Clients must trust this CA to avoid certificate warnings.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: trafficserver-ca
+  namespace: trafficserver
+spec:
+  commonName: trafficserver-ca
+  isCA: true
+  issuerRef:
+    kind: Issuer
+    name: selfsigned-issuer
+  secretName: trafficserver-ca
+---
+# Default server certificate presented by Traffic Server on its SSL listener
+# (port 8443). The certifier.so plugin immediately replaces this per-request
+# with a shadow certificate signed by trafficserver-ca, so the exact subject
+# does not matter — it just needs to be a valid TLS cert to satisfy the
+# TLS handshake before certifier.so takes over via TS_SSL_CERT_HOOK.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: trafficserver-server-cert
+  namespace: trafficserver
+spec:
+  commonName: trafficserver
+  dnsNames:
+    - trafficserver
+    - localhost
+  issuerRef:
+    kind: Issuer
+    name: selfsigned-issuer
+  secretName: trafficserver-server-cert
