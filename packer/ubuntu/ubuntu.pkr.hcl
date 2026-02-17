@@ -11,12 +11,14 @@ source "null" "dependencies" {
   communicator = "none"
 }
 
+# https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
 source "qemu" "ubuntu" {
   # iso_url      = "https://mirror.nju.edu.cn/ubuntu-cloud-images/questing/current/questing-server-cloudimg-amd64.img"
-  iso_url = "questing-server-cloudimg-amd64.img"
   # iso_checksum = "file:https://mirror.nju.edu.cn/ubuntu-cloud-images/questing/current/SHA256SUMS"
+  iso_url = "questing-server-cloudimg-amd64.img"
   iso_checksum = "file:/workspace/ubuntu/SHA256SUMS"
   disk_image   = true
+  efi_boot = true
 
   # VM Configuration
   cpus            = 4
@@ -39,38 +41,30 @@ source "qemu" "ubuntu" {
   ssh_password = "ubuntu"
   ssh_timeout  = "20m"
 
-  # HTTP server for cloud-init files
-  http_directory = "."
-
   # Output
   output_directory = "output"
   vm_name          = "ubuntu.qcow2"
 
-  # QEMU arguments for cloud-init
-  qemuargs = [
-    ["-device", "virtio-gpu-pci"],
-    ["-device", "virtio-net,netdev=user.0"],
-    ["-drive", "if=pflash,format=raw,id=ovmf_code,readonly=on,file=/usr/share/OVMF/OVMF_CODE.fd"],
-    ["-drive", "if=pflash,format=raw,id=ovmf_vars,file=output/efivars.fd"],
-    ["-drive", "file=output/ubuntu.qcow2,format=qcow2"],
-    ["-drive", "file=seeds-cloudimg.iso,format=raw"]
-  ]
+  # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
+  floppy_files = ["user-data", "meta-data"]
+  floppy_label = "cidata"
 
   # Shutdown
   shutdown_command = "sudo -S shutdown -P now"
 }
 
-build {
-  name    = "cloudimg.deps"
-  sources = ["source.null.dependencies"]
-
-  provisioner "shell-local" {
-    inline = [
-      "cloud-localds seeds-cloudimg.iso user-data meta-data"
-    ]
-    inline_shebang = "/bin/bash -e"
-  }
-}
+# build {
+#   name    = "cloudimg.deps"
+#   sources = ["source.null.dependencies"]
+#
+#   provisioner "shell-local" {
+#     inline = [
+#       "cloud-localds seeds-cloudimg.iso user-data meta-data",
+#       "cp /usr/share/OVMF/OVMF_VARS.fd output/efivars.fd"
+#     ]
+#     inline_shebang = "/bin/bash -e"
+#   }
+# }
 
 build {
   name    = "cloudimg.image"

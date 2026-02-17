@@ -9,3 +9,15 @@ services:
       - .:/workspace
       - /dev/kvm:/dev/kvm
     working_dir: /workspace
+  ubuntu:
+    image: harbor.clusters.zjusct.io/docker.io/library/ubuntu:questing
+    init: true
+    entrypoint: ["sleep", "infinity"]
+    environment:
+      - DEBIANC_FRONTEND=noninteractive
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    post_start:
+      - command: sed -i 's/[a-z]*.ubuntu.com/mirrors.zju.edu.cn/g' /etc/apt/sources.list.d/ubuntu.sources
+        user: root

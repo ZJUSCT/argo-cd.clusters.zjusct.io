@@ -9,6 +9,7 @@ mkdir -p "$(dirname "$TARGET_IMAGE")"
 qemu-img convert -O qcow2 "$SOURCE_IMAGE" "$TARGET_IMAGE"
 qemu-img resize -f qcow2 "$TARGET_IMAGE" 20G
 cp /usr/share/OVMF/OVMF_VARS.fd output/efivars.fd
+cloud-localds seeds-cloudimg.iso user-data meta-data
 
 qemu-system-x86_64 \
     -nographic \

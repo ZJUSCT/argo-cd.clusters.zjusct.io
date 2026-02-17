@@ -1,11 +1,11 @@
 #cloud-config
 # https://cloudinit.readthedocs.io/en/latest/reference/modules.html
 # https://cloudinit.readthedocs.io/en/latest/reference/examples.html
-# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#users-and-groups
 
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#users-and-groups
 users:
   - name: root
-    hashed_passwd: '$6$rounds=500000$MG4BlUFHQ2n1avrg$sKAltKOGOVy5euHIIrH8oUUKQNj3uBVGuSOyFKFPV/0nT5wTww5jpK816PzvH/YJpHwBj6Spl9EUXZnblVbeb1'
+    hashed_passwd: "$6$rounds=500000$MG4BlUFHQ2n1avrg$sKAltKOGOVy5euHIIrH8oUUKQNj3uBVGuSOyFKFPV/0nT5wTww5jpK816PzvH/YJpHwBj6Spl9EUXZnblVbeb1"
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrq5gq9D17lmgpNzk2xwgOkzYabiyDYZkjpwdKl5R7B bowling
@@ -22,8 +22,34 @@ users:
 ssh_pwauth: true
 # https://cloudinit.readthedocs.io/en/stable/reference/modules.html#ssh
 disable_root: false
+# https://cloudinit.readthedocs.io/en/latest/reference/modules.html#mod-cc-ca-certs
+ca_certs:
+  trusted_certs:
+    # trafficserver-ca.crt
+    - |
+      -----BEGIN CERTIFICATE-----
+      MIIDBjCCAe6gAwIBAgIUbx36gwWMxNLvSb/oMIsWCHzt+WswDQYJKoZIhvcNAQEL
+      BQAwGzEZMBcGA1UEAxMQdHJhZmZpY3NlcnZlci1jYTAeFw0yNjAyMTcwNzQ2NDVa
+      Fw0yNjA1MTgwNzQ2NDVaMBsxGTAXBgNVBAMTEHRyYWZmaWNzZXJ2ZXItY2EwggEi
+      MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDksys5nel4y1NdJUyptdzUMlq1
+      gXe4LJavfmGCKdIPZRDK4DqU9h2kSX4smioQ8qTPi+JqDe/suRMOCzAsrkZcrCL9
+      wwSeFo9soaVD1jIPTRHZOW33DwAH07zd3UOETlyrYo6nNafMHU1D/FDtMEp/tRx8
+      LyiImbZKJFdLMCC+ZKew5WwTra4+aNrFDdSw1BaEXfeUo3RJCr/mHJtDfbWT9mUJ
+      FXXDSMtrOzTJIyT+QWYXhZoy7ze5Vrk/6VslAl1hTEWegcgl0psr10z8CrPeeZKF
+      GLmgD1TJzpUjRkx3CVO7IzRwjPt5xlcRshYLASkvlgrFpcOaL005nxlXTsPDAgMB
+      AAGjQjBAMA4GA1UdDwEB/wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQW
+      BBQVx4YFAhOrEOh6mA4KlnJihpvyuDANBgkqhkiG9w0BAQsFAAOCAQEAUDdvHO2B
+      I8cC/xqPr6u58lnQ/+rbPIQbkZsW1EcLS8sV8KjSpYUlkQsIoFAkrIaYItrpfovh
+      kayd6tvma5KaVzVf3T4m9AAmeMnvCcEDCoCGUdMRFhjtmiPUqijM9NluMZHTpuok
+      826Q9KElmm2TDxVEy3NTP4OMKJ2sWwHwanEx7nhSUywKrg3rwTeEgmRdz+aVVPNt
+      aV+LRorJP1ydd3Q5ULontW52gdx0Q8UOr5UF5Jh9+m5ojGGY5YrNt9JFw2RYwEq9
+      z2so1Hynw3Yr1Nrx/Ww1IbPZbet0Y26saBUJUMFawR3boceOGFOuS55I4YWRvXI6
+      D+ei8YxUjbr02g==
+      -----END CERTIFICATE-----
 # https://cloudinit.readthedocs.io/en/stable/reference/modules.html#apt-configure
 apt:
+  http_proxy: http://172.28.0.3:8080
+  https_proxy: http://172.28.0.3:8080
   primary:
     - arches: [default]
       uri: https://mirrors.zju.edu.cn/ubuntu/
@@ -37,42 +63,249 @@ apt:
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436 # https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key
       keyserver: hkps://keyserver.ubuntu.com/
       source: deb [signed-by=$KEY_FILE] https://mirrors.tuna.tsinghua.edu.cn/kubernetes/core:/stable:/v1.35/deb/ /
+    nvidia:
+      keyid: EB693B3035CD5710E231E123A4B469963BF863CC # https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-archive-keyring.gpg
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/ /
+    doca:
+      keyid: CAE649B3B3929F8470D4D33BA024F6F0E6D6A281 # https://linux.mellanox.com/public/repo/doca/GPG-KEY-Mellanox.pub
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://linux.mellanox.com/public/repo/doca/latest/ubuntu25.04/x86_64/ ./
 # https://cloudinit.readthedocs.io/en/stable/reference/modules.html#package-update-upgrade-install
 packages:
-  # basic
+  - 7zip
+  - apt-file
   - apt-transport-https
-  - ca-certificates
-  # domain
-  - freeipa-client
-  # utils
-  - tmux
-  - htop
+  - aptitude
+  - aria2
+  - attr
+  - auditd
+  - autoconf
+  - autofs
+  - automake
+  - autopoint
+  - autotools-dev
+  - bash-completion
+  - bat
+  - bc
+  - bear
+  - binutils-dev
+  - binutils-riscv64-linux-gnu
+  - bison
+  - bridge-utils
   - btop
-  - python3-full
-  - python3-venv
-  - jq
-  - yq
-  # network
-  - ethtool
-  - tshark
-  - curl
-  - wget
-  - rsync
-  - iperf3
-  - nmap
-  # disk&filesystem
-  - hdparm
-  - smartmontools
-  - nvme-cli
-  - squashfs-tools
-  - diffutils
-  # oob
-  - ipmitool
-  - redfishtool
-  # dev
-  - git
-  - cmake
   - build-essential
+  - ca-certificates
+  - cargo
+  - ccache
+  - ccls
+  - ceph-common
+  - clang
+  - clang-format
+  - clang-tidy
+  - clangd
+  - cloud-init
+  - cmake
+  - cpu-checker
+  - cpufetch
+  - csh
+  - curl
+  - debootstrap
+  - device-tree-compiler
+  - devscripts
+  - diffutils
+  - doxygen
+  - dracut
+  - dracut-network
+  - duf
+  - etckeeper
+  - ethtool
+  - exfatprogs
+  - expect
+  - eza
+  - fastfetch
+  - fd-find
+  - ffmpeg
+  - file
+  - fish
+  - flex
+  - fonts-firacode
+  - fortran-language-server
+  - fq
+  - freeipa-client
+  - fzf
+  - g++
+  - gawk
+  - gcc-aarch64-linux-gnu
+  - gcc-doc
+  - gcc-riscv64-linux-gnu
+  - gcc-riscv64-unknown-elf
+  - gdb
+  - gdb-multiarch
+  - gdu
+  - gfortran
+  - git
+  - git-extras
+  - git-lfs
+  - glibc-doc
+  - golang
+  - gperf
+  - gping
+  - hdparm
+  - help2man
+  - htop
+  - httpie
+  - hugo
+  - hwinfo
+  - hwloc
+  - hyperfine
+  - ibutils
+  - ibverbs-providers
+  - ibverbs-utils
+  - infiniband-diags
+  - iotop
+  - iperf3
+  - ipmitool
+  - iptraf-ng
+  - jenkins-job-builder
+  - jq
+  - ldap-utils
+  - libbz2-dev
+  - libcap2-bin
+  - libcurl4-gnutls-dev
+  - libdouble-conversion-dev
+  - libdrm-dev
+  - libdw-dev
+  - libfabric1
+  - libfl-dev
+  - libfl2
+  - libfmt-dev
+  - libgflags-dev
+  - libgmock-dev
+  - libgmp-dev
+  - libgoogle-glog-dev
+  - libgoogle-perftools-dev
+  - libgtest-dev
+  - libgtk-3-dev
+  - libhdf5-dev
+  - libibmad-dev
+  - libibmad5
+  - libibumad3
+  - libibverbs1
+  - libjemalloc-dev
+  - libmpc-dev
+  - libmpfr-dev
+  - libmsgpack-dev
+  - libomp-dev
+  - libopencv-dev
+  - libpcap-dev
+  - librdmacm-dev
+  - librdmacm1t64
+  - libssl-dev
+  - libsss-sudo
+  - libtool
+  - liburing-dev
+  - libvirt-clients
+  - libvirt-daemon-system
+  - libzstd-dev
+  - linux-image-generic
+  - linux-perf
+  - linux-source
+  - linux-tools-common
+  - lldb
+  - lldpd
+  - llvm-dev
+  - lmod
+  - locate
+  - lrzsz
+  - lxcfs
+  - make
+  - mc
+  - meson
+  - mmdebstrap
+  - mstflint
+  - neovim
+  - net-tools
+  - network-manager
+  - nfs-common
+  - nfs-kernel-server
+  - ninja-build
+  - nmap
+  - npm
+  - numactl
+  - nvme-cli
+  - nvtop
+  - opensbi
+  - opensm
+  - openssh-server
+  - openssl
+  - patchutils
+  - perftest
+  - perl
+  - perl-doc
+  - pipx
+  - pkg-config
+  - procps
+  - proxychains4
+  - psmisc
+  - python-is-python3
+  - python3
+  - python3-full
+  - python3-lark
+  - python3-pip
+  - python3-rich
+  - python3-setuptools
+  - python3-toml
+  - python3-venv
+  - qemu-system-misc
+  - qemu-user
+  - rdma-core
+  - rdmacm-utils
+  - redfishtool
+  - rename
+  - ripgrep
+  - rpm2cpio
+  - rsync
+  - rustc
+  - samtools
+  - screenfetch
+  - skopeo
+  - smartmontools
+  - snmp
+  - squashfs-tools
+  - sshfs
+  - sssd-ldap
+  - sssd-tools
+  - stress
+  - sudo
+  - systemd-container
+  - systemd-coredump
+  - systemd-resolved
+  - systemd-timesyncd
+  - systemd-zram-generator
+  - tcpdump
+  - texinfo
+  - tig
+  - tmux
+  - traceroute
+  - tree
+  - tshark
+  - u-boot-qemu
+  - u-boot-tools
+  - umoci
+  - unrar
+  - valgrind
+  - vim
+  - webp
+  - wget
+  - wireshark
+  - xsltproc
+  - yq
+  - zip
+  - zlib1g
+  - zlib1g-dev
+  - zoxide
+  - zsh
   # docker
   - docker-ce
   - docker-ce-cli
@@ -83,14 +316,16 @@ packages:
   - kubectl
   - kubelet
   - kubeadm
-  # systemd
-  - systemd-coredump
-  - systemd-resolved
-  - systemd-timesyncd
+  # nvidia https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html
+  - nvidia-open
+  - nvidia-container-toolkit
+  # DO NOT INSTALL SYSTEM LEVEL CUDA!
 # https://cloudinit.readthedocs.io/en/stable/reference/modules.html#package-update-upgrade-install
 package_update: true
 package_upgrade: true
-
+# https://cloudinit.readthedocs.io/en/latest/reference/modules.html#mod-cc-locale
+locale: en_US
+# https://cloudinit.readthedocs.io/en/latest/reference/modules.html#mod-cc-timezone
 timezone: "Asia/Shanghai"
 # https://cloudinit.readthedocs.io/en/latest/reference/modules.html#set-hostname
 preserve_hostname: true

@@ -17,7 +17,7 @@ packer validate ubuntu.pkr.hcl
 echo ""
 echo "Step 3: Building image..."
 # packer build -on-error=ask -debug ubuntu.pkr.hcl
-packer build -on-error=ask ubuntu.pkr.hcl
+packer build ubuntu.pkr.hcl
 
 echo ""
 echo "Build complete!"
