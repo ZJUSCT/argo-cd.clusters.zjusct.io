@@ -4,6 +4,14 @@ metadata:
   name: trafficserver-config
   namespace: trafficserver
 data:
+  # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/records.yaml.en.html
+  records.yaml: |
+    records:
+      url_remap:
+        # 0 = forward proxy mode: requests without a remap rule are forwarded.
+        # Default is 1 (reverse proxy / accelerator mode), which returns 404
+        # for any request that does not match a remap.config rule.
+        remap_required: 0
   # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/cache.config.en.html
   cache.config: |
     url_regex=.*/(Packages|Sources)(\.bz2|\.gz|\.xz)?$ ttl-in-cache=0m

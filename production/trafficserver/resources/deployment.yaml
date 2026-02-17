@@ -29,6 +29,9 @@ spec:
               mountPath: /opt/var/trafficserver
             # Config files mounted individually to avoid clobbering defaults
             - name: config
+              mountPath: /opt/etc/trafficserver/records.yaml
+              subPath: records.yaml
+            - name: config
               mountPath: /opt/etc/trafficserver/cache.config
               subPath: cache.config
             - name: config

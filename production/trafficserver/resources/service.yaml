@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: trafficserver
   namespace: trafficserver
+  annotations:
+    lbipam.cilium.io/ips: "172.28.0.3"
 spec:
   type: LoadBalancer
   selector:
