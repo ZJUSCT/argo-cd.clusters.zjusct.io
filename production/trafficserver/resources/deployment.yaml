@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trafficserver
+  namespace: trafficserver
+spec:
+  replicas: 1
+  # Recreate is required: openebs-hostpath PVC is ReadWriteOnce; RollingUpdate
+  # would deadlock because the old pod holds the PVC while the new pod waits for it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: trafficserver
+  template:
+    metadata:
+      labels:
+        app: trafficserver
+    spec:
+      containers:
+        - name: trafficserver
+          image: hub.docker.com/trafficserver/trafficserver:latest
+          ports:
+            - name: proxy
+              containerPort: 8080
+          volumeMounts:
+            # Cache volume — must match storage.config path
+            - name: cache
+              mountPath: /opt/var/trafficserver
+            # Config files mounted individually to avoid clobbering defaults
+            - name: config
+              mountPath: /opt/etc/trafficserver/cache.config
+              subPath: cache.config
+            - name: config
+              mountPath: /opt/etc/trafficserver/storage.config
+              subPath: storage.config
+            - name: config
+              mountPath: /opt/etc/trafficserver/plugin.config
+              subPath: plugin.config
+            - name: config
+              mountPath: /opt/etc/trafficserver/ip_allow.yaml
+              subPath: ip_allow.yaml
+            # CA cert for certifier.so SSL bumping
+            - name: ca-cert
+              mountPath: /ca
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: trafficserver-cache
+        - name: config
+          configMap:
+            name: trafficserver-config
+        - name: ca-cert
+          secret:
+            secretName: trafficserver-ca
