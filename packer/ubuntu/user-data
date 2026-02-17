@@ -1,0 +1,96 @@
+#cloud-config
+# https://cloudinit.readthedocs.io/en/latest/reference/modules.html
+# https://cloudinit.readthedocs.io/en/latest/reference/examples.html
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#users-and-groups
+
+users:
+  - name: root
+    hashed_passwd: '$6$rounds=500000$MG4BlUFHQ2n1avrg$sKAltKOGOVy5euHIIrH8oUUKQNj3uBVGuSOyFKFPV/0nT5wTww5jpK816PzvH/YJpHwBj6Spl9EUXZnblVbeb1'
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrq5gq9D17lmgpNzk2xwgOkzYabiyDYZkjpwdKl5R7B bowling
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7FZqOes1C4K87s+fQBDbQJr2Sy4jnI0PMrJYQ2vkfp ckyasb
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMgUUki5hc9cQtT21hkOQ0EByOLwOgm++MjgNKDmy6aP jiahefang
+    lock_passwd: false
+  - name: ubuntu
+    lock_passwd: false
+    # Password: ubuntu
+    passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+# Allow password authentication
+ssh_pwauth: true
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#ssh
+disable_root: false
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#apt-configure
+apt:
+  primary:
+    - arches: [default]
+      uri: https://mirrors.zju.edu.cn/ubuntu/
+  sources:
+    # 先从官方源获得公钥，然后使用 gpg --show-keys <key_file> 获得公钥的 keyid 填入
+    docker:
+      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 # https://mirrors.zju.edu.cn/docker-ce/linux/ubuntu/gpg
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/ubuntu $RELEASE stable
+    kubernetes:
+      keyid: DE15B14486CD377B9E876E1A234654DA9A296436 # https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://mirrors.tuna.tsinghua.edu.cn/kubernetes/core:/stable:/v1.35/deb/ /
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#package-update-upgrade-install
+packages:
+  # basic
+  - apt-transport-https
+  - ca-certificates
+  # domain
+  - freeipa-client
+  # utils
+  - tmux
+  - htop
+  - btop
+  - python3-full
+  - python3-venv
+  - jq
+  - yq
+  # network
+  - ethtool
+  - tshark
+  - curl
+  - wget
+  - rsync
+  - iperf3
+  - nmap
+  # disk&filesystem
+  - hdparm
+  - smartmontools
+  - nvme-cli
+  - squashfs-tools
+  - diffutils
+  # oob
+  - ipmitool
+  - redfishtool
+  # dev
+  - git
+  - cmake
+  - build-essential
+  # docker
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+  # k8s
+  - kubectl
+  - kubelet
+  - kubeadm
+  # systemd
+  - systemd-coredump
+  - systemd-resolved
+  - systemd-timesyncd
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#package-update-upgrade-install
+package_update: true
+package_upgrade: true
+
+timezone: "Asia/Shanghai"
+# https://cloudinit.readthedocs.io/en/latest/reference/modules.html#set-hostname
+preserve_hostname: true

@@ -1,0 +1,11 @@
+services:
+  packer:
+    # image: harbor.clusters.zjusct.io/library/packer:latest
+    build: .
+    entrypoint: ["sleep", "infinity"]
+    init: true
+    privileged: true
+    volumes:
+      - .:/workspace
+      - /dev/kvm:/dev/kvm
+    working_dir: /workspace
