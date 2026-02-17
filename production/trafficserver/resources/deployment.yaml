@@ -20,6 +20,10 @@ spec:
       containers:
         - name: trafficserver
           image: hub.docker.com/trafficserver/trafficserver:latest
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "echo '1000' > /tmp/ca-serial.txt && chmod 666 /tmp/ca-serial.txt"]
           ports:
             - name: proxy
               containerPort: 8080
