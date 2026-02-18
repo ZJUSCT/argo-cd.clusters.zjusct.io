@@ -1,0 +1,66 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: s3upload
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.17.0"
+    tekton.dev/categories: Storage
+    tekton.dev/tags: s3,upload
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: >-
+    Upload a build artifact to Rook Ceph RGW object storage using MinIO Client
+    (mc). Credentials and endpoint are loaded from the ObjectBucketClaim-generated
+    Secret and ConfigMap named "packer-images" in the tekton namespace.
+  params:
+    - name: MC_IMAGE
+      description: MinIO Client container image
+      type: string
+      default: "minio/mc:latest"
+    - name: FILENAME
+      description: >-
+        Filename to search for under the workspace root,
+        passed to find -name (e.g. ubuntu-questing-amd64.qcow2).
+      type: string
+    - name: S3_PREFIX
+      description: >-
+        Destination prefix inside the bucket, with trailing slash
+        (e.g. ubuntu/). Leave empty to place files at bucket root.
+      type: string
+      default: ""
+  workspaces:
+    - name: source
+      description: Workspace containing the build artifact to upload
+  steps:
+    - name: upload
+      image: $(params.MC_IMAGE)
+      workingDir: $(workspaces.source.path)
+      envFrom:
+        - configMapRef:
+            name: packer-images
+        - secretRef:
+            name: packer-images
+      script: |
+        #!/bin/sh
+        set -e
+
+        S3_ENDPOINT="http://${BUCKET_HOST}:${BUCKET_PORT}"
+        mc alias set ceph "${S3_ENDPOINT}" "${AWS_ACCESS_KEY_ID}" "${AWS_SECRET_ACCESS_KEY}"
+
+        SRC="$(find . -maxdepth 8 -name '$(params.FILENAME)' -type f | head -n1)"
+        if [ -z "${SRC}" ]; then
+          echo "ERROR: No file named '$(params.FILENAME)' found under $(workspaces.source.path)"
+          exit 1
+        fi
+        echo "Found: ${SRC}"
+        ls -lh "${SRC}"
+
+        TS="$(date -u +%Y%m%dT%H%M%SZ)"
+        STEM="$(basename "${SRC}" | sed 's/\.[^.]*$//')"
+        EXT="${SRC##*.}"
+        TARGET="$(params.S3_PREFIX)${STEM}-${TS}.${EXT}"
+
+        mc cp "${SRC}" "ceph/${BUCKET_NAME}/${TARGET}"
+        echo "Uploaded: s3://${BUCKET_NAME}/${TARGET}"

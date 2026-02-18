@@ -1,11 +1,12 @@
-# Pipeline to build Ubuntu QCOW2 image with Packer
+# Pipeline to build Ubuntu QCOW2 image with Packer and upload to Rook Ceph RGW
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: packer-ubuntu
 spec:
   description: |
-    This pipeline clones a git repository and runs a packer build script.
+    This pipeline clones a git repository, runs a packer build script, and
+    uploads the resulting QCOW2 image to Rook Ceph object storage.
   params:
     - name: git-url
       description: Git repository URL
@@ -23,6 +24,14 @@ spec:
       description: Container image to run the script in
       type: string
       default: "harbor.clusters.zjusct.io/library/packer:latest"
+    - name: mc-image
+      description: MinIO Client container image for uploading artifacts
+      type: string
+      default: "minio/mc:latest"
+    - name: upload-s3-prefix
+      description: Destination prefix inside the bucket, with trailing slash
+      type: string
+      default: "ubuntu/"
   workspaces:
     - name: shared-data
       description: Workspace for sharing data between tasks
@@ -59,3 +68,31 @@ spec:
           value: $(params.image)
         - name: SCRIPT
           value: $(params.script)
+    - name: upload-cloud-init
+      runAfter: ["build-image"]
+      taskRef:
+        name: s3upload
+      workspaces:
+        - name: source
+          workspace: shared-data
+      params:
+        - name: MC_IMAGE
+          value: $(params.mc-image)
+        - name: FILENAME
+          value: "cloud-init.qcow2"
+        - name: S3_PREFIX
+          value: $(params.upload-s3-prefix)
+    - name: upload-customize
+      runAfter: ["upload-cloud-init"]
+      taskRef:
+        name: s3upload
+      workspaces:
+        - name: source
+          workspace: shared-data
+      params:
+        - name: MC_IMAGE
+          value: $(params.mc-image)
+        - name: FILENAME
+          value: "customize.qcow2"
+        - name: S3_PREFIX
+          value: $(params.upload-s3-prefix)

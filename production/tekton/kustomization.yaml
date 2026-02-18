@@ -8,8 +8,10 @@ resources:
   - resources/httproute.yaml
   - resources/buildkit-client-cert.yaml
   - resources/sealedsecret-harbor.yaml
+  - resources/obc-packer-images.yaml
   - tasks/buildkit.yaml
   - tasks/run-script.yaml
+  - tasks/s3upload.yaml
   - pipelines/buildkit.yaml
   - pipelines/packer-ubuntu.yaml
 patches:

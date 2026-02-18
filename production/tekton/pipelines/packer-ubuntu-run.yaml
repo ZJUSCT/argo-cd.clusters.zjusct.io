@@ -19,6 +19,10 @@ spec:
       value: "packer/ubuntu/run-packer.sh"
     - name: image
       value: "harbor.clusters.zjusct.io/library/packer:latest"
+    - name: mc-image
+      value: "harbor.clusters.zjusct.io/docker.io/minio/mc:latest"
+    - name: upload-s3-prefix
+      value: "ubuntu/"
   workspaces:
     - name: shared-data
       volumeClaimTemplate:
