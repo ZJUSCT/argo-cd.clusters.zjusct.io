@@ -1,0 +1,19 @@
+# OpenTelemetry Operator values for version 0.105.2
+
+# Enable cert-manager for webhook certificates (cert-manager is already deployed in the cluster)
+admissionWebhooks:
+  certManager:
+    enabled: true
+  autoGenerateCert:
+    enabled: false
+
+# Enable ServiceMonitor for Prometheus metrics (kube-prometheus-stack is deployed)
+manager:
+  serviceMonitor:
+    enabled: true
+    extraLabels:
+      prometheus: kube-prometheus
+
+# Create CRDs
+crds:
+  create: true

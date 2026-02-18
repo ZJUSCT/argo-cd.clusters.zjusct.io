@@ -1,0 +1,35 @@
+# OpenTelemetry eBPF Instrumentation values for version 0.4.3
+
+# Application observability preset
+preset: application
+
+# Enable ServiceMonitor for Prometheus metrics (kube-prometheus-stack is deployed)
+serviceMonitor:
+  enabled: true
+  additionalLabels:
+    prometheus: kube-prometheus
+
+# Enable metrics service
+service:
+  enabled: true
+
+# Default configuration for OTLP export
+config:
+  create: true
+  data:
+    otel_traces_export:
+      endpoint: "http://${HOST_IP}:4317"
+    otel_metrics_export:
+      endpoint: "http://${HOST_IP}:4318"
+    attributes:
+      kubernetes:
+        enable: true
+    filter:
+      network:
+        k8s_dst_owner_name:
+          not_match: '{kube*,*jaeger-agent*,*prometheus*,*promtail*,*grafana-agent*}'
+        k8s_src_owner_name:
+          not_match: '{kube*,*jaeger-agent*,*prometheus*,*promtail*,*grafana-agent*}'
+    prometheus_export:
+      port: 9090
+      path: /metrics
