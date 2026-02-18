@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: run-script
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.17.0"
+    tekton.dev/categories: General
+    tekton.dev/tags: script
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: >-
+    This Task runs a shell script using a specified container image. The working directory is set to the script's parent directory.
+  params:
+    - name: IMAGE
+      description: The container image to run the script in
+      type: string
+    - name: SCRIPT
+      description: Path to the script to run, relative to the workspace root
+      type: string
+  workspaces:
+    - name: source
+      description: Workspace containing the source code and scripts
+  steps:
+    - name: run
+      image: $(params.IMAGE)
+      workingDir: $(workspaces.source.path)
+      securityContext:
+        privileged: true
+      script: |
+        #!/bin/bash
+        set -e
+        SCRIPT_PATH="$(workspaces.source.path)/$(params.SCRIPT)"
+        cd "$(dirname "${SCRIPT_PATH}")"
+        bash "${SCRIPT_PATH}"

@@ -102,3 +102,6 @@ ln -s /usr/share/lmod/lmod/init/profile.fish /etc/fish/conf.d/z00_lmod.fish
 ########################################################################
 
 npm config set registry https://registry.npmmirror.com
+cat >/etc/npmrc <<EOF
+registry = "https://registry.npmmirror.com"
+EOF

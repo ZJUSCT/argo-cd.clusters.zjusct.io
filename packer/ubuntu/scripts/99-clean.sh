@@ -15,4 +15,3 @@ apt-get clean
 cloud-init clean --logs
 rm -f /etc/ssh/ssh_host_*
 truncate -s 0 /etc/machine-id
-sync

@@ -1,34 +1,30 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: packer-run-ubuntu-
+  generateName: packer-ubuntu-run-
   namespace: tekton
 spec:
   pipelineRef:
-    name: packer
-
+    name: packer-ubuntu
   taskRunTemplate:
     podTemplate:
       securityContext:
         fsGroup: 65532
-
   params:
-  - name: git-url
-    value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
-  - name: git-revision
-    value: "master"
-  - name: packer-file
-    value: "packer/ubuntu-simple.pkr.hcl"
-  - name: packer-image
-    value: "harbor.clusters.zjusct.io/library/packer:latest"
+    - name: git-url
+      value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+    - name: git-revision
+      value: "master"
+    - name: script
+      value: "packer/ubuntu/run-packer.sh"
+    - name: image
+      value: "harbor.clusters.zjusct.io/library/packer:latest"
   workspaces:
-  - name: shared-data
-    volumeClaimTemplate:
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 20Gi
-  - name: packer-cache
-    emptyDir: {}
+    - name: shared-data
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi

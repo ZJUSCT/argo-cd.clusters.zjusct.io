@@ -1,0 +1,61 @@
+# Pipeline to build Ubuntu QCOW2 image with Packer
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: packer-ubuntu
+spec:
+  description: |
+    This pipeline clones a git repository and runs a packer build script.
+  params:
+    - name: git-url
+      description: Git repository URL
+      type: string
+      default: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+    - name: git-revision
+      description: Git revision to checkout
+      type: string
+      default: "master"
+    - name: script
+      description: Path to the build script relative to repo root
+      type: string
+      default: "packer/ubuntu/run-packer.sh"
+    - name: image
+      description: Container image to run the script in
+      type: string
+      default: "harbor.clusters.zjusct.io/library/packer:latest"
+  workspaces:
+    - name: shared-data
+      description: Workspace for sharing data between tasks
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        resolver: bundles
+        params:
+          - name: bundle
+            value: ghcr.io/tektoncd/catalog/upstream/tasks/git-clone:0.9
+          - name: name
+            value: git-clone
+          - name: kind
+            value: Task
+      workspaces:
+        - name: output
+          workspace: shared-data
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+        - name: deleteExisting
+          value: "true"
+    - name: build-image
+      runAfter: ["fetch-repository"]
+      taskRef:
+        name: run-script
+      workspaces:
+        - name: source
+          workspace: shared-data
+      params:
+        - name: IMAGE
+          value: $(params.image)
+        - name: SCRIPT
+          value: $(params.script)

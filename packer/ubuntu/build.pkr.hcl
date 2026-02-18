@@ -1,8 +1,8 @@
 build {
   name = "cloud-init"
   source "source.qemu.ubuntu" {
-    # iso_url      = "https://mirror.sjtu.edu.cn/ubuntu-cloud-images/questing/current/questing-server-cloudimg-amd64.img"
-    iso_url = "questing-server-cloudimg-amd64.img"
+    iso_url      = "https://mirror.nju.edu.cn/ubuntu-cloud-images/questing/current/questing-server-cloudimg-amd64.img"
+    # iso_url = "questing-server-cloudimg-amd64.img"
 
     # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
     # note: nocloud datasource requires the meta-data file, or it will fail with "Invalid seed"
