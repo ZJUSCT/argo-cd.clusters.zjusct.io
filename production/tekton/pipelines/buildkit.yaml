@@ -1,0 +1,71 @@
+# Universal pipeline to build and push a Docker image with BuildKit
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: buildkit
+spec:
+  description: |
+    This pipeline clones the git repository and builds a Docker image using BuildKit,
+    then pushes to Harbor registry.
+  params:
+    - name: git-url
+      description: Git repository URL
+      type: string
+      default: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+    - name: git-revision
+      description: Git revision to checkout
+      type: string
+      default: "master"
+    - name: image-reference
+      description: Reference of the image BuildKit will produce
+      type: string
+    - name: dockerfile-path
+      description: Path to the Dockerfile relative to context-dir
+      type: string
+      default: "Dockerfile"
+    - name: context-dir
+      description: Build context directory relative to repo root
+      type: string
+      default: "."
+  workspaces:
+    - name: shared-data
+      description: Workspace for sharing data between tasks
+    - name: docker-credentials
+      description: Docker credentials for Harbor registry
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        resolver: bundles
+        params:
+          - name: bundle
+            value: ghcr.io/tektoncd/catalog/upstream/tasks/git-clone:0.9
+          - name: name
+            value: git-clone
+          - name: kind
+            value: Task
+      workspaces:
+        - name: output
+          workspace: shared-data
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+        - name: deleteExisting
+          value: "true"
+    - name: build-and-push
+      runAfter: ["fetch-repository"]
+      taskRef:
+        name: buildkit
+      workspaces:
+        - name: source
+          workspace: shared-data
+        - name: dockerconfig
+          workspace: docker-credentials
+      params:
+        - name: IMAGE
+          value: $(params.image-reference)
+        - name: DOCKERFILE
+          value: $(params.dockerfile-path)
+        - name: CONTEXT
+          value: $(params.context-dir)

@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: buildkit-packer-run-
+  generateName: buildkit-squid-run-
   namespace: tekton
 spec:
   pipelineRef:
@@ -16,11 +16,11 @@ spec:
     - name: git-revision
       value: "master"
     - name: image-reference
-      value: "harbor.clusters.zjusct.io/library/packer:latest"
+      value: "harbor.clusters.zjusct.io/library/squid:latest"
     - name: dockerfile-path
       value: "Dockerfile"
     - name: context-dir
-      value: "packer"
+      value: "production/squid"
   workspaces:
     - name: shared-data
       volumeClaimTemplate:
