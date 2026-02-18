@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: squid
-          image: harbor.clusters.zjusct.io/library/squid:latest
+          image: library/squid:latest # will be prefixed with harbor
           ports:
             - containerPort: 3128
               name: proxy
