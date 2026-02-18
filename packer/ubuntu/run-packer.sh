@@ -1,27 +1,31 @@
-#!/bin/bash
-# Simplified Packer build script - runs everything in one container
-set -e
+#!/usr/bin/env bash
+set -xeou pipefail
 
-rm -rf output
-
-export PACKER_LOG=1n
+export PACKER_LOG=1
 export PACKER_LOG_PATH="packer.log"
 
 echo "Step 1: Initializing Packer plugins..."
-packer init ubuntu.pkr.hcl
+packer init .
 
-echo ""
 echo "Step 2: Validating configuration..."
-packer validate ubuntu.pkr.hcl
+packer validate .
+cloud-init schema -c user-data
 
-echo ""
 echo "Step 3: Building image..."
-# packer build -on-error=ask -debug ubuntu.pkr.hcl
-packer build ubuntu.pkr.hcl
-
-echo ""
-echo "Build complete!"
-if [ -f output/ubuntu.qcow2 ]; then
+#    -debug -on-error=ask \
+# -on-error=abort will leave the output files for debugging
+packer build \
+    -on-error=abort \
+    -only="cloud-init.qemu.ubuntu" .
+if [ -f output-cloud-init/cloud-init.qcow2 ]; then
     echo "Output info:"
-    qemu-img info output/ubuntu.qcow2
+    qemu-img info output-cloud-init/cloud-init.qcow2
+fi
+#    -debug -on-error=ask \
+packer build \
+    -on-error=abort \
+    -only="customize.qemu.ubuntu" .
+if [ -f output-customize/customize.qcow2 ]; then
+    echo "Output info:"
+    qemu-img info output-customize/customize.qcow2
 fi

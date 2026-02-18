@@ -1,5 +1,5 @@
 # Packer build artifacts
-output/
+output*/
 packer_cache/
 *.qcow2
 crash.log

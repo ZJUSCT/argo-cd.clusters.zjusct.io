@@ -5,27 +5,26 @@
 # https://cloudinit.readthedocs.io/en/stable/reference/modules.html#users-and-groups
 users:
   - name: root
-    hashed_passwd: "$6$rounds=500000$MG4BlUFHQ2n1avrg$sKAltKOGOVy5euHIIrH8oUUKQNj3uBVGuSOyFKFPV/0nT5wTww5jpK816PzvH/YJpHwBj6Spl9EUXZnblVbeb1"
+    # Password: ubuntu
+    hashed_passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrq5gq9D17lmgpNzk2xwgOkzYabiyDYZkjpwdKl5R7B bowling
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7FZqOes1C4K87s+fQBDbQJr2Sy4jnI0PMrJYQ2vkfp ckyasb
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMgUUki5hc9cQtT21hkOQ0EByOLwOgm++MjgNKDmy6aP jiahefang
+    ssh_redirect_user: false
     lock_passwd: false
-  - name: ubuntu
-    lock_passwd: false
-    # Password: ubuntu
-    passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    shell: /bin/bash
-# Allow password authentication
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#set-passwords
 ssh_pwauth: true
 # https://cloudinit.readthedocs.io/en/stable/reference/modules.html#ssh
 disable_root: false
+# https://cloudinit.readthedocs.io/en/stable/reference/modules.html#bootcmd
+bootcmd:
+  - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
 # https://cloudinit.readthedocs.io/en/latest/reference/modules.html#mod-cc-ca-certs
 ca_certs:
-  trusted_certs:
-    # trafficserver-ca.crt
+  trusted:
+    # Cache Proxy CA
     - |
       -----BEGIN CERTIFICATE-----
       MIIDBjCCAe6gAwIBAgIUbx36gwWMxNLvSb/oMIsWCHzt+WswDQYJKoZIhvcNAQEL
@@ -48,8 +47,8 @@ ca_certs:
       -----END CERTIFICATE-----
 # https://cloudinit.readthedocs.io/en/stable/reference/modules.html#apt-configure
 apt:
-  http_proxy: http://172.28.0.3:8080
-  https_proxy: http://172.28.0.3:8080
+  # http_proxy: http://172.28.0.3:8080
+  # https_proxy: http://172.28.0.3:8080
   primary:
     - arches: [default]
       uri: https://mirrors.zju.edu.cn/ubuntu/

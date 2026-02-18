@@ -9,5 +9,7 @@ apk add --no-cache \
     ovmf \
     curl \
     bash \
-    cloud-utils-localds
+    cloud-init \
+    cloud-utils-localds \
+    openssh-client
 EOF

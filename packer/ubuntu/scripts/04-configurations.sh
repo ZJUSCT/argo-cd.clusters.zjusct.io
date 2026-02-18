@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xeou pipefail
 
 ########################################################################
 # NFS over RDMA
@@ -8,7 +9,7 @@ sed -E -i 's/^#[[:space:]]*rdma=n$/rdma=y/' "/etc/nfs.conf"
 ########################################################################
 # NVIDIA Performance Metrics
 ########################################################################
-cat > /etc/modprobe.d/nvidia-perf.conf <<EOF
+cat >/etc/modprobe.d/nvidia-perf.conf <<EOF
 options nvidia NVreg_RestrictProfilingToAdminUsers=0
 EOF
 

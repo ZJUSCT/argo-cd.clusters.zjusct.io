@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xeou pipefail
 
 ########################################################################
 # Python
@@ -6,12 +7,13 @@
 ########################################################################
 
 pip config --site \
-  set global.index-url https://mirrors.zju.edu.cn/pypi/web/simple
+    set global.index-url https://mirrors.zju.edu.cn/pypi/web/simple
 
 pip install --break-system-packages \
-  uv poetry
+    uv poetry
 
-cat > /etc/uv/uv.toml <<EOF
+mkdir -p /etc/uv
+cat >/etc/uv/uv.toml <<EOF
 [[index]]
 url = "https://mirrors.zju.edu.cn/pypi/web/simple/"
 default = true
@@ -23,37 +25,44 @@ EOF
 ########################################################################
 
 CONDA_MIRROR="https://mirrors.zju.edu.cn/anaconda/"
-if [ "$ARCH" == "amd64" ]; then
-	CONDA_SH="miniconda/Miniconda3-latest-Linux-x86_64.sh"
-elif [ "$ARCH" == "arm64" ]; then
-	CONDA_SH="miniconda/Miniconda3-latest-Linux-aarch64.sh"
-else
-	echo "Unsupported architecture: $ARCH, skipping conda installation"
-fi
+# Detect machine architecture via uname -m and map to installer names
+MACHINE="$(uname -m)"
+case "$MACHINE" in
+x86_64)
+    CONDA_SH="miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    ;;
+aarch64 | arm64)
+    CONDA_SH="miniconda/Miniconda3-latest-Linux-aarch64.sh"
+    ;;
+*)
+    echo "Unsupported architecture: $MACHINE, skipping conda installation"
+    CONDA_SH=""
+    ;;
+esac
 
 if [ -n "$CONDA_SH" ]; then
-CONDA_PATH="/opt/conda"
+    CONDA_PATH="/opt/conda"
 
-# The conda installation file must end with .sh, otherwise an error will occur, see the source code
-tmpfile=$(mktemp).sh
-if ! curl -L -o "$tmpfile" "$CONDA_MIRROR$CONDA_SH"; then
-  echo "Failed to download $MIRROR$CONDA_SH"
-  exit 1
-fi
+    # The conda installation file must end with .sh, otherwise an error will occur, see the source code
+    tmpfile=$(mktemp).sh
+    if ! curl -L -o "$tmpfile" "$CONDA_MIRROR$CONDA_SH"; then
+        echo "Failed to download $MIRROR$CONDA_SH"
+        exit 1
+    fi
 
-bash "$tmpfile" -b -p "$CONDA_PATH"
-rm "$tmpfile"
+    bash "$tmpfile" -b -p "$CONDA_PATH"
+    rm "$tmpfile"
 
-export PATH="$CONDA_PATH/bin:$PATH"
+    export PATH="$CONDA_PATH/bin:$PATH"
 
-# bash, zsh
-# will add /etc/profile.d/conda.sh
-conda init --system --all
-# fish
-mkdir -p /etc/fish/conf.d
-ln -s $CONDA_PATH/etc/fish/conf.d/conda.fish /etc/fish/conf.d/z00_conda.fish
+    # bash, zsh
+    # will add /etc/profile.d/conda.sh
+    conda init --system --all
+    # fish
+    mkdir -p /etc/fish/conf.d
+    ln -s $CONDA_PATH/etc/fish/conf.d/conda.fish /etc/fish/conf.d/z00_conda.fish
 
-cat >$CONDA_PATH/.condarc <<EOF
+    cat >$CONDA_PATH/.condarc <<EOF
 auto_activate_base: false
 channels:
   - defaults
@@ -81,10 +90,11 @@ fi
 ########################################################################
 
 # bash, zsh
-ln -s /usr/share/lmod/lmod/init/profile /etc/profile.d/z00_lmod.sh
+# lmod package already placed lmod.sh under profile.d, so no need here
+# ln -s /usr/share/lmod/lmod/init/profile /etc/profile.d/z00_lmod.sh
+
 # fish
 ln -s /usr/share/lmod/lmod/init/profile.fish /etc/fish/conf.d/z00_lmod.fish
-
 
 ########################################################################
 # npmmirror

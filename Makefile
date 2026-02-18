@@ -1,4 +1,5 @@
-.PHONY: help debug-pod debug-container debug-pvc
+SHELL := /bin/bash
+.PHONY: help debug-pod debug-container debug-pvc clean
 
 # Container Configuration
 DEBUG_IMAGE := harbor.clusters.zjusct.io/library/ubuntu:latest
@@ -12,6 +13,11 @@ DEBUG_NAMESPACE := tekton
 # Debug PVC Configuration
 DEBUG_PVC_NAME := pvc-f6e5474dea
 DEBUG_PVC_MOUNT_PATH := /mnt/debug-pvc
+
+clean:
+	@echo "Warning: This will remove all gitignored files in the repository."
+	@read -p "Are you sure you want to proceed? (y/N) " -n 1 -r; echo
+	git clean -fdX; \
 
 # Help target
 help:

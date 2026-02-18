@@ -1,9 +1,7 @@
----
 # Pre-commit hooks for GitOps repository validation
 # Install: pip install pre-commit
 # Setup: pre-commit install
 # Run manually: pre-commit run --all-files
-
 repos:
   # YAML linting
   - repo: https://github.com/adrienverge/yamllint
@@ -12,13 +10,24 @@ repos:
       - id: yamllint
         args: [--format, colored, -d, relaxed]
         exclude: .*\/templates\/.*\.yaml$
-
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.21.0
+    hooks:
+      - id: yamlfmt
+        exclude: .*\/templates\/.*\.yaml$
   # Markdown linting
   # - repo: https://github.com/markdownlint/markdownlint
   #   rev: v0.15.0
   #   hooks:
   #     - id: markdownlint
-
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+  - repo: https://github.com/openstack/bashate
+    rev: 2.1.1
+    hooks:
+      - id: bashate
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -32,7 +41,6 @@ repos:
         args: [--maxkb=1024]
       - id: check-merge-conflict
       - id: mixed-line-ending
-
   # Kustomize + Helm GitOps validation
   - repo: local
     hooks:
@@ -44,7 +52,6 @@ repos:
         always_run: false
         files: (kustomization\.yaml|values/.*\.yaml)$
         require_serial: true
-
 ci:
   autofix_commit_msg: |
     [pre-commit.ci] auto fixes from pre-commit.com hooks
