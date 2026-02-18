@@ -33,12 +33,11 @@ build {
       "cloud-init clean --logs",
       "apt-get autoremove --purge -yq",
       "apt-get clean -yq",
-      "rm -r /etc/fstab"
     ]
   }
 
   post-processor "manifest" {
-    output = "cloud-init-manifest.json"
+    output = "output-cloud-init/cloud-init-manifest.json"
   }
 }
 
@@ -68,6 +67,6 @@ build {
   }
 
   post-processor "manifest" {
-    output = "customize-manifest.json"
+    output = "output-customize/customize-manifest.json"
   }
 }
