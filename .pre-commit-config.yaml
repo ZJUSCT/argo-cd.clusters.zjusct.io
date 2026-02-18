@@ -10,11 +10,11 @@ repos:
       - id: yamllint
         args: [--format, colored, -d, relaxed]
         exclude: .*\/templates\/.*\.yaml$
-  - repo: https://github.com/google/yamlfmt
-    rev: v0.21.0
-    hooks:
-      - id: yamlfmt
-        exclude: .*\/templates\/.*\.yaml$
+  # - repo: https://github.com/google/yamlfmt
+  #   rev: v0.21.0
+  #   hooks:
+  #     - id: yamlfmt
+  #       exclude: .*\/templates\/.*\.yaml$
   # Markdown linting
   # - repo: https://github.com/markdownlint/markdownlint
   #   rev: v0.15.0

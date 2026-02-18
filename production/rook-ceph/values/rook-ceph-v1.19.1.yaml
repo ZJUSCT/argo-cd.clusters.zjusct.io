@@ -443,8 +443,7 @@ csi:
   pluginNodeAffinity: # key1=value1,value2; key2=value3
 
   # -- Enable Ceph CSI Liveness sidecar deployment
-  enableLiveness: false
-
+  enableLiveness: true
   # -- CSI CephFS driver metrics port
   # @default -- `9081`
   cephfsLivenessMetricsPort:
@@ -470,7 +469,7 @@ csi:
 
   serviceMonitor:
     # -- Enable ServiceMonitor for Ceph CSI drivers
-    enabled: false
+    enabled: true
     # -- Service monitor scrape interval
     interval: 10s
     # -- ServiceMonitor additional labels
