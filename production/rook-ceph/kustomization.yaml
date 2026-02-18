@@ -18,7 +18,6 @@ helmCharts:
     includeCRDs: true
 resources:
   - resources/rook-ceph-mgr-monitor.yaml
-  - resources/grafana-ceph-dashboards.yaml
   # TODO: transform ceph images when upgrading
   # transformers:
   #   - ../../image-prefix.yaml

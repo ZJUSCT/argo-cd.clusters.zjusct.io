@@ -1311,6 +1311,23 @@ grafana:
   ##
   defaultDashboardsInterval: 1m
 
+  ## Additional dashboards to download from grafana.com at startup
+  ## revision: must be specified explicitly; omitting it silently falls back to revision 1
+  dashboards:
+    default:
+      ceph-cluster:
+        gnetId: 2842
+        revision: 18
+        datasource: Prometheus
+      ceph-osd:
+        gnetId: 5336
+        revision: 9
+        datasource: Prometheus
+      ceph-pools:
+        gnetId: 5342
+        revision: 9
+        datasource: Prometheus
+
   # Administrator credentials when not using an existing secret (see below)
   adminUser: admin
   # adminPassword: strongpassword
