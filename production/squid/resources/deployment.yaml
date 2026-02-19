@@ -16,8 +16,8 @@ spec:
       labels:
         app: squid
     spec:
-      containers:
-        - name: squid
+      initContainers:
+        - name: init-squid
           image: library/squid:latest # will be prefixed with harbor
           command:
             - /bin/sh
@@ -27,9 +27,24 @@ spec:
               echo "Initializing SSL certificate database..."
               /usr/lib/squid/security_file_certgen -c -s /var/lib/squid/ssl_db -M 20MB
               echo "Initializing cache directories..."
-              squid -z
-              echo "Starting squid..."
-              exec squid -NYCd 1
+              squid -z -f /etc/squid/squid.conf
+              echo "Initialization complete"
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+            - name: config
+              mountPath: /etc/squid/squid.conf
+              subPath: squid.conf
+              readOnly: true
+            - name: ca-cert
+              mountPath: /etc/squid/ca
+              readOnly: true
+            - name: ssl-db
+              mountPath: /var/lib/squid
+      containers:
+        - name: squid
+          image: library/squid:latest # will be prefixed with harbor
+          command: ["squid", "-NYCd", "1"]
           ports:
             - containerPort: 3128
               name: proxy
