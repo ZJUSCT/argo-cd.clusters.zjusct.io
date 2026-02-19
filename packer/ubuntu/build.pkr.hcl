@@ -45,7 +45,7 @@ build {
   name = "customize"
 
   source "source.qemu.ubuntu" {
-    iso_url = "output-cloud-init/cloud-init.qcow2"
+    iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/ubuntu/cloud-init.qcow2"
 
     output_directory = "output-customize"
     vm_name          = "customize.qcow2"
