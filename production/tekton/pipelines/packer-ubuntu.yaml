@@ -16,10 +16,6 @@ spec:
       description: Git revision to checkout
       type: string
       default: "master"
-    - name: script
-      description: Path to the build script relative to repo root
-      type: string
-      default: "packer/ubuntu/run-packer.sh"
     - name: image
       description: Container image to run the script in
       type: string
@@ -56,7 +52,7 @@ spec:
           value: $(params.git-revision)
         - name: deleteExisting
           value: "true"
-    - name: build-image
+    - name: build-cloud-init
       runAfter: ["fetch-repository"]
       taskRef:
         name: run-script
@@ -67,9 +63,9 @@ spec:
         - name: IMAGE
           value: $(params.image)
         - name: SCRIPT
-          value: $(params.script)
+          value: "packer/ubuntu/packer-cloud-init.sh"
     - name: upload-cloud-init
-      runAfter: ["build-image"]
+      runAfter: ["build-cloud-init"]
       taskRef:
         name: s3upload
       workspaces:
@@ -82,8 +78,20 @@ spec:
           value: "cloud-init.qcow2"
         - name: S3_PREFIX
           value: $(params.upload-s3-prefix)
-    - name: upload-customize
+    - name: build-customize
       runAfter: ["upload-cloud-init"]
+      taskRef:
+        name: run-script
+      workspaces:
+        - name: source
+          workspace: shared-data
+      params:
+        - name: IMAGE
+          value: $(params.image)
+        - name: SCRIPT
+          value: "packer/ubuntu/packer-customize.sh"
+    - name: upload-customize
+      runAfter: ["build-customize"]
       taskRef:
         name: s3upload
       workspaces:
