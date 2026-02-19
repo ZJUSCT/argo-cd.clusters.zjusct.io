@@ -1,0 +1,48 @@
+=== POST-TEST METRICS ===
+Collected at: 2026-02-19T08:20:08Z
+jlat: 31.18ms (3298085 total writes)
+Per-operation latencies:
+  readdir     : 3.58ms avg (11328666 total ops)
+  unlink      : 0.31ms avg (912607 total ops)
+  rmdir       : 13.00ms avg (104903 total ops)
+  rename      : 30.78ms avg (182366 total ops)
+  mkdir       : 0.68ms avg (183065 total ops)
+  getattr     : 6.66ms avg (726769 total ops)
+  setattr     : 17.73ms avg (618567 total ops)
+  open        : 2.05ms avg (2560349 total ops)
+
+inodes cached: 522694
+inodes_expired: 100081402
+dir_fetch_complete: 12346212
+traverse_dir_fetch: 3418893
+traverse_hit: 429335262
+
+=== OSD PERF ===
+osd  commit_latency(ms)  apply_latency(ms)
+ 26                  12                 12
+ 25                   0                  0
+ 24                   0                  0
+ 23                   8                  8
+ 22                   0                  0
+ 21                   0                  0
+ 20                   0                  0
+ 19                   0                  0
+ 18                   0                  0
+ 17                   0                  0
+ 16                  36                 36
+ 15                   0                  0
+ 14                   0                  0
+ 13                   1                  1
+  0                   0                  0
+  1                   0                  0
+  2                   0                  0
+  3                   0                  0
+  4                   0                  0
+  5                   0                  0
+  6                  30                 30
+  7                   0                  0
+  8                   0                  0
+  9                   0                  0
+ 10                   0                  0
+ 11                   0                  0
+ 12                   0                  0

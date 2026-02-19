@@ -1,0 +1,70 @@
+{
+    "params": {
+        "host_set": "localhost",
+        "launch_by_daemon": false,
+        "version": "3.2",
+        "top": "/home/bowling/cephfs-bench/testdir",
+        "operation": "readdir",
+        "files_per_thread": 1000,
+        "threads": 4,
+        "file_size": 64,
+        "file_size_distr": -1,
+        "files_per_dir": 100,
+        "share_dir": "N",
+        "fname_prefix": "",
+        "fname_suffix": "",
+        "hash_to_dir": "N",
+        "fsync_after_modify": "N",
+        "pause_between_files": "0.0",
+        "auto_pause": "False",
+        "cleanup_delay_usec_per_file": "0",
+        "finish_all_requests": "N",
+        "stonewall": "Y",
+        "verify_read": "Y",
+        "xattr_size": "0",
+        "xattr_count": "0",
+        "permute_host_dirs": "N",
+        "network_sync_dir": "/home/bowling/cephfs-bench/testdir/network_shared",
+        "min_directories_per_sec": 50,
+        "total_hosts": 1,
+        "startup_timeout": 4,
+        "host_timeout": 4
+    },
+    "results": {
+        "elapsed": 0.05814814567565918,
+        "files": 4000,
+        "records": 0,
+        "filesPerSec": 70325.60278194128,
+        "thread": {
+            "00": {
+                "elapsed": 0.05677318572998047,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 17613.94903495658
+            },
+            "01": {
+                "elapsed": 0.05814814567565918,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 17197.45296054385
+            },
+            "02": {
+                "elapsed": 0.05756115913391113,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 17372.825965397693
+            },
+            "03": {
+                "elapsed": 0.05512261390686035,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 18141.374821043162
+            }
+        },
+        "totalhreads": 4,
+        "pctFilesDone": 100.0,
+        "startTime": 1771488649.1240945,
+        "status": "Success",
+        "date": "2026-02-19T08:10:49.000Z"
+    }
+}

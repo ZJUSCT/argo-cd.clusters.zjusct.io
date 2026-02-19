@@ -1,0 +1,81 @@
+{
+    "params": {
+        "host_set": "localhost",
+        "launch_by_daemon": false,
+        "version": "3.2",
+        "top": "/home/bowling/cephfs-bench/testdir",
+        "operation": "read",
+        "files_per_thread": 1000,
+        "threads": 4,
+        "file_size": 4,
+        "file_size_distr": -1,
+        "files_per_dir": 100,
+        "share_dir": "N",
+        "fname_prefix": "",
+        "fname_suffix": "",
+        "hash_to_dir": "N",
+        "fsync_after_modify": "N",
+        "pause_between_files": "0.0",
+        "auto_pause": "False",
+        "cleanup_delay_usec_per_file": "0",
+        "finish_all_requests": "N",
+        "stonewall": "Y",
+        "verify_read": "Y",
+        "xattr_size": "0",
+        "xattr_count": "0",
+        "permute_host_dirs": "N",
+        "network_sync_dir": "/home/bowling/cephfs-bench/testdir/network_shared",
+        "min_directories_per_sec": 50,
+        "total_hosts": 1,
+        "startup_timeout": 4,
+        "host_timeout": 4
+    },
+    "results": {
+        "elapsed": 0.03611326217651367,
+        "files": 4000,
+        "records": 4000,
+        "filesPerSec": 111603.22359380953,
+        "IOPS": 111603.22359380953,
+        "MiBps": 435.95009216331846,
+        "thread": {
+            "00": {
+                "elapsed": 0.035676002502441406,
+                "files": 1000,
+                "records": 1000,
+                "filesPerSec": 28030.04624555588,
+                "IOPS": 28030.04624555588,
+                "MiBps": 109.49236814670266
+            },
+            "01": {
+                "elapsed": 0.03577852249145508,
+                "files": 1000,
+                "records": 1000,
+                "filesPerSec": 27949.728786000825,
+                "IOPS": 27949.728786000825,
+                "MiBps": 109.17862807031572
+            },
+            "02": {
+                "elapsed": 0.03611326217651367,
+                "files": 1000,
+                "records": 1000,
+                "filesPerSec": 27690.65821614841,
+                "IOPS": 27690.65821614841,
+                "MiBps": 108.16663365682973
+            },
+            "03": {
+                "elapsed": 0.03580021858215332,
+                "files": 1000,
+                "records": 1000,
+                "filesPerSec": 27932.79034610441,
+                "IOPS": 27932.79034610441,
+                "MiBps": 109.11246228947036
+            }
+        },
+        "totalhreads": 4,
+        "totalDataGB": 0.0152587890625,
+        "pctFilesDone": 100.0,
+        "startTime": 1771488623.1197982,
+        "status": "Success",
+        "date": "2026-02-19T08:10:23.000Z"
+    }
+}
