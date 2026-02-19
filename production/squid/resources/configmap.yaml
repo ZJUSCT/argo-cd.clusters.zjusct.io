@@ -58,6 +58,8 @@ data:
     http_access deny to_localhost
     http_access deny to_linklocal
 
+    # Access logging configuration
+    access_log daemon:/var/log/squid/access.log squid
     # Suppress logging of health check probe errors
     acl healthcheck_error http_status 000
     access_log none healthcheck_error
