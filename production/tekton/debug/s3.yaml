@@ -24,6 +24,8 @@ spec:
         - name: packer-secret
           mountPath: /etc/packer-images/secret
           readOnly: true
+      #  - name: workspace
+      #    mountPath: /workspace
   volumes:
     - name: packer-cm
       configMap:
@@ -31,3 +33,6 @@ spec:
     - name: packer-secret
       secret:
         secretName: packer-images
+    # - name: workspace
+    #   persistentVolumeClaim:
+    #     claimName: pvc-24f21591b1

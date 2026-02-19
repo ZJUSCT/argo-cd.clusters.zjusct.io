@@ -5,9 +5,9 @@ default:
   bmc:
     credentialsName: bmc-credential
   image:
-    url: https://mirrors.tuna.tsinghua.edu.cn/ubuntu-cloud-images/noble/current/noble-server-cloudimg-amd64.img
+    url: https://radosgw.clusters.zjusct.io/packer-images/ubuntu/customize.qcow2
     checksumType: sha256
-    checksum: https://mirrors.tuna.tsinghua.edu.cn/ubuntu-cloud-images/noble/current/SHA256SUMS
+    checksum: https://radosgw.clusters.zjusct.io/packer-images/ubuntu/SHA256SUMS
     format: qcow2
   rootDeviceHints:
     rotational: false
@@ -44,10 +44,10 @@ nodes:
   #   bmc:
   #     address: redfish://172.25.3.63
 
-  # - name: m604
-  #   mac: "6c:b3:11:73:f0:4c"
-  #   bmc:
-  #     address: redfish://172.25.3.64
+  - name: m604
+    mac: "6c:b3:11:73:f0:4c"
+    bmc:
+      address: redfish://172.25.3.64
 
   # - name: root
   #   mac: "b4:05:5d:ad:d3:fa"

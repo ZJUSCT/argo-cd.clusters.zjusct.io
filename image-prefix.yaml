@@ -8,4 +8,7 @@ prefix: harbor.clusters.zjusct.io/
 fieldSpecs:
 - path: spec/template/spec/containers/image
 - path: spec/template/spec/initContainers/image
-- path: spec/image  # for kind Prometheus and Alertmanager
+- path: spec/image
+  kind: Prometheus
+- path: spec/image
+  kind: Alertmanager

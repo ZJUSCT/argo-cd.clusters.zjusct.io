@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: packer-ubuntu-cloud-init-
+  generateName: packer-ubuntu-customize-
   namespace: tekton
 spec:
   pipelineRef:
