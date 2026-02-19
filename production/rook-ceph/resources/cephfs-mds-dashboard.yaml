@@ -40,7 +40,7 @@ data:
             "name": "datasource",
             "label": "Datasource",
             "type": "datasource",
-            "pluginId": "prometheus",
+            "query": "prometheus",
             "refresh": 1,
             "current": {}
           },
