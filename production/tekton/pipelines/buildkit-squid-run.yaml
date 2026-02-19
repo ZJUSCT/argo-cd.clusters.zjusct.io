@@ -20,7 +20,7 @@ spec:
     - name: dockerfile-path
       value: "Dockerfile"
     - name: context-dir
-      value: "production/squid"
+      value: "production/squid/image"
   workspaces:
     - name: shared-data
       volumeClaimTemplate:
