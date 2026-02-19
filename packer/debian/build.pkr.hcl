@@ -1,8 +1,8 @@
 build {
   name = "cloud-init"
   source "source.qemu.ubuntu" {
-    iso_url      = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/ubuntu/questing-server-cloudimg-amd64.img"
-    # iso_url = "questing-server-cloudimg-amd64.img"
+    #iso_url      = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/debian/debian-13-generic-amd64.qcow2"
+    iso_url = "debian-13-generic-amd64.qcow2"
 
     # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
     # note: nocloud datasource requires the meta-data file, or it will fail with "Invalid seed"
@@ -45,7 +45,7 @@ build {
   name = "customize"
 
   source "source.qemu.ubuntu" {
-    iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/ubuntu/cloud-init.qcow2"
+    iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/debian/cloud-init.qcow2"
 
     output_directory = "output-customize"
     vm_name          = "customize.qcow2"
