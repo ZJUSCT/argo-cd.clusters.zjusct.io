@@ -57,7 +57,6 @@ spec:
 
 
         mc alias set ceph "http://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
-        mc
 
         mc cp "${SRC}" "ceph/${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
         echo "Uploaded: s3://${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
