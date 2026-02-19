@@ -16,7 +16,9 @@ data:
             tls-key=/etc/squid/ca/tls.key
     sslcrtd_program /usr/lib/squid/security_file_certgen -s /var/lib/squid/ssl_db -M 20MB
     sslproxy_cert_error allow all
-    ssl_bump stare all
+    acl step1 at_step SslBump1
+    ssl_bump peek step1
+    ssl_bump bump all
     # >>> ssl_bump
 
     acl SSL_ports port 4430 # for gitlab.star-home.top:4430
