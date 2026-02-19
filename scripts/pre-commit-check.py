@@ -487,17 +487,24 @@ class Checker:
 
         return len(self.errors) == 0
 
-    def run_checks(self, repo_root: Path) -> int:
-        """Run checks on all application directories."""
-        app_dirs = []
+    def run_checks(self, repo_root: Path, files: Optional[List[str]] = None) -> int:
+        """Run checks on application directories affected by changed files.
 
-        # Check all directories in dev/ and production/
-        for env in ["dev", "production"]:
-            env_path = repo_root / env
-            if env_path.exists():
-                for app_dir in sorted(env_path.iterdir()):
-                    if app_dir.is_dir() and (app_dir / "kustomization.yaml").exists():
-                        app_dirs.append(app_dir)
+        When *files* is provided (from pre-commit), only the kustomization app
+        directories that own those files are checked.  When *files* is absent
+        or empty all directories under dev/ and production/ are checked.
+        """
+        if files:
+            app_dirs = get_app_dirs_from_files(files, repo_root)
+        else:
+            app_dirs = []
+            # Fall back: check all directories in dev/ and production/
+            for env in ["dev", "production"]:
+                env_path = repo_root / env
+                if env_path.exists():
+                    for app_dir in sorted(env_path.iterdir()):
+                        if app_dir.is_dir() and (app_dir / "kustomization.yaml").exists():
+                            app_dirs.append(app_dir)
 
         if not app_dirs:
             print("No application directories to check")
@@ -547,6 +554,26 @@ def get_git_root() -> Path:
         return Path.cwd()
 
 
+def get_app_dirs_from_files(files: List[str], repo_root: Path) -> List[Path]:
+    """Derive unique app directories from a list of changed file paths.
+
+    Walks up from each file to find the nearest ancestor that contains a
+    kustomization.yaml, stopping before the repo root.
+    """
+    app_dirs: set = set()
+    for file_str in files:
+        file_path = Path(file_str)
+        if not file_path.is_absolute():
+            file_path = repo_root / file_path
+        candidate = file_path if file_path.is_dir() else file_path.parent
+        while candidate != repo_root and candidate != candidate.parent:
+            if (candidate / "kustomization.yaml").exists():
+                app_dirs.add(candidate)
+                break
+            candidate = candidate.parent
+    return sorted(app_dirs)
+
+
 def main():
     """Main entry point."""
     import argparse
@@ -561,11 +588,16 @@ def main():
         action="store_true",
         help="Check for helm chart version updates (fetches latest versions from repositories)"
     )
+    parser.add_argument(
+        "files",
+        nargs="*",
+        help="Changed files passed by pre-commit (limits checks to affected apps)"
+    )
     args = parser.parse_args()
 
     repo_root = get_git_root()
     checker = Checker(auto_fix=args.fix, update_versions=args.update)
-    return checker.run_checks(repo_root)
+    return checker.run_checks(repo_root, files=args.files)
 
 
 if __name__ == "__main__":
