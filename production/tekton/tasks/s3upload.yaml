@@ -21,8 +21,9 @@ spec:
       default: "minio/mc:latest"
     - name: FILENAME
       description: >-
-        Filename to search for under the workspace root,
-        passed to find -name (e.g. ubuntu-questing-amd64.qcow2).
+        Exact path (relative to the workspace root) to the file to upload
+        (e.g. images/cloud-init.qcow2). The task will check existence
+        and upload that file directly; no searching is performed.
       type: string
     - name: S3_PREFIX
       description: >-
@@ -44,23 +45,20 @@ spec:
             name: packer-images
       script: |
         #!/bin/sh
-        set -e
+        set -eu
 
-        S3_ENDPOINT="http://${BUCKET_HOST}:${BUCKET_PORT}"
-        mc alias set ceph "${S3_ENDPOINT}" "${AWS_ACCESS_KEY_ID}" "${AWS_SECRET_ACCESS_KEY}"
-
-        SRC="$(find . -maxdepth 8 -name '$(params.FILENAME)' -type f | head -n1)"
-        if [ -z "${SRC}" ]; then
-          echo "ERROR: No file named '$(params.FILENAME)' found under $(workspaces.source.path)"
+        SRC="$(params.FILENAME)"
+        if [ ! -f "${SRC}" ]; then
+          echo "ERROR: No file named '${SRC}' found under $(workspaces.source.path)"
           exit 1
         fi
         echo "Found: ${SRC}"
         ls -lh "${SRC}"
 
-        TS="$(date -u +%Y%m%dT%H%M%SZ)"
-        STEM="$(basename "${SRC}" | sed 's/\.[^.]*$//')"
-        EXT="${SRC##*.}"
-        TARGET="$(params.S3_PREFIX)${STEM}-${TS}.${EXT}"
 
-        mc cp "${SRC}" "ceph/${BUCKET_NAME}/${TARGET}"
-        echo "Uploaded: s3://${BUCKET_NAME}/${TARGET}"
+        mc alias set ceph "http://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
+        mc
+
+        mc cp "${SRC}" "ceph/${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
+        echo "Uploaded: s3://${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
+        mc ls ceph/${BUCKET_NAME}/$(params.S3_PREFIX) | tail -n 20

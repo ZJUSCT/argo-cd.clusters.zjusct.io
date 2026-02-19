@@ -13,7 +13,7 @@ resources:
   - tasks/run-script.yaml
   - tasks/s3upload.yaml
   - pipelines/buildkit.yaml
-  - pipelines/packer-ubuntu.yaml
+  - pipelines/packer.yaml
 patches:
   # https://github.com/tektoncd/operator/blob/main/docs/AirGapImageConfiguration.md
   - target:

@@ -1,7 +1,7 @@
 build {
   name = "cloud-init"
   source "source.qemu.ubuntu" {
-    iso_url      = "https://mirror.nju.edu.cn/ubuntu-cloud-images/questing/current/questing-server-cloudimg-amd64.img"
+    iso_url      = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/ubuntu/questing-server-cloudimg-amd64.img"
     # iso_url = "questing-server-cloudimg-amd64.img"
 
     # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
