@@ -15,3 +15,7 @@ apk add --no-cache \
     cloud-utils-localds \
     openssh-client
 EOF
+
+RUN <<EOF
+packer plugins install github.com/hashicorp/qemu
+EOF
