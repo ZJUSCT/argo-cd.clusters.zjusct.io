@@ -4,8 +4,8 @@ RUN sed -i 's/[a-z]*.ubuntu.com/mirrors.zju.edu.cn/' /etc/apt/sources.list.d/ubu
 
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y squid-openssl
-RUN apt-get clean
+    && apt-get install -y squid-openssl \
+    && apt-get clean
 
 # https://support.kaspersky.com/kwts/6.1/zh-HantTW/166244.htm
 # RUN mkdir -p /var/lib/squid \

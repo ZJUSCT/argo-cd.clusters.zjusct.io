@@ -65,19 +65,13 @@ spec:
             - name: ssl-db
               mountPath: /var/lib/squid
           readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - "squidclient -h 127.0.0.1 -p 3128 cache_object://localhost/info > /dev/null"
+            tcpSocket:
+              port: 3128
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - "squidclient -h 127.0.0.1 -p 3128 cache_object://localhost/info > /dev/null"
+            tcpSocket:
+              port: 3128
             initialDelaySeconds: 30
             periodSeconds: 30
           resources:
