@@ -59,10 +59,10 @@ data:
     coredump_dir /var/spool/squid
     refresh_pattern ^ftp:           1440    20%     10080
     refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
-    refresh_pattern \/(Packages|Sources)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
-    refresh_pattern \/Release(|\.gpg)$ 0 0% 0 refresh-ims
-    refresh_pattern \/InRelease$ 0 0% 0 refresh-ims
-    refresh_pattern \/(Translation-.*)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
+    refresh_pattern \/(Packages|Sources)(|\.bz2|\.gz|\.xz)$ 0 0% 0 reload-into-ims
+    refresh_pattern \/Release(|\.gpg)$ 0 0% 0 reload-into-ims
+    refresh_pattern \/InRelease$ 0 0% 0 reload-into-ims
+    refresh_pattern \/(Translation-.*)(|\.bz2|\.gz|\.xz)$ 0 0% 0 reload-into-ims
     refresh_pattern .               0       20%     4320
     # >>> from default squid.conf file
 
