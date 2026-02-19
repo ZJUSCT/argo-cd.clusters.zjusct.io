@@ -19,6 +19,17 @@ spec:
       containers:
         - name: squid
           image: library/squid:latest # will be prefixed with harbor
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Initializing SSL certificate database..."
+              /usr/lib/squid/security_file_certgen -c -s /var/lib/squid/ssl_db -M 20MB
+              echo "Initializing cache directories..."
+              squid -z
+              echo "Starting squid..."
+              exec squid -NYCd 1
           ports:
             - containerPort: 3128
               name: proxy
