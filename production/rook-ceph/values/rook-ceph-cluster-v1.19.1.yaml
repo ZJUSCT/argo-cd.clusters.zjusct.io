@@ -911,7 +911,7 @@ cephObjectStores:
       #     sectionName: https
       parentRefs:
         - name: envoy-gateway
-          namespace: default
+          namespace: envoy-gateway
 ## cephECBlockPools are disabled by default, please remove the comments and set desired values to enable it
 ## For erasure coded a replicated metadata pool is required.
 ## https://rook.io/docs/rook/latest/CRDs/Shared-Filesystem/ceph-filesystem-crd/#erasure-coded
