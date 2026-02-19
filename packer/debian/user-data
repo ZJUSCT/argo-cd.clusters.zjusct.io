@@ -21,6 +21,7 @@ disable_root: false
 # https://docs.cloud-init.io/en/latest/reference/modules.html#bootcmd
 bootcmd:
   - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - ['sed', '-i', 's/^Components: main$/Components: main contrib non-free non-free-firmware/', '/etc/apt/sources.list.d/debian.sources']
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
 ca_certs:
   trusted:
@@ -56,17 +57,6 @@ apt:
   security:
     - arches: [default]
       uri: https://mirrors.zju.edu.cn/debian-security/
-  sources_list: |
-    Types: deb deb-src
-    URIs: https://mirrors.zju.edu.cn/debian/
-    Suites: $RELEASE $RELEASE-updates $RELEASE-backports
-    Components: main contrib non-free non-free-firmware
-    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-    Types: deb deb-src
-    URIs: https://mirrors.zju.edu.cn/debian-security/
-    Suites: $RELEASE-security
-    Components: main contrib non-free non-free-firmware
-    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
   sources:
     # 先从官方源获得公钥，然后使用 gpg --show-keys <key_file> 获得公钥的 keyid 填入
     docker:
@@ -133,8 +123,6 @@ packages:
   - devscripts
   - diffutils
   - doxygen
-  - dracut
-  - dracut-network
   - duf
   - etckeeper
   - ethtool
@@ -177,7 +165,6 @@ packages:
   - hwinfo
   - hwloc
   - hyperfine
-  - ibutils
   - ibverbs-providers
   - ibverbs-utils
   - infiniband-diags
@@ -339,7 +326,7 @@ packages:
   - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
   # DO NOT INSTALL SYSTEM LEVEL CUDA!
   # doca https://developer.nvidia.com/doca-downloads
-  # - doca-all # network problem
+  - doca-all
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 # package_update: true
 # package_upgrade: true

@@ -54,8 +54,8 @@ build {
   provisioner "shell" {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive",
-      # "http_proxy=http://172.28.0.3:8080",
-      # "https_proxy=http://172.28.0.3:8080"
+      "http_proxy=http://172.28.0.4:3128",
+      "https_proxy=http://172.28.0.4:3128"
     ]
     scripts = [
       "scripts/02-pkgmgr.sh",

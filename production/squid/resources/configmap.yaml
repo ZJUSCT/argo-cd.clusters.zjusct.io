@@ -23,12 +23,9 @@ data:
 
     acl SSL_ports port 4430 # for gitlab.star-home.top:4430
 
-    # <<< docker image pattern
-    # https://stackoverflow.com/questions/71095593/caching-with-squid-not-working-for-docker-images-why
-    refresh_pattern -i (/blobs/sha256)     1440 99% 10080  ignore-no-store ignore-private override-expire store-stale reload-into-ims
-    refresh_pattern -i (/images/sha256)    1440 99% 10080  ignore-no-store ignore-private override-expire store-stale reload-into-ims
-    refresh_pattern -i (/manifests/)       1440 99% 10080  ignore-no-store ignore-private override-expire store-stale reload-into-ims
-    # >>> docker image pattern
+    acl purge method PURGE
+    http_access allow localhost purge
+    http_access deny purge
 
     # <<< from default squid.conf file
     acl localnet src 0.0.0.1-0.255.255.255  # RFC 1122 "this" network (LAN)
@@ -59,10 +56,6 @@ data:
     http_access deny to_linklocal
     http_access allow localnet
     http_access deny all
-
-    # Access logging configuration
-    logformat combined %>a %[ui %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh
-    access_log daemon:/var/log/squid/access.log combined !localnet
     coredump_dir /var/spool/squid
     refresh_pattern ^ftp:           1440    20%     10080
     refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
@@ -71,8 +64,6 @@ data:
     refresh_pattern \/InRelease$ 0 0% 0 refresh-ims
     refresh_pattern \/(Translation-.*)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
     refresh_pattern .               0       20%     4320
-    # Set max_filedescriptors to avoid using system's RLIMIT_NOFILE. See LP: #1978272
-    max_filedescriptors 102400
     # >>> from default squid.conf file
 
     # current largest file: nvhpc runfile is 8.2GB
@@ -87,8 +78,10 @@ data:
     # continue downloads after abort
     # quick_abort_min -1
 
-    workers 8
+    # When multiple clients request the same uncached object, collapse them into a single backend request
+    collapsed_forwarding on
+    # Increase shared entries limit for multi-worker setup (8 workers)
+    # This prevents hash collisions that cause missed collapsing opportunities
+    shared_transient_entries_limit 32768
 
-    # Direct routing (no upstream proxy)
-    acl zju dstdomain .zju.edu.cn
-    always_direct allow zju
+    workers 8
