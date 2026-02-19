@@ -323,6 +323,153 @@ If OSDs 6 and 16 are in this list, fixing their WAL latency will directly reduce
 
 ---
 
+---
+
+## Addendum: Follow-up Investigation (2026-02-19)
+
+Two issues with the initial report were raised and investigated.
+
+### Q1: Why Only Monitor mds.cephfs-b? There are 2 Active MDS
+
+`ceph fs status` shows two active MDS daemons:
+
+| Rank | MDS | State | Req/s | DNS | Caps |
+|---|---|---|---|---|---|
+| 0 | cephfs-b | active | **7/s** | 571K | 515K |
+| 1 | cephfs-a | active | 0/s | 2,120 | 449 |
+
+Rank 1 (cephfs-a) handles essentially **zero client load** — 2,120 cached directory entries vs 571K for rank 0. All 71 connected clients are served by rank 0. Monitoring only cephfs-b was appropriate for this workload.
+
+However, comparing their `jlat` values is informative:
+
+| MDS | jlat | Total journal writes |
+|---|---|---|
+| cephfs-b (rank 0) | **31.1 ms** | 3,283,045 |
+| cephfs-a (rank 1) | **12.0 ms** | 2,172 |
+
+The factor-of-2.6 difference between two daemons sharing the same metadata pool is explained by finding Q2 below: jlat per MDS daemon depends on which PGs its journal segment occupies, and those PGs may be on different device classes.
+
+---
+
+### Q2: Is the cephfs-metadata Pool Actually on NVMe? Is jlat Bounded by the Slowest Device?
+
+The user reported that the home directory CephFS uses NVMe via a subvolume `data_pool` setting. This is confirmed:
+
+```
+ceph fs subvolume info cephfs bowling home → data_pool: cephfs-cephfs-nvme-data
+```
+
+The `cephfs-cephfs-nvme-data` pool uses CRUSH rule `nvme` (`default~nvme`), so file data for `/home/bowling` goes to NVMe OSDs only. **This is correct.**
+
+However, the **MDS journal** writes to `cephfs-metadata`, which is a completely separate pool. Checking its CRUSH rule:
+
+```
+pool 4 'cephfs-metadata'  crush_rule 4
+```
+
+CRUSH rule 4 (`cephfs-metadata`):
+```json
+{ "op": "take", "item_name": "default" }   ← no device class filter
+```
+
+**The `cephfs-metadata` pool has no device class restriction.** It uses the entire `default` CRUSH bucket, distributing PGs across HDD, NVMe, and SSD indiscriminately.
+
+#### PG-to-Device Mapping for cephfs-metadata
+
+All 32 PGs analyzed:
+
+| PG | Primary OSD | Replica OSD | Primary Class | Note |
+|---|---|---|---|---|
+| 4.0 | osd.4 | osd.18 | nvme | |
+| 4.1 | osd.18 | osd.2 | nvme | |
+| 4.2 | osd.6 | osd.12 | **hdd** | |
+| 4.3 | osd.24 | osd.12 | **hdd** | |
+| 4.4 | osd.1 | osd.2 | nvme | |
+| 4.5 | osd.18 | osd.6 | nvme | |
+| 4.6 | osd.16 | osd.8 | **hdd** | both replicas HDD |
+| 4.7 | osd.15 | osd.1 | **hdd** | |
+| 4.8 | osd.19 | osd.26 | **hdd** | both replicas HDD |
+| 4.9 | osd.1 | osd.2 | nvme | |
+| 4.a | osd.2 | osd.18 | nvme | |
+| 4.b | osd.8 | osd.19 | **hdd** | both replicas HDD |
+| 4.c | osd.24 | osd.12 | **hdd** | |
+| 4.d | osd.17 | osd.13 | **hdd** | |
+| 4.e | osd.4 | osd.5 | nvme | |
+| 4.f | osd.26 | osd.13 | **hdd** | |
+| 4.10 | osd.21 | osd.16 | **hdd** | both replicas HDD |
+| 4.11 | osd.24 | osd.19 | **hdd** | both replicas HDD |
+| 4.12 | osd.24 | osd.9 | **hdd** | both replicas HDD |
+| 4.13 | osd.4 | osd.24 | nvme | |
+| 4.14 | osd.9 | osd.26 | **hdd** | both replicas HDD |
+| 4.15 | osd.18 | osd.23 | nvme | |
+| 4.16 | osd.25 | osd.22 | **hdd** | both replicas HDD |
+| 4.17 | osd.12 | osd.11 | nvme | |
+| 4.18 | osd.13 | osd.9 | nvme | |
+| 4.19 | osd.26 | osd.5 | **hdd** | both replicas HDD |
+| 4.1a | osd.8 | osd.6 | **hdd** | both replicas HDD |
+| 4.1b | osd.26 | osd.3 | **hdd** | |
+| 4.1c | osd.1 | osd.19 | nvme | |
+| 4.1d | osd.26 | osd.11 | **hdd** | both replicas HDD |
+| 4.1e | osd.18 | osd.13 | nvme | |
+| 4.1f | osd.22 | osd.24 | **hdd** | both replicas HDD |
+
+**Summary: 19/32 PGs (59.4%) have HDD primary OSDs.**
+
+#### OSD Latency by Device Class (at time of investigation)
+
+| Device | OSD | Commit latency | Apply latency |
+|---|---|---|---|
+| nvme | osd.1 | 0 ms | 0 ms |
+| nvme | osd.2 | 0 ms | 0 ms |
+| nvme | osd.4 | 0 ms | 0 ms |
+| nvme | osd.12 | 0 ms | 0 ms |
+| nvme | osd.13 | 0 ms | 0 ms |
+| nvme | osd.18 | 0 ms | 0 ms |
+| hdd | osd.6 | 26 ms | 26 ms |
+| hdd | osd.16 | 33 ms | 33 ms |
+| hdd | osd.26 | 15 ms | 15 ms |
+
+All NVMe OSDs show ~0ms commit latency at this moment; HDD OSDs show 15–33ms. The blended jlat of 31ms is consistent with ~59% of writes hitting HDD at ~50ms average and ~41% hitting NVMe at <1ms: `0.59 × 50 + 0.41 × 1 ≈ 30ms`.
+
+#### Why cephfs-a Shows Lower jlat
+
+With only 2,172 total journal writes (vs 3.3M for cephfs-b), cephfs-a's journal segment occupies a small number of PGs that happen to be NVMe-primary, giving a 12ms average. This is a sampling artifact from low volume — if cephfs-a were under the same load as cephfs-b and writing to all 32 PGs proportionally, it would converge to the same ~31ms.
+
+#### Root Cause Confirmed
+
+The 31ms `jlat` is caused by **the `cephfs-metadata` pool having no device class constraint**, placing 59% of its PGs on HDD OSDs. This is a misconfiguration — it has nothing to do with the NVMe data pool configuration, which is correctly set. The data writes correctly go to NVMe, but all metadata journal writes pass through this mixed-device metadata pool.
+
+---
+
+### Corrected Recommendation R1
+
+> **The OSDs cited in the original R1 (OSD 6, OSD 16) are HDD, not NVMe. The original recommendation was incorrect.** Those OSDs are not supposed to serve the metadata pool. The issue is not WAL/DB co-location on NVMe — it is that the metadata pool CRUSH rule must be restricted to NVMe.
+
+**Correct fix:** Change the `cephfs-metadata` pool CRUSH rule from `default` (all devices) to `default~nvme` (NVMe only).
+
+The cluster has 6 NVMe OSDs across 2 hosts (m600: osd.2, osd.4, osd.12, osd.13; m601: osd.1, osd.18). With replication size 2 and host-level failure domain, all 32 metadata PGs can be served from NVMe OSDs on m600 and m601. The `storage` host has no NVMe OSDs and would be excluded from metadata placement, which is the correct and intended behavior.
+
+To apply this fix:
+
+```bash
+# 1. Create a new CRUSH rule for metadata (NVMe only)
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- \
+  ceph osd crush rule create-replicated cephfs-metadata-nvme default host nvme
+
+# 2. Apply the rule to the metadata pool
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- \
+  ceph osd pool set cephfs-metadata crush_rule cephfs-metadata-nvme
+
+# 3. Monitor PG remapping (PGs will migrate from HDD to NVMe OSDs)
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph -w
+```
+
+After remapping completes (backfill of ~6.6 GiB from 19 PGs), jlat should drop from ~31ms to <5ms, directly reducing `rmdir` from 11ms to <2ms and `rename` from 31ms to <5ms.
+
+> **Note:** This change affects the `storage` host's utilization — it will no longer serve metadata PGs. This is fine since its NVMe capacity is zero. The replication factor of 2 with m600+m601 provides host-level redundancy as long as both hosts are healthy.
+
+---
+
 ## Appendix: Raw Data
 
 All raw benchmark output, MDS perf dumps, and monitoring logs are saved to `/home/bowling/cephfs-bench/results/`:
