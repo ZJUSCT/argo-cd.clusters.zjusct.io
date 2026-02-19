@@ -722,6 +722,7 @@ cephFileSystems:
       preserveFilesystemOnDelete: true
       metadataPool:
         failureDomain: host
+        enableCrushUpdates: true
         deviceClass: nvme
         replicated:
           size: 2
@@ -735,6 +736,7 @@ cephFileSystems:
           name: data0
         - name: cephfs-hdd-data
           failureDomain: host
+          enableCrushUpdates: true
           deviceClass: hdd
           replicated:
             size: 2
@@ -743,6 +745,7 @@ cephFileSystems:
         - name: cephfs-nvme-data
           failureDomain: host
           deviceClass: nvme
+          enableCrushUpdates: true
           replicated:
             size: 2
           parameters:
@@ -750,6 +753,7 @@ cephFileSystems:
         - name: cephfs-ssd-data
           failureDomain: host
           deviceClass: ssd
+          enableCrushUpdates: true
           replicated:
             size: 2
           parameters:
@@ -757,6 +761,7 @@ cephFileSystems:
         - name: cephfs-home
           failureDomain: host
           deviceClass: nvme
+          enableCrushUpdates: true
           replicated:
             size: 2
           parameters:

@@ -327,31 +327,197 @@ If OSDs 6 and 16 are in this list, fixing their WAL latency will directly reduce
 
 ## Addendum: Follow-up Investigation (2026-02-19)
 
-Two issues with the initial report were raised and investigated.
+Two issues with the initial report were raised and investigated. Additionally, the original R1 is corrected below (OSD 6 and OSD 16 are HDD, not NVMe — the original recommendation was wrong).
 
-### Q1: Why Only Monitor mds.cephfs-b? There are 2 Active MDS
+### Q1: MDS Imbalance — Why is Rank 1 Idle and How to Fix It
 
-`ceph fs status` shows two active MDS daemons:
+`ceph fs status` shows two active MDS daemons with severely unequal load:
 
-| Rank | MDS | State | Req/s | DNS | Caps |
-|---|---|---|---|---|---|
-| 0 | cephfs-b | active | **7/s** | 571K | 515K |
-| 1 | cephfs-a | active | 0/s | 2,120 | 449 |
+| Rank | MDS | State | Req/s | DNS (inodes) | Caps | Sequence |
+|---|---|---|---|---|---|---|
+| 0 | cephfs-b | active | **7/s** | 571K | 515K | 144,244 |
+| 1 | cephfs-a | active | 0/s | 2,120 | 449 | 42 |
 
-Rank 1 (cephfs-a) handles essentially **zero client load** — 2,120 cached directory entries vs 571K for rank 0. All 71 connected clients are served by rank 0. Monitoring only cephfs-b was appropriate for this workload.
+The extremely low sequence number for rank 1 (seq=42 vs seq=144244) shows that cephfs-a was recently started or restarted and has received no subtree delegation from rank 0 since.
 
-However, comparing their `jlat` values is informative:
+#### Why the Automatic Balancer Doesn't Help
 
-| MDS | jlat | Total journal writes |
-|---|---|---|
-| cephfs-b (rank 0) | **31.1 ms** | 3,283,045 |
-| cephfs-a (rank 1) | **12.0 ms** | 2,172 |
+`ceph fs get cephfs` shows:
+```
+balancer          (empty)
+bal_rank_mask     -1
+```
 
-The factor-of-2.6 difference between two daemons sharing the same metadata pool is explained by finding Q2 below: jlat per MDS daemon depends on which PGs its journal segment occupies, and those PGs may be on different device classes.
+- `balancer` empty → default balancer algorithm (`mds_bal_mode=0`, "Hybrid")
+- `bal_rank_mask -1` → all ranks are eligible candidates (not the bottleneck)
+
+The MDS load balancer is a **hotspot-driven balancer**. It migrates subtrees when a directory fragment's request rate exceeds split thresholds:
+
+```
+mds_bal_split_rd   = 25,000 ops/sec   (per directory fragment, read threshold)
+mds_bal_split_wr   = 10,000 ops/sec   (per directory fragment, write threshold)
+mds_bal_min_rebalance = 0.1           (minimum fractional imbalance to trigger migration)
+```
+
+Rank 0 is receiving **7 total req/s** spread across 571K cached inodes. No single directory fragment is anywhere close to 25,000 ops/sec. The balancer's temperature model sees nothing "hot" enough to migrate. **This is expected behavior** — the MDS load balancer was designed for single-directory hotspots (e.g., a build system hammering one directory), not for distributing a broad low-intensity workload like user home directories.
+
+Rook sets zero balancer configuration (confirmed from source: `pkg/operator/ceph/file/mds/config.go` only sets `mds_cache_memory_limit` and `mds_join_fs`). The balancer is entirely unmanaged by Rook.
+
+#### How to Balance: Ephemeral Random Pinning
+
+For a home directory filesystem with many user subdirectories, the correct approach is **random ephemeral pinning**, not the automatic load balancer. This pins approximately 50% of top-level subdirectories to rank 1:
+
+```bash
+# Pin ~50% of subdirectories under the volumes/home group to rank 1 automatically
+# (applied to the MDS-visible path of the subvolumegroup)
+setfattr -n ceph.dir.pin.random -v "0.5" /home
+```
+
+This is persistent across MDS restarts (stored in the inode's xattr) and requires no manual enumeration. After setting, newly-accessed directories will gradually be distributed as caps are granted.
+
+Alternatively, for explicit control, use hard export pins on a per-user basis:
+
+```bash
+# Pin bowling's home to rank 0, pin another user to rank 1
+setfattr -n ceph.dir.pin -v 0 /home/bowling   # rank 0
+setfattr -n ceph.dir.pin -v 1 /home/someuser  # rank 1
+```
+
+> **Caveat:** Distributing metadata across ranks only helps if the MDS CPU or journal write concurrency is the bottleneck. With the current root cause being HDD-primary PGs in the metadata pool (see Q2), fixing the CRUSH rule should take priority. After the CRUSH fix, if jlat drops to <5ms and MDS CPU becomes the bottleneck, then rank balancing will be meaningful.
+
+#### Summary for Q1
+
+Monitoring only `mds.cephfs-b` was appropriate because it handles all real traffic. The imbalance is not a misconfiguration — it is expected behavior when the workload is broad and low-intensity. The load-based automatic balancer will never trigger at 7 req/s total. Explicit ephemeral random pinning is the correct tool for distributing home directory workloads across MDS ranks.
 
 ---
 
-### Q2: Is the cephfs-metadata Pool Actually on NVMe? Is jlat Bounded by the Slowest Device?
+### Q2: deviceClass: nvme in metadataPool Config — Why Didn't It Take Effect?
+
+The values file correctly declares:
+
+```yaml
+metadataPool:
+  failureDomain: host
+  deviceClass: nvme
+  replicated:
+    size: 2
+```
+
+Yet the `cephfs-metadata` pool uses CRUSH rule `cephfs-metadata` which targets `default` (all devices, no class filter). The `cephfs-cephfs-home` data pool has the same issue despite `deviceClass: nvme`. Here is the complete root-cause trace through the Rook source code.
+
+#### Code Path: How Rook Applies deviceClass to a Pool
+
+**File: `pkg/daemon/ceph/client/pool.go`**
+
+The relevant function is `createReplicatedPoolForApp` (line 442). It runs every reconciliation cycle for every pool:
+
+```go
+// Step 1 (line 467–471): Always create/verify the CRUSH rule
+checkFailureDomain = true
+if err := createReplicationCrushRule(ctx, clusterInfo, clusterSpec, crushRuleName, pool); err != nil {
+    return errors.Wrapf(err, "failed to create replicated crush rule %q", crushRuleName)
+}
+
+// Step 2 (line 475–495): Create pool if new, or update size if exists
+poolDetails, err := GetPoolDetails(...)
+if err != nil {
+    // Pool doesn't exist: create it, using crushRuleName
+} else {
+    // Pool exists: only update replication size if changed
+}
+
+// Step 3 (line 504–508): Update CRUSH rule if deviceClass is set
+if checkFailureDomain || pool.PoolSpec.DeviceClass != "" {
+    if err = updatePoolCrushRule(ctx, clusterInfo, clusterSpec, pool); err != nil {
+        return errors.Wrapf(err, ...)
+    }
+}
+```
+
+`crushRuleName` is always `pool.Name` (i.e., `"cephfs-metadata"`) — **the CRUSH rule name is the same as the pool name, regardless of deviceClass.**
+
+**Step 1: `createReplicationCrushRule` (line 743)**
+
+```go
+args := []string{"osd", "crush", "rule", "create-replicated", ruleName, crushRoot, failureDomain}
+if pool.DeviceClass != "" {
+    args = append(args, pool.DeviceClass)
+}
+output, err := NewCephCommand(context, clusterInfo, args).Run()
+if err != nil {
+    return errors.Wrapf(err, "failed to create crush rule %s. %s", ruleName, output)
+}
+```
+
+This runs: `ceph osd crush rule create-replicated cephfs-metadata default host nvme`
+
+**Critical behavior verified by live test:**
+
+```
+$ ceph osd crush rule create-replicated cephfs-metadata default host nvme
+rule cephfs-metadata already exists
+Exit code: 0
+```
+
+When a CRUSH rule with that name already exists (even with different content — e.g., no `nvme` class), **Ceph returns exit code 0** and the message "already exists". It does NOT update the existing rule. Rook sees no error, so Step 1 "succeeds" silently, and the existing rule (without `nvme`) is left unchanged.
+
+**Step 3: `updatePoolCrushRule` (line 512) — The Safety Gate**
+
+```go
+func updatePoolCrushRule(...) error {
+    if pool.EnableCrushUpdates == nil || !*pool.EnableCrushUpdates {
+        logger.Debugf("Skipping crush rule update for pool %q: EnableCrushUpdates is disabled")
+        return nil   // <-- exits immediately, no update
+    }
+    // ... would create rule "cephfs-metadata_host_nvme" and apply it ...
+}
+```
+
+`EnableCrushUpdates` is a `*bool` field in the pool spec (`pkg/apis/ceph.rook.io/v1/types.go` line 956). It defaults to `nil`. **When nil or false, all CRUSH rule updates for existing pools are skipped.** This is an intentional safety gate — Rook avoids silently triggering PG remapping (data movement) on existing pools without explicit opt-in.
+
+#### The Operator Confirms: No Error, Silent No-Op
+
+Operator log during a recent reconciliation:
+```
+I | cephclient: setting pool property "pg_autoscale_mode" to "off" on pool "cephfs-metadata"
+I | cephclient: application "cephfs" is already set on pool "cephfs-metadata"
+I | cephclient: reconciling replicated pool cephfs-metadata succeeded
+```
+
+No CRUSH-rule-related lines. No error. The pool reconciles successfully but the deviceClass is silently never applied.
+
+#### Why Both `cephfs-metadata` and `cephfs-cephfs-home` Are Affected
+
+Both pools were created before `deviceClass: nvme` was added to the spec (or before `enableCrushUpdates: true` was set). The CRUSH rule for `cephfs-cephfs-home` (rule 18) also uses `default` despite `deviceClass: nvme`. Same mechanism.
+
+#### The Fix
+
+Add `enableCrushUpdates: true` to the metadataPool spec in `values/rook-ceph-cluster-v1.19.1.yaml`:
+
+```yaml
+metadataPool:
+  failureDomain: host
+  deviceClass: nvme
+  enableCrushUpdates: true    # ADD THIS
+  replicated:
+    size: 2
+  parameters:
+    pg_autoscale_mode: "off"
+```
+
+On next reconciliation, `updatePoolCrushRule` will:
+1. Detect: current rule = `cephfs-metadata` (no device class), desired = nvme
+2. Create new rule: `ceph osd crush rule create-replicated cephfs-metadata_host_nvme default host nvme`
+3. Apply: `ceph osd pool set cephfs-metadata crush_rule cephfs-metadata_host_nvme`
+4. 19 HDD-primary PGs will remap to NVMe OSDs — backfill of ~6.6 GiB (metadata pool)
+
+The same fix applies to `cephfs-home` data pool (currently 0 bytes used, so backfill is trivial).
+
+> **Important:** After applying `enableCrushUpdates: true`, Rook will update the CRUSH rule on EVERY reconciliation if the detected rule doesn't match. This is safe because `updatePoolCrushRule` checks the current rule before acting — it only updates if the rule actually differs from the desired state.
+
+---
+
+Back to the original Q2 question about data pool vs metadata pool:
 
 The user reported that the home directory CephFS uses NVMe via a subvolume `data_pool` setting. This is confirmed:
 
