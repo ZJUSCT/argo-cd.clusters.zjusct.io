@@ -20,6 +20,7 @@ resources:
   - resources/rook-ceph-mgr-monitor.yaml
   - resources/cephfs-mds-dashboard.yaml
   - resources/cephfs-mds-alerts.yaml
+  - resources/radosgw-backendtrafficpolicy.yaml
   # TODO: transform ceph images when upgrading
   # transformers:
   #   - ../../image-prefix.yaml
