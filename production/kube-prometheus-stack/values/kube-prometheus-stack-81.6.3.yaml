@@ -1319,19 +1319,19 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-        - name: default
+        - name: ceph
           orgId: 1
           folder: Ceph
           type: file
           disableDeletion: false
-          editable: false
+          editable: true
           options:
-            path: /var/lib/grafana/dashboards/default
+            path: /var/lib/grafana/dashboards/ceph
 
   ## Additional dashboards to download from grafana.com at startup
   ## revision: must be specified explicitly; omitting it silently falls back to revision 1
   dashboards:
-    default:
+    ceph:
       ceph-cluster:
         gnetId: 2842
         revision: 18
