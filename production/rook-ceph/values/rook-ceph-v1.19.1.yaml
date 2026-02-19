@@ -675,7 +675,7 @@ obcProvisionerNamePrefix:
 # Other fields should be considered risky. To allow all additional configs, use this value:
 #   "maxObjects,maxSize,bucketMaxObjects,bucketMaxSize,bucketPolicy,bucketLifecycle,bucketOwner"
 # @default -- "maxObjects,maxSize"
-obcAllowAdditionalConfigFields: "maxObjects,maxSize"
+obcAllowAdditionalConfigFields: "maxObjects,maxSize,bucketPolicy"
 
 monitoring:
   # -- Enable monitoring. Requires Prometheus to be pre-installed.

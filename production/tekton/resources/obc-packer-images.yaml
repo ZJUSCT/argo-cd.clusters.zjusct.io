@@ -11,3 +11,23 @@ metadata:
 spec:
   bucketName: packer-images
   storageClassName: ceph-bucket
+  additionalConfig:
+    bucketPolicy: |
+      {
+          "Version": "2012-10-17",
+          "Statement": [
+              {
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": [
+                      "s3:GetObject",
+                      "s3:ListBucket",
+                      "s3:GetBucketLocation"
+                  ],
+                  "Resource": [
+                      "arn:aws:s3:::packer-images",
+                      "arn:aws:s3:::packer-images/*"
+                  ]
+              }
+          ]
+      }
