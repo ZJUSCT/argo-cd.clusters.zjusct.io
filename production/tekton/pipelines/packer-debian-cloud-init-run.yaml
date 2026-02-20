@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: packer-debian-cloud-init-
+  namespace: tekton
+spec:
+  pipelineRef:
+    name: packer
+  params:
+    - name: git-url
+      value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+    - name: git-revision
+      value: "master"
+    - name: build-script
+      value: "packer/debian/packer-cloud-init.sh"
+    - name: build-image
+      value: "harbor.clusters.zjusct.io/library/packer:latest"
+    - name: build-output
+      value: "packer/debian/output-cloud-init/cloud-init.qcow2"
+    - name: upload-image
+      value: "harbor.clusters.zjusct.io/docker.io/minio/mc:latest"
+    - name: upload-s3-prefix
+      value: "debian/"
+  taskRunTemplate:
+    podTemplate:
+      securityContext:
+        fsGroup: 65532
+  workspaces:
+    - name: shared-data
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
