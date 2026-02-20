@@ -146,9 +146,9 @@ tap:
           canStopTrafficCapturing: true
           showAdminConsoleLink: true
   ingress:
-    enabled: false
-    className: ""
-    host: ks.svc.cluster.local
+    enabled: true
+    className: "nginx"
+    host: kubeshark.clusters.zjusct.io
     path: /
     tls: []
     annotations: {}
