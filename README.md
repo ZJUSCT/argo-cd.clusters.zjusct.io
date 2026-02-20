@@ -149,7 +149,7 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
 本节记录 `production/` 目录下部署的服务及其配置要点。
 
 | 项目主页 | 社区 |
-|---|---|
+| --- | --- |
 | [refector](https://github.com/emberstack/kubernetes-reflector) | 未知 |
 | [kubelet-csr-approver](https://github.com/postfinance/kubelet-csr-approver) | 公司：PostFinance |
 | [FreeIPA](https://www.freeipa.org/) | 公司：RedHat |
@@ -171,9 +171,20 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
 | [Metallb](https://metallb.universe.tf/) | Linux Foundation - CNCF |
 | [ExternalDNS](https://github.com/kubernetes-sigs/external-dns/) | Kubernetes SIG Network |
 
-### 服务部署要求
+### 服务部署
 
-- 域名：`*.clusters.zjusct.io`、`*.s.zjusct.io`。如果应用支持多 Host 则前述域名均应当配置，否则仅配置第一个。
+- 获取 Helm Chart 及其版本，将 `values.yaml` 复制到 `values/<name>-<version>.yaml`，并根据需要修改覆盖值。
+
+    ```bash
+    helm search repo ...
+    helm show values ...
+    ```
+
+- 放置 `.gitignore`，排除 Kustomize 自动拉取的 Helm Chart。
+- 为服务配置外部访问：
+
+    - 使用 Chart 内置的 Gateway API 或 Ingress。如果 Chart 不支持，则自行创建 HTTPRoute 资源。
+    - 域名：`*.clusters.zjusct.io`、`*.s.zjusct.io`。如果应用支持多 Host 则前述域名均应当配置，否则仅配置第一个。
 
 ### production/default
 
@@ -228,8 +239,6 @@ images:
 - 80：HTTP
 - 443：HTTPS，已配置 TLS 泛域名证书
 - 444：TLS Passthrough，适用于需要直接暴露 TLS 服务的应用
-
-
 
 ### production/dragonfly
 
