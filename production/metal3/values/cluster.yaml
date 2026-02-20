@@ -71,23 +71,11 @@ nodes:
     mac: "80:61:5f:10:88:99"
     bmc:
       address: redfish://172.25.3.70
-    image:
-      enabled: false
-    rootDeviceHints:
-      enabled: false
-    userData:
-      enabled: false
 
   - name: m701
     mac: "80:61:5f:10:8c:c7"
     bmc:
       address: redfish://172.25.3.71
-    image:
-      enabled: false
-    rootDeviceHints:
-      enabled: false
-    userData:
-      enabled: false
 
   # Node with custom image override
   # - name: a700
