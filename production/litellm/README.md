@@ -10,7 +10,7 @@ LiteLLM acts as an LLM proxy service that centrally manages API access to multip
 
 ## Key Points for Model Configuration
 
-### 1. Adding OpenAI-Compatible Providers
+### 1. Adding OpenAI-Compatible Providers (Generic)
 
 For providers that are not built into LiteLLM (such as SiliconFlow, Bailian, etc.), you **must** add the `openai/` prefix to the `litellm_params.model` field:
 
@@ -31,7 +31,33 @@ model_list:
 
 **Rationale**: LiteLLM determines the provider by parsing the `model` field via the `get_llm_provider()` function. For model names that are not in the built-in model list, a `<provider>/` prefix is required. `openai` is a built-in provider that triggers the OpenAI-compatible routing logic; at runtime, the `api_base` parameter redirects requests to the correct endpoint.
 
-### 2. Using Known Model Names
+### 2. Using Built-in Volcengine (火山引擎) Provider
+
+Volcengine is a built-in provider in LiteLLM with special handling for Volcengine-specific features like the `thinking` parameter.
+
+#### Configuration
+
+```yaml
+model_list:
+  - model_name: volcengine/doubao-seed-2.0-code
+    litellm_params:
+      model: volcengine/doubao-seed-2.0-code  # Use volcengine/ prefix
+      api_key: your-volcengine-api-key
+      api_base: https://ark.cn-beijing.volces.com/api/coding/v3  # Required for custom endpoints
+      thinking: {"type": "disabled"}  # Volcengine-specific parameter
+      tools:
+        web_search: 1
+```
+
+#### Key Differences from Generic OpenAI-Compatible Provider
+
+| Feature | `volcengine/` Provider | Generic `openai/` Provider |
+|---------|-------------------------|-----------------------------|
+| Default Base URL | `https://ark.cn-beijing.volces.com/api/v3` | `https://api.openai.com` |
+| `thinking` Parameter | Supported natively | Not supported (use `extra_body`) |
+| Environment Variables | `ARK_API_KEY`, `VOLCENGINE_API_KEY` | `OPENAI_API_KEY` |
+
+### 3. Using Known Model Names (Anthropic-Compatible)
 
 If the model name exists in LiteLLM’s model registry (for example, `claude-sonnet-4-5`), you can omit the prefix, but you must override the default endpoint using `api_base`:
 
@@ -44,40 +70,15 @@ model_list:
       api_key: sk-...
 ```
 
-**Rationale**: `claude-sonnet-4-5` is registered in `model_prices_and_context_window_backup.json` with `litellm_provider: "anthropic"`, so it is recognized as an Anthropic model. At runtime, `api_base` redirects requests to a compatible third-party endpoint.
+#### How LiteLLM Detects Anthropic-Compatible Providers
 
-### 3. Avoid `model_info` Being `null`
+LiteLLM uses multiple methods to detect Anthropic models:
 
-**Do not** define an empty `model_info:` key in the configuration:
+1. **Explicit `custom_llm_provider: "anthropic"`**
+2. **Model is in `litellm.anthropic_models` list** (contains all known Claude models)
+3. **Fallback**: Model name contains "claude" (case-insensitive)
 
-```yaml
-# ❌ Incorrect – will cause: TypeError: argument of type 'NoneType' is not iterable
-model_list:
-  - model_name: example
-    litellm_params:
-      model: gpt-4
-    model_info:    # empty value is parsed as null
-```
-
-```yaml
-# ✅ Correct – omit the model_info key entirely
-model_list:
-  - model_name: example
-    litellm_params:
-      model: gpt-4
-```
-
-```yaml
-# ✅ Correct – or provide a valid model_info object
-model_list:
-  - model_name: example
-    litellm_params:
-      model: gpt-4
-    model_info:
-      id: example-id
-```
-
-**Rationale**: In `set_model_list()`, the router checks `if "id" not in _model_info`. When `_model_info` is `None`, this results in a `TypeError`.
+**Note**: You don't *have to* use a "claude-" prefix. You can explicitly set `custom_llm_provider: "anthropic"` in your `litellm_params` even if the model name doesn't start with "claude-".
 
 ## Auto Router Configuration
 
@@ -191,17 +192,14 @@ kubectl logs -n litellm <pod-name> --previous
 Common errors:
 
 1. **`TypeError: argument of type 'NoneType' is not iterable`**
-
    * Cause: `model_info:` is empty
    * Fix: remove the empty `model_info:` key
 
 2. **`BadRequestError: LLM Provider NOT provided`**
-
    * Cause: model name is unrecognized and no provider prefix is used
    * Fix: add the `openai/` prefix to `litellm_params.model`
 
 3. **`Unsupported provider - <provider>`**
-
    * Cause: the provider is not in LiteLLM’s `provider_list` or `providers.json`
    * Fix: use the `openai/` prefix as a generic OpenAI-compatible provider
 
@@ -221,8 +219,9 @@ kubectl kustomize --enable-helm --load-restrictor=LoadRestrictionsNone productio
 
 ## References
 
-* LiteLLM source code: `litellm/`
-* Adding OpenAI-compatible providers: `litellm/docs/my-website/docs/contributing/adding_openai_compatible_providers.md`
-* Proxy configuration: `litellm/docs/my-website/docs/proxy/configs.md`
-* Auto routing: `litellm/docs/my-website/docs/proxy/auto_routing.md`
-* Provider routing logic: `litellm/litellm/litellm_core_utils/get_llm_provider_logic.py`
+* LiteLLM source code: `tmp/litellm/`
+* Adding OpenAI-compatible providers: `tmp/litellm/docs/my-website/docs/contributing/adding_openai_compatible_providers.md`
+* Proxy configuration: `tmp/litellm/docs/my-website/docs/proxy/configs.md`
+* Auto routing: `tmp/litellm/docs/my-website/docs/proxy/auto_routing.md`
+* Provider routing logic: `tmp/litellm/litellm/litellm_core_utils/get_llm_provider_logic.py`
+* Volcengine provider implementation: `tmp/litellm/litellm/llms/volcengine/`
