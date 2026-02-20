@@ -68,10 +68,10 @@ apt:
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436 # https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key
       keyserver: hkps://keyserver.ubuntu.com/
       source: deb [signed-by=$KEY_FILE] https://mirrors.tuna.tsinghua.edu.cn/kubernetes/core:/stable:/v1.35/deb/ /
-    # nvidia:
-    #   keyid: 02182E60104FCDC26EAE1B8597A5D4CB8793F200 # https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/8793F200.pub
-    #   keyserver: hkps://keyserver.ubuntu.com/
-    #   source: deb [signed-by=$KEY_FILE] https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/ /
+    nvidia:
+      keyid: 02182E60104FCDC26EAE1B8597A5D4CB8793F200 # https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/8793F200.pub
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/ /
     nvidia-container:
       keyid: C95B321B61E88C1809C4F759DDCAE044F796ECB0 # https://nvidia.github.io/libnvidia-container/gpgkey
       keyserver: hkps://keyserver.ubuntu.com/
@@ -322,12 +322,12 @@ packages:
   - kubelet
   - kubeadm
   # nvidia https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html
-  # - nvidia-open
+  - nvidia-open
   # nvidia-container
-  # - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
+  - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
   # DO NOT INSTALL SYSTEM LEVEL CUDA!
   # doca https://developer.nvidia.com/doca-downloads
-  # - doca-all
+  - doca-all
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 # package_update: true
 # package_upgrade: true
