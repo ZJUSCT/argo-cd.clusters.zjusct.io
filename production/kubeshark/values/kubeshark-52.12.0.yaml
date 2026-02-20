@@ -1,0 +1,282 @@
+tap:
+  docker:
+    registry: docker.io/kubeshark
+    tag: ""
+    tagLocked: true
+    imagePullPolicy: Always
+    imagePullSecrets: []
+    overrideImage:
+      worker: ""
+      hub: ""
+      front: ""
+    overrideTag:
+      worker: ""
+      hub: ""
+      front: ""
+  proxy:
+    worker:
+      srvPort: 48999
+    hub:
+      srvPort: 8898
+    front:
+      port: 8899
+    host: 127.0.0.1
+  regex: .*
+  namespaces: []
+  excludedNamespaces: []
+  bpfOverride: ""
+  capture:
+    stopped: false
+    stopAfter: 5m
+    raw:
+      enabled: true
+      storageSize: 1Gi
+    dbMaxSize: 500Mi
+  delayedDissection:
+    image: kubeshark/worker:master
+    cpu: "1"
+    memory: 4Gi
+  snapshots:
+    storageClass: ""
+    storageSize: 20Gi
+  release:
+    repo: https://helm.kubeshark.com
+    name: kubeshark
+    namespace: default
+  persistentStorage: false
+  persistentStorageStatic: false
+  persistentStoragePvcVolumeMode: FileSystem
+  efsFileSytemIdAndPath: ""
+  secrets: []
+  storageLimit: 10Gi
+  storageClass: standard
+  dryRun: false
+  dns:
+    nameservers: []
+    searches: []
+    options: []
+  resources:
+    hub:
+      limits:
+        cpu: "0"
+        memory: 5Gi
+      requests:
+        cpu: 50m
+        memory: 50Mi
+    sniffer:
+      limits:
+        cpu: "0"
+        memory: 5Gi
+      requests:
+        cpu: 50m
+        memory: 50Mi
+    tracer:
+      limits:
+        cpu: "0"
+        memory: 5Gi
+      requests:
+        cpu: 50m
+        memory: 50Mi
+  probes:
+    hub:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+    sniffer:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+  serviceMesh: true
+  tls: true
+  disableTlsLog: true
+  packetCapture: best
+  labels: {}
+  annotations: {}
+  nodeSelectorTerms:
+    hub:
+    - matchExpressions:
+      - key: kubernetes.io/os
+        operator: In
+        values:
+        - linux
+    workers:
+    - matchExpressions:
+      - key: kubernetes.io/os
+        operator: In
+        values:
+        - linux
+    front:
+    - matchExpressions:
+      - key: kubernetes.io/os
+        operator: In
+        values:
+        - linux
+    dex:
+    - matchExpressions:
+      - key: kubernetes.io/os
+        operator: In
+        values:
+        - linux
+  tolerations:
+    hub: []
+    workers:
+    - operator: Exists
+      effect: NoExecute
+    front: []
+  auth:
+    enabled: false
+    type: saml
+    saml:
+      idpMetadataUrl: ""
+      x509crt: ""
+      x509key: ""
+      roleAttribute: role
+      roles:
+        admin:
+          filter: ""
+          canDownloadPCAP: true
+          canUseScripting: true
+          scriptingPermissions:
+            canSave: true
+            canActivate: true
+            canDelete: true
+          canUpdateTargetedPods: true
+          canStopTrafficCapturing: true
+          showAdminConsoleLink: true
+  ingress:
+    enabled: false
+    className: ""
+    host: ks.svc.cluster.local
+    path: /
+    tls: []
+    annotations: {}
+  priorityClass: ""
+  routing:
+    front:
+      basePath: ""
+  ipv6: true
+  debug: false
+  dashboard:
+    streamingType: connect-rpc
+    completeStreamingEnabled: true
+  telemetry:
+    enabled: true
+  resourceGuard:
+    enabled: false
+  watchdog:
+    enabled: false
+  gitops:
+    enabled: false
+  sentry:
+    enabled: false
+    environment: production
+  defaultFilter: ""
+  liveConfigMapChangesDisabled: false
+  globalFilter: ""
+  enabledDissectors:
+  - amqp
+  - dns
+  - http
+  - icmp
+  - kafka
+  - redis
+  - ws
+  - ldap
+  - radius
+  - diameter
+  - udp-flow
+  - tcp-flow
+  portMapping:
+    http:
+    - 80
+    - 443
+    - 8080
+    amqp:
+    - 5671
+    - 5672
+    kafka:
+    - 9092
+    redis:
+    - 6379
+    ldap:
+    - 389
+    diameter:
+    - 3868
+  customMacros:
+    https: tls and (http or http2)
+  metrics:
+    port: 49100
+  pprof:
+    enabled: false
+    port: 8000
+    view: flamegraph
+  misc:
+    jsonTTL: 5m
+    pcapTTL: "0"
+    pcapErrorTTL: "0"
+    trafficSampleRate: 100
+    tcpStreamChannelTimeoutMs: 10000
+    tcpStreamChannelTimeoutShow: false
+    resolutionStrategy: auto
+    duplicateTimeframe: 200ms
+    detectDuplicates: false
+    staleTimeoutSeconds: 30
+  securityContext:
+    privileged: true
+    appArmorProfile:
+      type: ""
+      localhostProfile: ""
+    seLinuxOptions:
+      level: ""
+      role: ""
+      type: ""
+      user: ""
+    capabilities:
+      networkCapture:
+      - NET_RAW
+      - NET_ADMIN
+      serviceMeshCapture:
+      - SYS_ADMIN
+      - SYS_PTRACE
+      - DAC_OVERRIDE
+      ebpfCapture:
+      - SYS_ADMIN
+      - SYS_PTRACE
+      - SYS_RESOURCE
+      - IPC_LOCK
+  mountBpf: true
+  hostNetwork: true
+logs:
+  file: ""
+  grep: ""
+pcapdump:
+  enabled: false
+  timeInterval: 1m
+  maxTime: 1h
+  maxSize: 500MB
+  time: time
+  debug: false
+  dest: ""
+kube:
+  configPath: ""
+  context: ""
+dumpLogs: false
+headless: false
+license: ""
+cloudLicenseEnabled: true
+aiAssistantEnabled: true
+demoModeEnabled: false
+supportChatEnabled: false
+betaEnabled: false
+internetConnectivity: true
+scripting:
+  env: {}
+  source: ""
+  sources: []
+  watchScripts: true
+  active: []
+  console: true
+timezone: ""
+logLevel: warning
