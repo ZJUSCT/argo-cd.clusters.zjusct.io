@@ -390,9 +390,9 @@ proxy:
   httpsProxy:
   noProxy: 127.0.0.1,localhost,.local,.internal
   components:
-  - core
-  - jobservice
-  - trivy
+    - core
+    - jobservice
+    - trivy
 
 # Run the migration job via helm hook
 enableMigrateHelmHook: false
@@ -432,12 +432,14 @@ metrics:
     # Scrape interval. If not set, the Prometheus default scrape interval is used.
     interval: ""
     # Metric relabel configs to apply to samples before ingestion.
-    metricRelabelings: []
+    metricRelabelings:
+      []
       # - action: keep
     #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
     #   sourceLabels: [__name__]
     # Relabel configs to apply to samples before ingestion.
-    relabelings: []
+    relabelings:
+      []
       # - sourceLabels: [__meta_kubernetes_pod_node_name]
       #   separator: ;
       #   regex: ^(.*)$
@@ -496,7 +498,7 @@ containerSecurityContext:
   runAsNonRoot: true
   capabilities:
     drop:
-    - ALL
+      - ALL
 
 # If service exposed via "ingress", the Nginx will not be used
 nginx:
@@ -699,7 +701,7 @@ jobservice:
   maxJobWorkers: 10
   # The logger for jobs: "file", "database" or "stdout"
   jobLoggers:
-  - file
+    - file
     # - database
     # - stdout
   # The jobLogger sweeper duration (ignored if `jobLogger` is `stdout`)
@@ -893,12 +895,12 @@ trivy:
   #
   # OCI repository(ies) to retrieve the trivy vulnerability database in order of priority
   dbRepository:
-  - "mirror.gcr.io/aquasec/trivy-db"
-  - "ghcr.io/aquasecurity/trivy-db"
+    - "mirror.gcr.io/aquasec/trivy-db"
+    - "ghcr.io/aquasecurity/trivy-db"
   # OCI repository(ies) to retrieve the Java trivy vulnerability database in order of priority
   javaDBRepository:
-  - "mirror.gcr.io/aquasec/trivy-java-db"
-  - "ghcr.io/aquasecurity/trivy-java-db"
+    - "mirror.gcr.io/aquasec/trivy-java-db"
+    - "ghcr.io/aquasecurity/trivy-java-db"
   # The offlineScan option prevents Trivy from sending API requests to identify dependencies.
   #
   # Scanning JAR files and pom.xml may require Internet access for better detection, but this option tries to avoid it.
