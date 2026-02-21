@@ -168,16 +168,18 @@ proxy_config:
     ####################################################################
     - model_name: plan/minimax/MiniMax-M2.5-highspeed
       litellm_params:
-        model: minimax/MiniMax-M2.5-highspeed
-        api_base: https://api.minimaxi.com/anthropic/v1
+        model: MiniMax-M2.5-highspeed
+        api_base: https://api.minimaxi.com/anthropic
         api_key: os.environ/PLAN_MINIMAX_API_KEY
+        custom_llm_provider: anthropic
         tools:
           web_search: 1
     - model_name: plan/minimax/MiniMax-M2.5
       litellm_params:
-        model: minimax/MiniMax-M2.5
-        api_base: https://api.minimaxi.com/anthropic/v1
+        model: MiniMax-M2.5
+        api_base: https://api.minimaxi.com/anthropic
         api_key: os.environ/PLAN_MINIMAX_API_KEY
+        custom_llm_provider: anthropic
         tools:
           web_search: 1
 
