@@ -261,12 +261,12 @@ proxy_config:
         model: claude-sonnet-4-6
         api_base: https://jp.duckcoding.com
         api_key: os.environ/API_DUCKCODING_API_KEY
-    # - model_name: api/duckcoding/gpt-5.3-codex
-    #   litellm_params:
-    #     model: gpt-5.3-codex
-    #     api_base: https://jp.duckcoding.com/v1
-    #     api_key: os.environ/API_DUCKCODING_API_KEY
-    #     custom_llm_provider: openai
+    - model_name: api/duckcoding/gpt-5.3-codex
+      litellm_params:
+        model: gpt-5.3-codex
+        api_base: https://jp.duckcoding.com/v1
+        api_key: os.environ/API_DUCKCODING_API_KEY
+        custom_llm_provider: openai
     - model_name: api/duckcoding/gemini-3.1-pro
       litellm_params:
         model: gemini-3.1-pro-preview
