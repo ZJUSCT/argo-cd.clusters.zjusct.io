@@ -249,18 +249,36 @@ proxy_config:
     #     model: openrouter/auto
     #     api_base: https://openrouter.ai/api/v1
     #     api_key:
-
+    # 硅基流动 SiliconFlow
     - model_name: api/siliconflow/GLM-5
       litellm_params:
         model: openai/Pro/zai-org/GLM-5
         api_base: https://api.siliconflow.cn
         api_key: os.environ/API_SILICONFLOW_API_KEY
-
+    # Duckcoding
     - model_name: api/duckcoding/claude-sonnet-4-6
       litellm_params:
         model: claude-sonnet-4-6
         api_base: https://jp.duckcoding.com
         api_key: os.environ/API_DUCKCODING_API_KEY
+    # - model_name: api/duckcoding/gpt-5.3-codex
+    #   litellm_params:
+    #     model: gpt-5.3-codex
+    #     api_base: https://jp.duckcoding.com/v1
+    #     api_key: os.environ/API_DUCKCODING_API_KEY
+    #     custom_llm_provider: openai
+    - model_name: api/duckcoding/gemini-3.1-pro
+      litellm_params:
+        model: gemini-3.1-pro-preview
+        api_base: https://jp.duckcoding.com/v1
+        api_key: os.environ/API_DUCKCODING_API_KEY
+        custom_llm_provider: openai
+    # - model_name: api/duckcoding/grok-4.1
+    #   litellm_params:
+    #     model: grok-4.1
+    #     api_base: https://jp.duckcoding.com/v1
+    #     api_key: os.environ/API_DUCKCODING_API_KEY
+    #     custom_llm_provider: openai
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
 
