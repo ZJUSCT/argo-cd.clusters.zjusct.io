@@ -8,7 +8,7 @@ replicaCount: 1
 image:
   # Use "ghcr.io/berriai/litellm-database" for optimized image with database
   repository: ghcr.io/berriai/litellm-database
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   # tag: "main-latest"
   tag: ""
@@ -63,8 +63,7 @@ securityContext:
 #  pod as environment variables.  These secrets can then be referenced in the
 #  configuration file (or "litellm" ConfigMap) with `os.environ/<Env Var Name>`
 environmentSecrets:
-  []
-  # - litellm-env-secret
+  - litellm-env-secret
 
 # A list of Kubernetes ConfigMap objects that will be exported to the LiteLLM proxy
 #  pod as environment variables.  The ConfigMap kv-pairs can then be referenced in the
@@ -114,27 +113,152 @@ masterkeySecretKey: "masterkey"
 
 proxyConfigMap:
   # when true, creates a new configmap
-  # create: true
+  create: true
   # if create is false and name is set, use existing ConfigMap
-  create: false
-  name: "litellm-config"
-  key: "config.yaml"
+  # create: false
+  # name: ""
+  # key: "config.yaml"
 
 # The elements within proxy_config are rendered as config.yaml for the proxy
 #  Examples: https://github.com/BerriAI/litellm/tree/main/litellm/proxy/example_config_yaml
 #  Reference: https://docs.litellm.ai/docs/proxy/configs
 proxy_config:
   model_list:
-    # At least one model must exist for the proxy to start.
-    - model_name: gpt-3.5-turbo
+    ####################################################################
+    # 字节跳动 - 火山方舟 - Pro
+    ####################################################################
+    - model_name: plan/volcengine/doubao-seed-2.0-code
       litellm_params:
-        model: gpt-3.5-turbo
-        api_key: eXaMpLeOnLy
-    - model_name: fake-openai-endpoint
+        model: volcengine/doubao-seed-2.0-code
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        tools:
+          web_search: 1
+    - model_name: plan/volcengine/doubao-seed-code
       litellm_params:
-        model: openai/fake
-        api_key: fake-key
-        api_base: https://exampleopenaiendpoint-production.up.railway.app/
+        model: volcengine/doubao-seed-code
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        tools:
+          web_search: 1
+    - model_name: plan/volcengine/glm-4.7
+      litellm_params:
+        model: volcengine/pro/glm-4.7
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        tools:
+          web_search: 1
+    - model_name: plan/volcengine/kimi-k2-thinking
+      litellm_params:
+        model: volcengine/kimi-k2-thinking
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        tools:
+          web_search: 1
+    - model_name: plan/volcengine/kimi-k2.5
+      litellm_params:
+        model: volcengine/kimi-k2.5
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        tools:
+          web_search: 1
+
+    ####################################################################
+    # 稀宇科技 - MiniMax - Max-极速版
+    ####################################################################
+    - model_name: plan/minimax/MiniMax-M2.5-highspeed
+      litellm_params:
+        model: minimax/MiniMax-M2.5-highspeed
+        api_base: https://api.minimaxi.com/anthropic/v1
+        api_key: os.environ/PLAN_MINIMAX_API_KEY
+        tools:
+          web_search: 1
+    - model_name: plan/minimax/MiniMax-M2.5
+      litellm_params:
+        model: minimax/MiniMax-M2.5
+        api_base: https://api.minimaxi.com/anthropic/v1
+        api_key: os.environ/PLAN_MINIMAX_API_KEY
+        tools:
+          web_search: 1
+
+    ####################################################################
+    # 阿里云 - 百炼 - Pro
+    ####################################################################
+    - model_name: plan/bailian/qwen3.5-plus
+      litellm_params:
+        model: qwen3.5-plus
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/qwen3-max-2026-01-23
+      litellm_params:
+        model: qwen3-max-2026-01-23
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/qwen3-coder-next
+      litellm_params:
+        model: qwen3-coder-next
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/qwen3-coder-plus
+      litellm_params:
+        model: qwen3-coder-plus
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/glm-4.7
+      litellm_params:
+        model: glm-4.7
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/kimi-k2.5
+      litellm_params:
+        model: kimi-k2.5
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+
+    ####################################################################
+    # API 计费
+    ####################################################################
+    # - model_name: api/ohmygpt/claude-sonnet-4-5
+    #   litellm_params:
+    #     model: claude-sonnet-4-5
+    #     api_base: https://apic1.ohmycdn.com
+    #     api_key:
+
+    # - model_name: api/openrouter/auto
+    #   litellm_params:
+    #     model: openrouter/auto
+    #     api_base: https://openrouter.ai/api/v1
+    #     api_key:
+
+    - model_name: api/siliconflow/GLM-5
+      litellm_params:
+        model: openai/Pro/zai-org/GLM-5
+        api_base: https://api.siliconflow.cn
+        api_key: os.environ/API_SILICONFLOW_API_KEY
+
+    - model_name: api/duckcoding/claude-sonnet-4-6
+      litellm_params:
+        model: claude-sonnet-4-6
+        api_base: https://jp.duckcoding.com
+        api_key: os.environ/API_DUCKCODING_API_KEY
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
 

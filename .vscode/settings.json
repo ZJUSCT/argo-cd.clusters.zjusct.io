@@ -6,10 +6,7 @@
     "**/templates/**/*.yaml": "go-template", // Helm templates
   },
   "yaml.schemas": {
-    "https://json.schemastore.org/yamllint.json": [
-      "*.yml",
-      "*.yaml"
-    ],
+    "https://www.schemastore.org/any.json": "*.yaml",
     "https://www.schemastore.org/kustomization.json": "**/kustomization.yaml"
-  },
+  }
 }
