@@ -9,8 +9,8 @@ spec:
     - name: envoy-gateway
       namespace: envoy-gateway
   hostnames:
-    - otel.clusters.zjusct.io
-    - otel.s.zjusct.io
+    - otel-http.clusters.zjusct.io
+    - otel-http.s.zjusct.io
   rules:
     - backendRefs:
         - name: otel-collector-collector
