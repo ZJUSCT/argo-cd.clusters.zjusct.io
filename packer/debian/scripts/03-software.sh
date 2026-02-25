@@ -167,7 +167,8 @@ install_pkg_from_github "apptainer/apptainer" "apptainer_*_amd64.deb"
 ########################################################################
 
 npm i -g \
-    opencode-ai @anthropic-ai/claude-code \
+    opencode-ai \
+    @anthropic-ai/claude-code \
     @openai/codex \
     @google/gemini-cli
 
