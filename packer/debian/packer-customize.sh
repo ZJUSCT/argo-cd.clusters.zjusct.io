@@ -10,4 +10,5 @@ packer build \
 if [ -f output-customize/customize.qcow2 ]; then
     echo "Output info:"
     qemu-img info output-customize/customize.qcow2
+    sha256sum output-customize/customize.qcow2
 fi

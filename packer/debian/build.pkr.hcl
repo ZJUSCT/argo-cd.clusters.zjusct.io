@@ -1,8 +1,8 @@
 build {
   name = "cloud-init"
   source "source.qemu.ubuntu" {
-    iso_url      = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/debian/debian-13-generic-amd64.qcow2"
-    #iso_url = "debian-13-generic-amd64.qcow2"
+    iso_url      = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/debian/debian-13-generic-amd64-20250911-2232.qcow2"
+    #iso_url = "debian-13-generic-amd64-20250911-2232.qcow2"
 
     # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
     # note: nocloud datasource requires the meta-data file, or it will fail with "Invalid seed"
@@ -57,8 +57,8 @@ build {
   provisioner "shell" {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive",
-      # "http_proxy=http://172.28.0.4:3128",
-      # "https_proxy=http://172.28.0.4:3128"
+      "http_proxy=http://172.28.0.4:3128",
+      "https_proxy=http://172.28.0.4:3128"
     ]
     scripts = [
       "scripts/01-software.sh",

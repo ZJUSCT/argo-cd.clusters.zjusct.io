@@ -27,6 +27,20 @@ bootcmd:
   - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
   - ['sed', '-i', 's/^Components: main$/Components: main contrib non-free non-free-firmware/', '/etc/apt/sources.list.d/debian.sources']
   - sed -i -e 's/deb.debian.org/mirrors.zju.edu.cn/g' /etc/apt/mirrors/debian.list /etc/apt/mirrors/debian-security.list
+  # TODO: nvidia repo has problem with squid cache proxy
+  - echo 'Acquire::http::Proxy::developer.download.nvidia.com "DIRECT";' > /etc/apt/apt.conf.d/99noproxy
+  # TODO: Hold Kernel Version to 6.12.41 for DOCA
+  - |
+    cat >/etc/apt/preferences.d/99-mask-kernel-meta <<'EOF'
+    Package: linux-image-amd64
+    Pin-Priority: -1
+
+    Package: linux-headers-amd64
+    Pin-Priority: -1
+    EOF
+  - apt-get update
+  - apt-get install -y linux-headers-6.12.41+deb13-amd64 linux-image-6.12.41+deb13-amd64
+  - apt-mark hold linux-image-amd64 linux-headers-amd64 linux-image-6.12.41+deb13-amd64 linux-headers-6.12.41+deb13-amd64
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
 ca_certs:
   trusted:
@@ -53,8 +67,8 @@ ca_certs:
       -----END CERTIFICATE-----
 # https://docs.cloud-init.io/en/latest/reference/modules.html#apt-configure
 apt:
-  # http_proxy: http://172.28.0.4:3128
-  # https_proxy: http://172.28.0.4:3128
+  http_proxy: http://172.28.0.4:3128
+  https_proxy: http://172.28.0.4:3128
   # primary and security do not support enable components, so use sources_list
   primary:
     - arches: [default]
@@ -227,9 +241,6 @@ packages:
   - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
   # doca https://developer.nvidia.com/doca-downloads
   - doca-all # For BuildField Devices
-  # TODO: temporary fix for DOCA
-  - linux-image-6.12.41+deb13-amd64
-  - linux-image-6.12.41+deb13-amd64-dbg
   # TODO: temporary CUDA
   - cuda-13-1
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install

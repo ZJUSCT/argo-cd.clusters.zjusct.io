@@ -5,7 +5,7 @@ set -xeou pipefail
 #   rsync -av --delete rootfs/ user@localhost:/tmp/rootfs/
 
 TARGET_IMAGE="${1:-output/debian.qcow2}"
-SOURCE_IMAGE="debian-13-generic-amd64.qcow2"
+SOURCE_IMAGE="debian-13-generic-amd64-20250911-2232.qcow2"
 SSH_PORT=2222
 
 # validate cloud-init config

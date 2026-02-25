@@ -12,4 +12,5 @@ packer build \
 if [ -f output-cloud-init/cloud-init.qcow2 ]; then
     echo "Output info:"
     qemu-img info output-cloud-init/cloud-init.qcow2
+    sha256sum output-cloud-init/cloud-init.qcow2
 fi

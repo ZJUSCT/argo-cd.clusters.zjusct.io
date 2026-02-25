@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cp output-cloud-init/cloud-init.qcow2 /tmp/cloud-init.qcow2
+cp debian-13-generic-amd64-20250911-2232.qcow2 /tmp/cloud-init.qcow2
 /usr/bin/qemu-system-x86_64 \
     -nographic \
     -drive file=/tmp/cloud-init.qcow2,if=virtio,cache=writeback,discard=ignore,format=qcow2 \
