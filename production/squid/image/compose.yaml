@@ -1,6 +1,6 @@
 services:
   squid:
-    image: harbor.clusters.zjusct.io/docker.io/ubuntu/squid
+    image: harbor.clusters.zjusct.io/library/squid
     init: true
     entrypoint: ["sleep", "infinity"]
     environment:
