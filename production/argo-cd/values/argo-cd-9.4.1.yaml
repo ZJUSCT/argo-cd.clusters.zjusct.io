@@ -2672,10 +2672,10 @@ server:
   # Gateway API GRPCRoute configuration
   # NOTE: Gateway API support is in EXPERIMENTAL status
   # Support depends on your Gateway controller implementation
-  # Refer to https://gateway-api.sigs.k8s.io/implementations/ for controller-specific details
+  # Refer to https://gateway-api.sigs.k8s.io/implementations for controller-specific details
   grpcroute:
     # -- Enable GRPCRoute resource for Argo CD server (Gateway API)
-    enabled: false
+    enabled: true
     # -- Additional GRPCRoute labels
     labels: {}
     # -- Additional GRPCRoute annotations
@@ -2683,26 +2683,27 @@ server:
     # -- Gateway API parentRefs for the GRPCRoute
     ## Must reference an existing Gateway
     # @default -- `[]` (See [values.yaml])
-    parentRefs: []
-      # - name: example-gateway
-      #   namespace: example-gateway-namespace
-      #   sectionName: grpc
+    parentRefs:
+      - name: envoy-gateway
+        namespace: envoy-gateway
     # -- List of hostnames for the GRPCRoute
+    ## Use separate hostname to avoid Gateway API Cross Serving conflict with HTTPRoute
     # @default -- `[]` (See [values.yaml])
-    hostnames: []
-      # - grpc.argocd.example.com
+    hostnames:
+      - grpc-argo-cd.clusters.zjusct.io
+      - grpc-argo-cd.s.zjusct.io
     # -- GRPCRoute rules configuration
+    ## Match all gRPC methods using RegularExpression to satisfy Gateway API validation
     # @default -- `[]` (See [values.yaml])
     rules:
       - matches:
           - method:
-              type: Exact
-        # filters: []
-        #   - type: RequestHeaderModifier
-        #     requestHeaderModifier:
-        #       add:
-        #         - name: X-Custom-Header
-        #           value: custom-value
+              type: RegularExpression
+              service: ".*"
+              method: ".*"
+        backendRefs:
+          - name: argo-cd-argocd-server
+            port: 80
 
   # Gateway API BackendTLSPolicy configuration
   # NOTE: BackendTLSPolicy support is in EXPERIMENTAL status

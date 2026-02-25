@@ -223,6 +223,7 @@ sources:
   - service
   - ingress
   - gateway-httproute
+  - gateway-grpcroute
 
 # -- How DNS records are synchronized between sources and providers; available values are `create-only`, `sync`, & `upsert-only`.
 policy: upsert-only  # @schema enum:[create-only, sync, upsert-only]; type:string; default: "upsert-only"
