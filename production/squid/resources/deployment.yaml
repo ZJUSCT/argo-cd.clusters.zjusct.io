@@ -18,7 +18,7 @@ spec:
     spec:
       initContainers:
         - name: init-squid
-          image: library/squid:latest # will be prefixed with harbor
+          image: docker.io/ubuntu/squid:latest
           command:
             - /bin/sh
             - -c
@@ -44,7 +44,7 @@ spec:
               mountPath: /var/lib/squid
       containers:
         - name: squid
-          image: library/squid:latest # will be prefixed with harbor
+          image: docker.io/ubuntu/squid:latest
           command: ["squid", "-NYCd", "1"]
           ports:
             - containerPort: 3128
