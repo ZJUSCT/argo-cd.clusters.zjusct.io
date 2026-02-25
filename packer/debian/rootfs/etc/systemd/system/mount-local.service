@@ -1,0 +1,11 @@
+[Unit]
+Description=Mount /local
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/mount-local.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

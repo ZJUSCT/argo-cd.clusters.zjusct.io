@@ -51,17 +51,20 @@ build {
     vm_name          = "customize.qcow2"
   }
 
+  provisioner "file" {
+    source = "rootfs/"
+    destination = "/tmp/rootfs"
+  }
+
   provisioner "shell" {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive",
-      "http_proxy=http://172.28.0.4:3128",
-      "https_proxy=http://172.28.0.4:3128"
+      # "http_proxy=http://172.28.0.4:3128",
+      # "https_proxy=http://172.28.0.4:3128"
     ]
     scripts = [
-      "scripts/02-pkgmgr.sh",
-      "scripts/03-software.sh",
-      "scripts/04-configurations.sh",
-      "scripts/05-mount-local.sh",
+      "scripts/01-software.sh",
+      "scripts/02-config.sh",
       "scripts/99-clean.sh"
     ]
   }

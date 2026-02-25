@@ -1,0 +1,8 @@
+#!/bin/bash --norc
+printf "\nWelcome to "; hostname
+# printf "  Kernel: "; uname -v
+printf "  "; uptime -p
+printf "\nSystem information as of "; date --rfc-3339=seconds
+printf "  CPU load: "; cat /proc/loadavg | awk '{ printf "%s %s %s\n", $1, $2, $3; }'
+# RAM
+free -m | awk '/Mem/  { printf "  Memory:  %4sM  (%2d%%)  out of %2.1fG\n", $3, ($3/$2) * 100, $2/1000; }'

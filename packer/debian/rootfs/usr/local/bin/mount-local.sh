@@ -1,7 +1,3 @@
-#!/usr/bin/env bash
-set -xeou pipefail
-
-cat >/usr/local/bin/mount-local.sh <<'EOF'
 #!/bin/bash
 # Mount ext4 disks to /local/nvme-N or /local/sata-N
 set -e
@@ -34,21 +30,3 @@ for disk in /dev/nvme*n1; do
         ((nvme_count++))
     fi
 done
-
-EOF
-chmod +x /usr/local/bin/mount-local.sh
-
-cat >/etc/systemd/system/mount-local.service <<'EOF'
-[Unit]
-Description=Mount /local
-After=local-fs.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/mount-local.sh
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl enable mount-local

@@ -9,8 +9,9 @@ services:
       - .:/workspace
       - /dev/kvm:/dev/kvm
     working_dir: /workspace
-  ubuntu:
-    image: harbor.clusters.zjusct.io/docker.io/library/ubuntu:questing
+    network_mode: host
+  debian:
+    image: harbor.clusters.zjusct.io/docker.io/library/debian:trixie
     init: true
     entrypoint: ["sleep", "infinity"]
     environment:
@@ -19,5 +20,5 @@ services:
       - .:/workspace
     working_dir: /workspace
     post_start:
-      - command: sed -i 's/[a-z]*.ubuntu.com/mirrors.zju.edu.cn/g' /etc/apt/sources.list.d/ubuntu.sources
+      - command: sed -i 's/[a-z]*.debian.org/mirrors.zju.edu.cn/g' /etc/apt/sources.list.d/debian.sources
         user: root

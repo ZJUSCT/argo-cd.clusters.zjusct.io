@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -xeou pipefail
 
-##########
-# github #
-##########
+########################################################################
+# Helper functions
+########################################################################
 
 # Mimics `gh release download` without requiring authentication.
 # Usage: gh_release_download --repo OWNER/REPO --pattern GLOB [--dir DIR]
@@ -79,10 +79,6 @@ gh_release_download() {
     echo "gh_release_download: no asset matching '$pattern' in $repo" >&2
     return 1
 }
-
-########
-# pkgs #
-########
 
 # install_pkg_from_github OWNER/REPO GLOB_PATTERN
 # Example: install_pkg_from_github wagoodman/dive "dive_*_linux_amd64.deb"
@@ -192,3 +188,72 @@ for _bin in radostrace kfstrace osdtrace; do
     install_bin_from_github "taodd/cephtrace" "$_bin"
 done
 unset _bin
+
+########################################################################
+# Python
+# https://docs.astral.sh/uv/getting-started/installation/
+########################################################################
+
+pip config --site \
+    set global.index-url https://mirrors.zju.edu.cn/pypi/web/simple
+
+pip install --break-system-packages \
+    uv poetry
+
+########################################################################
+# conda
+# https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+########################################################################
+
+CONDA_MIRROR="https://mirrors.zju.edu.cn/anaconda/"
+# Detect machine architecture via uname -m and map to installer names
+MACHINE="$(uname -m)"
+case "$MACHINE" in
+x86_64)
+    CONDA_SH="miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    ;;
+aarch64 | arm64)
+    CONDA_SH="miniconda/Miniconda3-latest-Linux-aarch64.sh"
+    ;;
+*)
+    echo "Unsupported architecture: $MACHINE, skipping conda installation"
+    CONDA_SH=""
+    ;;
+esac
+
+if [ -n "$CONDA_SH" ]; then
+    CONDA_PATH="/opt/conda"
+
+    # The conda installation file must end with .sh, otherwise an error will occur, see the source code
+    tmpfile=$(mktemp).sh
+    if ! curl -L -o "$tmpfile" "$CONDA_MIRROR$CONDA_SH"; then
+        echo "Failed to download $MIRROR$CONDA_SH"
+        exit 1
+    fi
+
+    bash "$tmpfile" -b -p "$CONDA_PATH"
+    rm "$tmpfile"
+
+    export PATH="$CONDA_PATH/bin:$PATH"
+
+    # bash, zsh
+    # will add /etc/profile.d/conda.sh
+    conda init --system --all
+    # fish
+    mkdir -p /etc/fish/conf.d
+    ln -s $CONDA_PATH/etc/fish/conf.d/conda.fish /etc/fish/conf.d/z00_conda.fish
+fi
+
+########################################################################
+# lmod
+# https://lmod.readthedocs.io/en/latest/030_installing.html
+########################################################################
+
+# bash, zsh
+# lmod package already placed lmod.sh under profile.d, so no need here
+# ln -s /usr/share/lmod/lmod/init/profile /etc/profile.d/z00_lmod.sh
+
+# fish
+ln -s /usr/share/lmod/lmod/init/profile.fish /etc/fish/conf.d/z00_lmod.fish
+
+

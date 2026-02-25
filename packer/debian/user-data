@@ -53,8 +53,8 @@ ca_certs:
       -----END CERTIFICATE-----
 # https://docs.cloud-init.io/en/latest/reference/modules.html#apt-configure
 apt:
-  http_proxy: http://172.28.0.4:3128
-  https_proxy: http://172.28.0.4:3128
+  # http_proxy: http://172.28.0.4:3128
+  # https_proxy: http://172.28.0.4:3128
   # primary and security do not support enable components, so use sources_list
   primary:
     - arches: [default]
@@ -83,7 +83,8 @@ apt:
     doca:
       keyid: CAE649B3B3929F8470D4D33BA024F6F0E6D6A281 # https://linux.mellanox.com/public/repo/doca/GPG-KEY-Mellanox.pub
       keyserver: hkps://keyserver.ubuntu.com/
-      source: deb [signed-by=$KEY_FILE] https://linux.mellanox.com/public/repo/doca/latest/debian13/x86_64/ ./
+      # TODO: DOCA HTTPS has some issues, so use HTTP temporarily
+      source: deb [signed-by=$KEY_FILE] http://linux.mellanox.com/public/repo/doca/latest/debian13/x86_64/ ./
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 packages:
   - 7zip
@@ -226,6 +227,11 @@ packages:
   - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
   # doca https://developer.nvidia.com/doca-downloads
   - doca-all # For BuildField Devices
+  # TODO: temporary fix for DOCA
+  - linux-image-6.12.41+deb13-amd64
+  - linux-image-6.12.41+deb13-amd64-dbg
+  # TODO: temporary CUDA
+  - cuda-13-1
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 # package_update: true
 # package_upgrade: true
