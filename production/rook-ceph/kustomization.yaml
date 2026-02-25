@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rook-ceph
+helmCharts:
+  - name: rook-ceph
+    version: v1.19.1
+    repo: https://charts.rook.io/release
+    releaseName: rook-ceph
+    namespace: rook-ceph
+    valuesFile: values/rook-ceph-v1.19.1.yaml
+    includeCRDs: true
+  - name: rook-ceph-cluster
+    version: v1.19.1
+    repo: https://charts.rook.io/release
+    releaseName: rook-ceph-cluster
+    namespace: rook-ceph
+    valuesFile: values/rook-ceph-cluster-v1.19.1.yaml
+    includeCRDs: true
+resources:
+  - resources/rook-ceph-mgr-monitor.yaml
+  - resources/cephfs-mds-dashboard.yaml
+  - resources/cephfs-mds-alerts.yaml
+  - resources/radosgw-backendtrafficpolicy.yaml
+  # TODO: transform ceph images when upgrading
+  # transformers:
+  #   - ../../image-prefix.yaml

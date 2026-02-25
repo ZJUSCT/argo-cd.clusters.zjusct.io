@@ -1,0 +1,123 @@
+# values in global config can be overridden by node specific config.
+# if not configured, default will be used.
+default:
+  # Boot mode: UEFI, UEFISecureBoot, or legacy
+  bootMode: UEFI
+
+  # Automated cleaning mode: metadata (default) or disabled
+  # automatedCleaningMode: metadata
+
+  # BMC credentials secret (must be created by user with keys "username" and "password")
+  # Example: kubectl create secret generic bmc-credential \
+  #   --from-literal=username=admin \
+  #   --from-literal=password=secret
+  # bmc:
+  #   credentialsName: bmc-credential
+
+  # User data secret (optional, for cloud-init configuration)
+  # userData:
+  #   name: userdata
+  #   namespace: {{ .Release.Namespace }}
+
+  # Network data secret (optional, for network configuration)
+  # networkData:
+  #   name: networkdata
+  #   namespace: {{ .Release.Namespace }}
+
+  # Preprovisioning network data secret name (optional)
+  # preprovisioningNetworkDataName: preprovisioning-networkdata
+
+  # OS image to deploy
+  image:
+    url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+    checksumType: sha256
+    checksum: https://cloud-images.ubuntu.com/noble/current/SHA256SUMS
+    format: qcow2
+
+  # Hints for selecting the root device
+  rootDeviceHints:
+    rotational: false
+    vendor: "ATA"
+    # Other available hints:
+    # deviceName: "/dev/sda"
+    # hctl: "0:0:0:0"
+    # model: "SSD"
+    # serialNumber: "..."
+    # minSizeGigabytes: 100
+    # wwn: "..."
+    # wwnWithExtension: "..."
+    # wwnVendorExtension: "..."
+
+nodes:
+  # Example: basic node (requires bmc.credentialsName)
+  - name: example
+    mac: "00:11:22:33:44:55"
+    bmc:
+      address: redfish://1.2.3.4
+      credentialsName: bmc-credential
+    annotations:
+      baremetalhost.metal3.io/detached: ""
+
+  # Example: node with description and architecture
+  # - name: node-with-metadata
+  #   description: "Production web server node in rack A"
+  #   architecture: "x86_64"
+  #   mac: "00:11:22:33:44:66"
+  #   bmc:
+  #     address: redfish://1.2.3.5
+  #     credentialsName: bmc-credential
+
+  # Example: node without userData (image baked-in, no cloud-init)
+  # - name: node-with-baked-image
+  #   mac: "00:11:22:33:44:66"
+  #   bmc:
+  #     address: redfish://1.2.3.5
+  #     credentialsName: bmc-credential
+  #   userData:
+  #     enabled: false
+
+  # Example: node with custom image and network configuration
+  # - name: node-custom-image
+  #   mac: "00:11:22:33:44:77"
+  #   bmc:
+  #     address: redfish://1.2.3.6
+  #     credentialsName: bmc-credential
+  #   image:
+  #     url: https://example.com/custom-image.img
+  #     checksum: https://example.com/custom-SHA256SUMS
+  #   networkData:
+  #     name: custom-networkdata
+  #     namespace: default
+
+  # Example: node with specific disk selection by serial number
+  # - name: node-specific-disk
+  #   mac: "00:11:22:33:44:88"
+  #   bmc:
+  #     address: redfish://1.2.3.7
+  #     credentialsName: bmc-credential
+  #   rootDeviceHints:
+  #     serialNumber: "ABC123XYZ"
+  #     minSizeGigabytes: 500
+
+  # Example: externally provisioned node (power management only)
+  # - name: node-external
+  #   mac: "00:11:22:33:44:99"
+  #   bmc:
+  #     address: redfish://1.2.3.8
+  #     credentialsName: bmc-credential
+  #   externallyProvisioned: true
+  #   online: true
+
+  # Example: inspection-only node (no deployment)
+  # - name: node-inspection-only
+  #   mac: "00:11:22:33:44:88"
+  #   bmc:
+  #     address: redfish://1.2.3.7
+  #     credentialsName: bmc-credential
+  #   image:
+  #     enabled: false
+  #   rootDeviceHints:
+  #     enabled: false
+  #   userData:
+  #     enabled: false
+  #   online: false

@@ -1,0 +1,259 @@
+# https://opentelemetry.io/docs/collector/configuration/
+# https://github.com/open-telemetry/opentelemetry-collector/blob/main/examples/local/otel-config.yaml
+#
+# Version: otelcol-contrib v0.146.1
+
+extensions:
+  pprof:
+    endpoint: localhost:1778
+  zpages:
+    endpoint: localhost:55680
+
+receivers:
+  ##############
+  # Containers #
+  ##############
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/dockerstatsreceiver
+  # requires unix:///var/run/docker.sock
+  docker_stats:
+    metrics:
+      container.uptime:
+        enabled: true
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md
+  filelog/docker:
+    include:
+      - /var/lib/docker/containers/*/*-json.log
+      - /opt/docker/containers/*/*-json.log # openWRT
+    include_file_path: true
+    include_file_name_resolved: true
+    include_file_path_resolved: true
+    operators:
+      - type: container
+        format: docker
+        add_metadata_from_filepath: false
+      # self defined docker log format
+      - type: key_value_parser
+        parse_from: attributes.attrs.tag
+        parse_to: resource
+        if: 'type(attributes.attrs) != "nil"'
+      - type: remove
+        field: attributes.attrs
+        if: 'type(attributes.attrs) != "nil"'
+      # use iostrem to determine severity
+      - type: severity_parser
+        parse_from: attributes["log.iostream"]
+        overwrite_text: true
+        mapping:
+          WARN: stderr
+          INFO: stdout
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/podmanreceiver
+  podman_stats:
+    # 默认仅收集 root 的 /run/podman/podman.sock
+    # 每个用户有自己的 /run/user/<uid>/podman/podman.sock，无法逐一收集
+
+  ########
+  # Apps #
+  ########
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/otlpreceiver
+  otlp:
+    protocols:
+      # by default bind to localhost, grpc 4317, http 4318
+      grpc:
+      http:
+
+  ##########
+  # System #
+  ##########
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver
+  journald:
+    # https://www.freedesktop.org/software/systemd/man/249/journald.conf.html
+    directory: /var/log/journal
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md
+    # 目前，该 receiver 仅设置 timestamp，其余信息全部堆在 body。
+    # 正在等待标准修订，下面的 Issue 需要跟踪。
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/7298
+    operators:
+      # https://www.freedesktop.org/software/systemd/man/latest/systemd.journal-fields.html
+      # 全部移动到 attributes.journald，然后将语义明确的移动到 resource 和 attributes
+      - type: move
+        from: body
+        to: attributes.journald
+      - type: move
+        from: attributes.journald["MESSAGE"]
+        to: body
+      # 注意：kernel 和某些 log 没有 PID、COMM、EXE、CMDLINE、UID、GID 等字段
+      - type: move
+        from: attributes.journald["_PID"]
+        to: resource["process.pid"]
+        if: 'type(attributes.journald["_PID"]) != "nil"'
+      - type: move
+        from: attributes.journald["_COMM"]
+        to: resource["process.executable.name"]
+        if: 'type(attributes.journald["_COMM"]) != "nil"'
+      - type: move
+        from: attributes.journald["_EXE"]
+        to: resource["process.executable.path"]
+        if: 'type(attributes.journald["_EXE"]) != "nil"'
+      - type: move
+        from: attributes.journald["_CMDLINE"]
+        to: resource["process.command_line"]
+        if: 'type(attributes.journald["_CMDLINE"]) != "nil"'
+      - type: move
+        from: attributes.journald["_UID"]
+        to: resource["process.owner"]
+        if: 'type(attributes.journald["_UID"]) != "nil"'
+      # 下面的字段所有情况都有
+      - type: move
+        from: attributes.journald["SYSLOG_IDENTIFIER"]
+        to: resource["service.name"]
+        if: 'type(attributes.journald["SYSLOG_IDENTIFIER"]) != "nil"'
+      - type: move
+        from: attributes.journald["_HOSTNAME"]
+        to: resource["host.name"]
+      - type: severity_parser
+        parse_from: attributes.journald["PRIORITY"]
+        preset: none
+        overwrite_text: true
+        mapping:
+          # OTel severity number: systemd priority # syslog severity
+          FATAL: 0 # emerg
+          ERROR3: 1 # alert
+          ERROR2: 2 # crit
+          ERROR: 3
+          WARN: 4
+          INFO2: 5 # notice
+          INFO: 6
+          DEBUG: 7
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md
+  filelog:
+    include:
+      # auditd
+      - /var/log/audit/audit.log
+    include_file_path: true
+    include_file_name_resolved: true
+    include_file_path_resolved: true
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
+  hostmetrics/fast:
+    collection_interval: 15s
+    scrapers:
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/documentation.md
+      cpu:
+        metrics:
+          system.cpu.frequency:
+            enabled: true
+      disk:
+      load:
+      memory:
+      network:
+        include:
+          interfaces: ["^eth*", "^en*", "^ib*", "^bond*"]
+          match_type: "regexp"
+      paging:
+      processes:
+      # 消耗资源较多，在生产环境中建议关闭
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/processscraper/documentation.md
+      process:
+        mute_process_all_errors: true
+        metrics:
+          process.disk.operations:
+            enabled: true
+          process.threads:
+            enabled: true
+      system:
+  hostmetrics/slow:
+    collection_interval: 4m
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.logical.count:
+            enabled: true
+          system.cpu.physical.count:
+            enabled: true
+      filesystem:
+        include_virtual_filesystems: false
+        # include_fs_types:
+        #   fs_types: [btrfs, nfs, ext4, zfs, xfs, nfs4, exfat, apfs]
+        #   match_type: "strict"
+
+processors:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+  batch:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/memorylimiterprocessor
+  memory_limiter:
+    # 75% of maximum memory up to 2G
+    limit_mib: 1536
+    # 25% of limit up to 2G
+    spike_limit_mib: 512
+    check_interval: 5s
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourceprocessor
+  resource/cloud:
+    attributes:
+      - key: cloud.region
+        value: ${OTEL_CLOUD_REGION}
+        action: upsert
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
+  resourcedetection:
+    detectors: ["system"]
+    timeout: 24h
+    system:
+      hostname_sources: ["os"]
+      resource_attributes:
+        host.arch:
+          enabled: true
+        host.name:
+          enabled: true
+        host.id:
+          enabled: true
+        host.ip:
+          enabled: true
+        host.cpu.model.name:
+          enabled: true
+        os.description:
+          enabled: true
+        os.type:
+          enabled: true
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor
+  transform/journald:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - flatten(attributes)
+
+exporters:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/debugexporter
+  debug/basic:
+    verbosity: basic
+  debug/normal:
+    verbosity: normal
+  debug/detailed:
+    verbosity: detailed
+  # https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlp_httpexporter/README.md
+  otlp_http:
+    endpoint: https://otel.clusters.zjusct.io
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/docker, filelog]
+      processors: [memory_limiter, batch, resourcedetection]
+      exporters: [otlp_http]
+    logs/journald:
+      receivers: [journald]
+      processors: [memory_limiter, batch, transform/journald, resourcedetection]
+      exporters: [otlp_http]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resourcedetection]
+      exporters: [otlp_http]
+    metrics:
+      # not enabled by default:
+      # - podman_stats
+      receivers: [otlp, docker_stats, hostmetrics/fast, hostmetrics/slow]
+      processors: [memory_limiter, batch, resourcedetection]
+      exporters: [otlp_http]
+  # https://opentelemetry.io/docs/collector/internal-telemetry/#activate-internal-telemetry-in-the-collector
+  # internal is enabled by default, close it
+  telemetry:
+    metrics:
+      level: none

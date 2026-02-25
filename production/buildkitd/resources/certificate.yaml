@@ -1,0 +1,76 @@
+# Self-signed issuer for bootstrapping the CA
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: buildkit-selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+# CA Certificate (root CA for buildkit)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: buildkit-ca
+spec:
+  commonName: buildkit-ca
+  isCA: true
+  issuerRef:
+    kind: Issuer
+    name: buildkit-selfsigned-issuer
+  secretName: buildkit-ca-secret
+  secretTemplate:
+    annotations:
+      # Enable reflector to sync this CA secret to other namespaces
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "tekton"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "tekton"
+---
+# CA Issuer (signs server and client certs)
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: buildkit-ca-issuer
+spec:
+  ca:
+    secretName: buildkit-ca-secret
+---
+# Daemon (server) certificate
+# Replace the SANs below with actual DNS names and IPs for your buildkit daemon
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: buildkit-daemon
+spec:
+  secretName: buildkit-daemon-certs
+  commonName: buildkit-daemon
+  dnsNames:
+    - buildkitd
+    - buildkitd.buildkitd
+    - buildkitd.buildkitd.svc
+    - buildkitd.buildkitd.svc.cluster.local
+  ipAddresses:
+    - 127.0.0.1
+  usages:
+    - server auth
+    - key encipherment
+    - digital signature
+  issuerRef:
+    kind: Issuer
+    name: buildkit-ca-issuer
+---
+# Client certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: buildkit-client
+spec:
+  secretName: buildkit-client-certs
+  commonName: client
+  usages:
+    - client auth
+    - key encipherment
+    - digital signature
+  issuerRef:
+    kind: Issuer
+    name: buildkit-ca-issuer

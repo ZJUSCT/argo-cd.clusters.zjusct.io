@@ -1,0 +1,15 @@
+services:
+  squid:
+    image: harbor.clusters.zjusct.io/docker.io/ubuntu/squid
+    init: true
+    entrypoint: ["sleep", "infinity"]
+    environment:
+      - DEBIANC_FRONTEND=noninteractive
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    post_start:
+      - command: sed -i 's/[a-z]*.ubuntu.com/mirrors.zju.edu.cn/g' /etc/apt/sources.list.d/ubuntu.sources
+        user: root
+      - command: [sed, -i, 's/Types: deb/Types: deb deb-src/g', /etc/apt/sources.list.d/ubuntu.sources]
+        user: root

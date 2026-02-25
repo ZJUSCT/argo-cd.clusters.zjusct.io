@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumBGPClusterConfig
+metadata:
+  name: main-bgp-config
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+  bgpInstances:
+  - name: instance-64513
+    localASN: 64513
+    peers:
+    - name: router-peer
+      peerASN: 64512
+      peerAddress: 172.25.4.254
+      peerConfigRef:
+        name: cilium-peer

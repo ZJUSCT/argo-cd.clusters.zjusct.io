@@ -1,0 +1,31 @@
+---
+# NOTE: The buildkit-ca-secret is automatically synced from dev-buildkitd namespace
+# by reflector. See dev-buildkitd/certificate.yaml for the source CA configuration.
+#
+# CA Issuer using the CA certificate from dev-buildkitd
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: buildkit-ca-issuer
+spec:
+  ca:
+    secretName: buildkit-ca-secret
+---
+# Client Certificate for BuildKit Client (buildctl)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: buildkit-client-cert
+spec:
+  commonName: buildkit-client
+  issuerRef:
+    kind: Issuer
+    name: buildkit-ca-issuer
+  secretName: buildkit-client-certs
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - client auth
+    - key encipherment
+    - digital signature

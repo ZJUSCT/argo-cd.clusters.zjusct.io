@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-prometheus-stack
+resources:
+- resources/namespace.yaml
+- resources/sealedsecret-grafana.yaml
+- resources/obc-loki.yaml
+- resources/obc-tempo.yaml
+- resources/obc-mimir-ruler.yaml
+- resources/obc-mimir-tsdb.yaml
+helmCharts:
+- name: kube-prometheus-stack
+  repo: https://prometheus-community.github.io/helm-charts
+  includeCRDs: true
+  releaseName: kube-prometheus-stack
+  namespace: kube-prometheus-stack
+  valuesFile: values/kube-prometheus-stack-81.6.3.yaml
+  version: 81.6.3
+- name: loki
+  repo: https://grafana.github.io/helm-charts
+  includeCRDs: true
+  releaseName: loki
+  namespace: kube-prometheus-stack
+  valuesFile: values/loki-6.53.0.yaml
+  version: 6.53.0
+- name: tempo
+  repo: https://grafana.github.io/helm-charts
+  includeCRDs: true
+  releaseName: tempo
+  namespace: kube-prometheus-stack
+  valuesFile: values/tempo-1.24.4.yaml
+  version: 1.24.4
+- name: mimir-distributed
+  repo: https://grafana.github.io/helm-charts
+  includeCRDs: true
+  releaseName: mimir
+  namespace: kube-prometheus-stack
+  valuesFile: values/mimir-distributed-6.0.5.yaml
+  version: 6.0.5
+
+images:
+  - name: grafana/mimir
+    newName: hub.docker.com/grafana/mimir
+  - name: memcached
+    newName: hub.docker.com/library/memcached
+  - name: prom/memcached-exporter
+    newName: quay.io/prometheus/memcached-exporter
+  - name: apache/kafka-native
+    newName: hub.docker.com/apache/kafka-native
+  - name: grafana/rollout-operator
+    newName: hub.docker.com/grafana/rollout-operator
+
+transformers:
+  - ../../image-prefix.yaml

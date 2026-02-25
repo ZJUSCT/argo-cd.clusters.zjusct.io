@@ -1,0 +1,73 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy-gateway
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: envoy-gateway
+    namespace: envoy-gateway
+---
+# https://gateway-api.sigs.k8s.io/reference/spec/#gateway
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-gateway
+  namespace: envoy-gateway
+  annotations:
+    lbipam.cilium.io/ips: "172.28.0.1"
+spec:
+  gatewayClassName: envoy-gateway
+  infrastructure:
+    annotations:
+      lbipam.cilium.io/ips: "172.28.0.1"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.clusters.zjusct.io"
+      tls:
+        certificateRefs:
+        - kind: Secret
+          name: clusters-zjusct-io-cert
+          namespace: cert-manager
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: tls-passthrough
+      protocol: TLS
+      port: 444
+      tls:
+        mode: Passthrough
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+# https://gateway-api.sigs.k8s.io/reference/spec/#tlsroute
+# https://gateway-api.sigs.k8s.io/guides/tls/
+# this exposes k8s apiserver using TLS passthrough
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: TLSRoute
+metadata:
+  name: apiserver
+  namespace: envoy-gateway
+spec:
+  hostnames:
+  - k8s-api.s.zjusct.io
+  - k8s-api.clusters.zjusct.io
+  parentRefs:
+  - name: envoy-gateway
+    namespace: envoy-gateway
+    sectionName: tls-passthrough
+  rules:
+  - backendRefs:
+    - name: kubernetes
+      port: 443

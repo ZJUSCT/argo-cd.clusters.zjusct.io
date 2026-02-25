@@ -1,0 +1,72 @@
+# https://github.com/moby/buildkit/blob/master/examples/kubernetes/deployment%2Bservice.userns.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: buildkitd
+  name: buildkitd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buildkitd
+  template:
+    metadata:
+      labels:
+        app: buildkitd
+    spec:
+      hostUsers: false
+      containers:
+        - name: buildkitd
+          image: moby/buildkit:master
+          args:
+            - --addr
+            - unix:///run/buildkit/buildkitd.sock
+            - --addr
+            - tcp://0.0.0.0:1234
+            - --tlscacert
+            - /certs/ca.crt
+            - --tlscert
+            - /certs/tls.crt
+            - --tlskey
+            - /certs/tls.key
+            - --config
+            - /etc/buildkit/buildkitd.toml
+          # the probe below will only work after Release v0.6.3
+          readinessProbe:
+            exec:
+              command:
+                - buildctl
+                - debug
+                - workers
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          # the probe below will only work after Release v0.6.3
+          livenessProbe:
+            exec:
+              command:
+                - buildctl
+                - debug
+                - workers
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          securityContext:
+            # Not really privileged
+            privileged: true
+          ports:
+            - containerPort: 1234
+          volumeMounts:
+            - name: certs
+              readOnly: true
+              mountPath: /certs
+            - name: buildkit-config
+              readOnly: true
+              mountPath: /etc/buildkit
+      volumes:
+        # buildkit-daemon-certs must contain ca.pem, cert.pem, and key.pem
+        - name: certs
+          secret:
+            secretName: buildkit-daemon-certs
+        - name: buildkit-config
+          configMap:
+            name: buildkitd-config

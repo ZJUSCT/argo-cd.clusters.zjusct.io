@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: default
+resources:
+- resources/harbor-core-sealedsecret.yaml
+- resources/harbor-jobservice-sealedsecret.yaml
+- resources/harbor-registry-sealedsecret.yaml
+- resources/cilium-lb-ipam-pool.yaml
+- resources/cilium-bgp-cluster-config.yaml
+- resources/cilium-bgp-peer-config.yaml
+- resources/cilium-bgp-advertisement.yaml
+helmCharts:
+- name: cilium
+  repo: https://helm.cilium.io/
+  includeCRDs: true
+  releaseName: cilium
+  valuesFile: values/cilium-1.19.0.yaml
+  version: 1.19.0
+  namespace: default
+- name: harbor
+  repo: https://helm.goharbor.io
+  includeCRDs: true
+  releaseName: harbor
+  valuesFile: values/harbor-1.18.2.yaml
+  version: 1.18.2
+  namespace: default

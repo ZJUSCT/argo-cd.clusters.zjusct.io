@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argo-cd
+resources:
+- resources/apps.yaml
+- resources/configmap-plugin.yaml
+- resources/namespace.yaml
+- resources/sealedsecret-password.yaml
+- resources/sealedsecret-repo.yaml
+helmCharts:
+- name: argo-cd
+  repo: https://argoproj.github.io/argo-helm
+  includeCRDs: true
+  releaseName: argo-cd
+  namespace: argo-cd
+  valuesFile: values/argo-cd-9.4.1.yaml
+  version: 9.4.1
+transformers:
+  - ../../image-prefix.yaml

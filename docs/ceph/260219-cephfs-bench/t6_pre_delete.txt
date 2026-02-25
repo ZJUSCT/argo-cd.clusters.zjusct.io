@@ -1,0 +1,10 @@
+jlat: 31.16ms (3290770 total writes)
+readdir: 3.58ms (11322673 total ops)
+unlink: 0.29ms (812137 total ops)
+rmdir: 11.00ms (100341 total ops)
+rename: 30.81ms (182186 total ops)
+mkdir: 0.68ms (180733 total ops)
+
+inodes cached: 560173
+dir_fetch_complete: 12338023
+traverse_dir_fetch: 3413529

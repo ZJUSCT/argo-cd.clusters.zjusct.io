@@ -1,0 +1,178 @@
+# 1. Infrastructure & Identity: Core services for authentication and cluster storage.
+
+# 1.1 Identity & Access
+freeipa-client
+ldap-utils
+libsss-sudo
+openssh-server
+sssd-ldap
+sssd-tools
+sudo
+
+# 1.2 Cluster & Network Filesystems
+attr
+autofs
+ceph-common
+nfs-common
+nfs-kernel-server
+sshfs
+
+# 2. Languages
+
+# 2.1 Version Control & Build Systems
+autoconf
+automake
+bison
+build-essential
+cmake
+git
+git-extras
+git-lfs
+meson
+ninja-build
+pkg-config
+
+# 2.2 C/C++
+bear
+clang
+clang-format
+clang-tidy
+clangd
+
+# 2.3 Python
+pipx
+python-is-python3
+python3
+python3-full
+python3-pip
+python3-venv
+
+# 2.4 Misc
+cargo
+golang
+npm
+rustc
+
+# 3. Hardware & Bare-Metal Management: Low-level hardware inspection and BMC control.
+
+# 3.1 BMC & Power
+ipmitool
+redfishtool
+
+# 3.2 Storage Inspection
+hdparm
+nvme-cli
+smartmontools
+
+# 3.3 Hardware Diagnostics
+cpu-checker
+cpufetch
+hwinfo
+hwloc
+linux-cpupower
+numactl
+pciutils
+stress
+usbutils
+
+# 4. Networking & Connectivity: Traffic analysis and protocol management.
+
+# 4.1 Analysis & Monitoring
+ethtool
+iperf3
+lldpd
+nmap
+snmp
+tcpdump
+traceroute
+tshark
+wireshark
+
+# 4.2 Network Configuration
+net-tools
+netplan.io
+network-manager
+
+# 5. System Operations & Image Management: Tools for maintaining the OS and building images.
+
+# 5.1 Package & Image Tools
+apt-file
+apt-transport-https
+aptitude
+lmod
+rpm2cpio
+
+# 5.2 Systemd & Core Services
+cloud-init
+etckeeper
+systemd-container
+systemd-coredump
+systemd-networkd
+systemd-resolved
+systemd-timesyncd
+
+# 5.3 Virtualization & Runtimes
+libvirt-clients
+libvirt-daemon-system
+lxcfs
+qemu-system-misc
+qemu-user
+
+# 6. Monitoring & Profiling: Real-time system observation.
+
+# 6.1 System Monitors
+btop
+htop
+iotop
+nvtop
+procps
+psmisc
+
+# 6.2 Performance Profiling
+hyperfine
+linux-perf
+
+# 7. Shell, Data & Productivity: The interactive operator environment.
+
+# 7.1 Shells & Environment
+bash-completion
+csh
+fish
+fzf
+shellcheck
+tmux
+zoxide
+zsh
+
+# 7.2 Text & Data Processing
+bat
+bc
+fd-find
+ffmpeg
+fq
+gawk
+jq
+mc
+neovim
+ripgrep
+vim
+yq
+
+# 7.3 File Management & Archival
+7zip
+duf
+eza
+file
+gdu
+rsync
+squashfs-tools
+tree
+unrar
+zip
+
+# 7.4 Transfer & Download
+aria2
+curl
+httpie
+lrzsz
+wget

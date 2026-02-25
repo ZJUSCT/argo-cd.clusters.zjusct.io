@@ -1,0 +1,83 @@
+# values in global config can be overridden by node specific config.
+# if not configured, default will be used.
+default:
+  bootMode: UEFI
+  bmc:
+    credentialsName: bmc-credential
+  image:
+    url: https://radosgw.clusters.zjusct.io/packer-images/debian/customize.qcow2
+    checksumType: sha256
+    checksum: https://radosgw.clusters.zjusct.io/packer-images/debian/SHA256SUMS
+    format: qcow2
+  rootDeviceHints:
+    rotational: false
+    vendor: "ATA"
+
+nodes:
+  # m600, m601 is control plane cluster. DO NOT USE METAL3 TO MANAGE THEM.
+  # Migration notes:
+  # - Old: ipSuffix -> New: use full bmc.address: redfish://172.25.3.<ipSuffix>
+  # - Old: deploy: false -> New: disable individual fields with enabled: false
+  # - Old: detached: true -> New: use annotations: baremetalhost.metal3.io/detached: ""
+
+  # - name: m600
+  #   mac: "6c:b3:11:73:ee:78"
+  #   bmc:
+  #     address: redfish://172.25.3.60
+  #   annotations:
+  #     baremetalhost.metal3.io/detached: ""
+
+  # - name: m601
+  #   mac: "9c:c2:c4:29:74:bd"
+  #   bmc:
+  #     address: redfish://172.25.3.61
+  #   annotations:
+  #     baremetalhost.metal3.io/detached: ""
+
+  - name: m602
+    mac: "6c:b3:11:73:ea:a0"
+    bmc:
+      address: redfish://172.25.3.62
+
+  - name: m603
+    mac: "c4:07:78:d9:bf:97"
+    bmc:
+      address: redfish://172.25.3.63
+
+  - name: m604
+    mac: "6c:b3:11:73:f0:4c"
+    bmc:
+      address: redfish://172.25.3.64
+
+  # - name: root
+  #   mac: "b4:05:5d:ad:d3:fa"
+  #   bmc:
+  #     address: redfish://172.25.3.65
+  #   bootMode: legacy
+
+  # Inspection-only nodes
+  - name: atlas800
+    mac: "B0:EC:DD:D1:97:F4"
+    bmc:
+      address: redfish://172.25.3.66
+    image:
+      enabled: false
+    rootDeviceHints:
+      enabled: false
+    userData:
+      enabled: false
+
+  - name: m700
+    mac: "80:61:5f:10:88:99"
+    bmc:
+      address: redfish://172.25.3.70
+
+  - name: m701
+    mac: "80:61:5f:10:8c:c7"
+    bmc:
+      address: redfish://172.25.3.71
+
+  - name: a700
+    mac: "9c:c2:c4:79:da:c2"
+    bmc:
+      address: redfish://172.25.3.72

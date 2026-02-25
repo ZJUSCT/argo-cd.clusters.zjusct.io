@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-packer
+  namespace: tekton
+  labels:
+    app: debug-packer
+spec:
+  restartPolicy: Never
+  securityContext:
+    fsGroup: 65532
+  containers:
+    - name: packer
+      image: harbor.clusters.zjusct.io/library/packer
+      imagePullPolicy: Always
+      command: ["sh", "-c", "sleep infinity"]
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+  volumes:
+    - name: workspace
+      persistentVolumeClaim:
+        claimName: pvc-8c5b57f19b

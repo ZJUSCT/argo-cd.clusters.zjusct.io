@@ -1,0 +1,19 @@
+ipa:
+  replicas: 1
+  image:
+    repository: quay.io/freeipa/freeipa-server
+    tag: fedora-rawhide-4.13.1
+  server:
+    adminEmail: mail@zjusct.io
+  domain: clusters.zjusct.io
+  timezone: Asia/Shanghai
+
+  # Secret configuration - reference to SealedSecret
+  secrets:
+    create: false
+    name: freeipa-admin-secrets
+
+network:
+  services:
+    ipa-01:
+      ipv4: "172.28.0.2"

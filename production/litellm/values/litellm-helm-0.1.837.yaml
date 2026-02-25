@@ -1,0 +1,458 @@
+# Default values for litellm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+# numWorkers: 2
+
+image:
+  # Use "ghcr.io/berriai/litellm-database" for optimized image with database
+  repository: ghcr.io/berriai/litellm-database
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # tag: "main-latest"
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: "litellm"
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# annotations for litellm deployment
+deploymentAnnotations: {}
+deploymentLabels: {}
+# annotations for litellm pods
+podAnnotations: {}
+podLabels: {}
+
+terminationGracePeriodSeconds: 90
+topologySpreadConstraints:
+  []
+  # - maxSkew: 1
+  #   topologyKey: kubernetes.io/hostname
+  #   whenUnsatisfiable: DoNotSchedule
+  #   labelSelector:
+  #     matchLabels:
+  #       app: litellm
+
+# At the time of writing, the litellm docker image requires write access to the
+#  filesystem on startup so that prisma can install some dependencies.
+podSecurityContext: {}
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #     - ALL
+  # readOnlyRootFilesystem: false
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# A list of Kubernetes Secret objects that will be exported to the LiteLLM proxy
+#  pod as environment variables.  These secrets can then be referenced in the
+#  configuration file (or "litellm" ConfigMap) with `os.environ/<Env Var Name>`
+environmentSecrets:
+  - litellm-env-secret
+
+# A list of Kubernetes ConfigMap objects that will be exported to the LiteLLM proxy
+#  pod as environment variables.  The ConfigMap kv-pairs can then be referenced in the
+#  configuration file (or "litellm" ConfigMap) with `os.environ/<Env Var Name>`
+environmentConfigMaps:
+  - litellm-env-configmap
+
+service:
+  type: ClusterIP
+  port: 4000
+  # If service type is `LoadBalancer` you can
+  # optionally specify loadBalancerClass
+  # loadBalancerClass: tailscale
+
+# Separate health app configuration
+# When enabled, health checks will use a separate port and the application
+# will receive SEPARATE_HEALTH_APP=1 and SEPARATE_HEALTH_PORT from environment variables
+separateHealthApp: false
+separateHealthPort: 8081
+
+ingress:
+  enabled: false
+  className: "nginx"
+  labels: {}
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: api.example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# masterkey: changeit
+
+# if set, use this secret for the master key; otherwise, autogenerate a new one
+masterkeySecretName: "litellm-masterkey"
+
+# if set, use this secret key for the master key; otherwise, use the default key
+masterkeySecretKey: "masterkey"
+
+proxyConfigMap:
+  # when true, creates a new configmap
+  create: true
+  # if create is false and name is set, use existing ConfigMap
+  # create: false
+  # name: ""
+  # key: "config.yaml"
+
+# The elements within proxy_config are rendered as config.yaml for the proxy
+#  Examples: https://github.com/BerriAI/litellm/tree/main/litellm/proxy/example_config_yaml
+#  Reference: https://docs.litellm.ai/docs/proxy/configs
+proxy_config:
+  litellm_settings:
+    callbacks: ["otel"]
+  model_list:
+    ####################################################################
+    # 字节跳动 - 火山方舟 - Pro
+    ####################################################################
+    - model_name: plan/volcengine/doubao-seed-2.0-code
+      litellm_params:
+        model: doubao-seed-2.0-code
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: volcengine
+        tools:
+          web_search: 1
+        drop_params: True
+    - model_name: plan/volcengine/doubao-seed-code
+      litellm_params:
+        model: doubao-seed-code
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: volcengine
+        tools:
+          web_search: 1
+        drop_params: True
+    - model_name: plan/volcengine/glm-4.7
+      litellm_params:
+        model: glm-4.7
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: volcengine
+        tools:
+          web_search: 1
+    - model_name: plan/volcengine/kimi-k2-thinking
+      litellm_params:
+        model: kimi-k2-thinking
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        tools:
+          web_search: 1
+    - model_name: plan/volcengine/kimi-k2.5
+      litellm_params:
+        model: kimi-k2.5
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: volcengine
+        tools:
+          web_search: 1
+
+    ####################################################################
+    # 稀宇科技 - MiniMax - Max-极速版
+    ####################################################################
+    - model_name: plan/minimax/MiniMax-M2.5-highspeed
+      litellm_params:
+        model: MiniMax-M2.5-highspeed
+        api_base: https://api.minimaxi.com/anthropic
+        api_key: os.environ/PLAN_MINIMAX_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/minimax/MiniMax-M2.5
+      litellm_params:
+        model: MiniMax-M2.5
+        api_base: https://api.minimaxi.com/anthropic
+        api_key: os.environ/PLAN_MINIMAX_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+
+    ####################################################################
+    # 阿里云 - 百炼 - Pro
+    ####################################################################
+    - model_name: plan/bailian/qwen3.5-plus
+      litellm_params:
+        model: qwen3.5-plus
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/qwen3-max-2026-01-23
+      litellm_params:
+        model: qwen3-max-2026-01-23
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/qwen3-coder-next
+      litellm_params:
+        model: qwen3-coder-next
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/qwen3-coder-plus
+      litellm_params:
+        model: qwen3-coder-plus
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/glm-4.7
+      litellm_params:
+        model: glm-4.7
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+    - model_name: plan/bailian/kimi-k2.5
+      litellm_params:
+        model: kimi-k2.5
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+        tools:
+          web_search: 1
+
+    ####################################################################
+    # API 计费
+    ####################################################################
+    # - model_name: api/ohmygpt/claude-sonnet-4-5
+    #   litellm_params:
+    #     model: claude-sonnet-4-5
+    #     api_base: https://apic1.ohmycdn.com
+    #     api_key:
+
+    # - model_name: api/openrouter/auto
+    #   litellm_params:
+    #     model: openrouter/auto
+    #     api_base: https://openrouter.ai/api/v1
+    #     api_key:
+    # 硅基流动 SiliconFlow
+    - model_name: api/siliconflow/GLM-5
+      litellm_params:
+        model: Pro/zai-org/GLM-5
+        api_base: https://api.siliconflow.cn
+        api_key: os.environ/API_SILICONFLOW_API_KEY
+        custom_llm_provider: openai
+    # Duckcoding
+    - model_name: api/duckcoding/claude-sonnet-4-6
+      litellm_params:
+        model: claude-sonnet-4-6
+        api_base: https://jp.duckcoding.com
+        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: api/duckcoding/gpt-5.3-codex
+      litellm_params:
+        model: gpt-5.3-codex
+        api_base: https://jp.duckcoding.com/v1
+        api_key: os.environ/API_DUCKCODING_CODEX_API_KEY
+        custom_llm_provider: openai
+    - model_name: api/duckcoding/gemini-3.1-pro
+      litellm_params:
+        model: gemini-3.1-pro-preview
+        api_base: https://jp.duckcoding.com/v1
+        api_key: os.environ/API_DUCKCODING_GEMINI_API_KEY
+        custom_llm_provider: openai
+    # - model_name: api/duckcoding/grok-4.1
+    #   litellm_params:
+    #     model: grok-4.1
+    #     api_base: https://jp.duckcoding.com/v1
+    #     api_key: os.environ/API_DUCKCODING_API_KEY
+    #     custom_llm_provider: openai
+  general_settings:
+    master_key: os.environ/PROXY_MASTER_KEY
+
+resources:
+  {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+db:
+  # Use an existing postgres server/cluster
+  useExisting: false
+
+  # How to connect to the existing postgres server/cluster
+  endpoint: localhost
+  database: litellm
+  url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
+  secret:
+    name: postgres
+    usernameKey: username
+    passwordKey: password
+    # Optional: when set, DATABASE_HOST will be sourced from this secret key instead of db.endpoint
+    endpointKey: ""
+
+  # Use the Stackgres Helm chart to deploy an instance of a Stackgres cluster.
+  #  The Stackgres Operator must already be installed within the target
+  #  Kubernetes cluster.
+  # TODO: Stackgres deployment currently unsupported
+  useStackgresOperator: false
+
+  # Use the Postgres Helm chart to create a single node, stand alone postgres
+  #  instance.  See the "postgresql" top level key for additional configuration.
+  deployStandalone: true
+
+# Settings for Bitnami postgresql chart (if db.deployStandalone is true, ignored
+#  otherwise)
+postgresql:
+  architecture: standalone
+  auth:
+    username: litellm
+    database: litellm
+
+    # You should override these on the helm command line with
+    #  `--set postgresql.auth.postgres-password=<some good password>,postgresql.auth.password=<some good password>`
+    password: NoTaGrEaTpAsSwOrD
+    postgres-password: NoTaGrEaTpAsSwOrD
+
+    # A secret is created by this chart (litellm-helm) with the credentials that
+    #  the new Postgres instance should use.
+    existingSecret: "litellm-dbcredentials" # Created by litellm-helm with the username and password specified above.
+    # secretKeys:
+    #   userPasswordKey: password
+
+  primary:
+    persistence:
+      storageClass: openebs-hostpath
+      size: 10Gi
+
+# requires cache: true in config file
+# either enable this or pass a secret for REDIS_HOST, REDIS_PORT, REDIS_PASSWORD or REDIS_URL
+# with cache: true to use existing redis instance
+redis:
+  enabled: false
+  architecture: standalone
+
+# Prisma migration job settings
+migrationJob:
+  enabled: true # Enable or disable the schema migration Job
+  retries: 3 # Number of retries for the Job in case of failure
+  backoffLimit: 4 # Backoff limit for Job restarts
+  disableSchemaUpdate: false # Skip schema migrations for specific environments. When True, the job will exit with code 0.
+  annotations: {}
+  ttlSecondsAfterFinished: 120
+  resources: {}
+  #  requests:
+  #    cpu: 100m
+  #    memory: 100Mi
+  extraContainers: []
+
+  # Hook configuration
+  hooks:
+    argocd:
+      enabled: true
+    helm:
+      enabled: false
+
+# Additional environment variables to be added to the deployment as a map of key-value pairs
+envVars: {}
+
+# USE_DDTRACE: "true"
+# Additional environment variables to be added to the deployment as a list of k8s env vars
+extraEnvVars: {}
+
+# if you want to override the container command, you can do so here
+command: {}
+# if you want to override the container args, you can do so here
+args: {}
+
+# - name: EXTRA_ENV_VAR
+#   value: EXTRA_ENV_VAR_VALUE
+# Additional Kubernetes resources to deploy with litellm
+extraResources: []
+
+# - apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: my-extra-config
+#   data:
+#     foo: bar
+# Pod Disruption Budget
+pdb:
+  enabled: false
+  # Set exactly one of the following. If both are set, minAvailable takes precedence.
+  minAvailable: null # e.g. "50%" or 1
+  maxUnavailable: null # e.g. 1 or "20%"
+  annotations: {}
+  labels: {}
+
+serviceMonitor:
+  enabled: true
+  labels:
+    {}
+    # test: test
+  annotations:
+    {}
+    # kubernetes.io/test: test
+  interval: 15s
+  scrapeTimeout: 10s
+  relabelings: []
+  # - targetLabel: __meta_kubernetes_pod_node_name
+  #   replacement: $1
+  #   action: replace
+  namespaceSelector:
+    matchNames: []
+    # - test-namespace

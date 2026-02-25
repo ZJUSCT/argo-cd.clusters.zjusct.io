@@ -1,0 +1,12 @@
+{
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.associations": {
+    "**/templates/**/*.yaml": "go-template", // Helm templates
+  },
+  "yaml.schemas": {
+    "https://www.schemastore.org/any.json": "*.yaml",
+    "https://www.schemastore.org/kustomization.json": "**/kustomization.yaml"
+  }
+}

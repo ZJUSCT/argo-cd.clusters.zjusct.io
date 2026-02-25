@@ -1,0 +1,105 @@
+---
+# BuildKit Task - modernized version without deprecated PipelineResource
+# Based on: https://github.com/tektoncd/catalog/tree/main/task/buildkit/0.1
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: buildkit
+  labels:
+    app.kubernetes.io/version: "0.2"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.17.0"
+    tekton.dev/categories: Image Build
+    tekton.dev/tags: image-build
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: >-
+    This Task builds source into a container image using Moby BuildKit.
+
+  params:
+  - name: IMAGE
+    description: Reference of the image buildkit will produce.
+    type: string
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build.
+    default: "./Dockerfile"
+    type: string
+  - name: CONTEXT
+    description: The build context used by buildkit.
+    default: "."
+    type: string
+  - name: BUILDKIT_CLIENT_IMAGE
+    description: The name of the BuildKit client (buildctl) image
+    default: "moby/buildkit:v0.12.5-rootless"
+    type: string
+  - name: BUILDKIT_DAEMON_ADDRESS
+    description: The address of the BuildKit daemon (buildkitd) service
+    default: "tcp://buildkitd.buildkitd.svc.cluster.local:1234"
+    type: string
+  - name: BUILDKIT_CLIENT_CERTS
+    description: The name of Secret containing ca.pem, cert.pem, key.pem for mTLS
+    default: "buildkit-client-certs"
+    type: string
+  - name: DOCKER_CONFIG
+    description: The name of the secret containing registry credentials
+    default: "harbor-credentials"
+    type: string
+
+  workspaces:
+  - name: source
+    description: Workspace containing the source code to build.
+  - name: dockerconfig
+    description: Docker config secret for authentication
+    optional: true
+
+  steps:
+  - name: build-and-push
+    image: $(params.BUILDKIT_CLIENT_IMAGE)
+    workingDir: $(workspaces.source.path)
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    script: |
+      #!/bin/sh
+      set -e
+
+      echo "Building and pushing image: $(params.IMAGE)"
+      echo "Using Dockerfile: $(params.DOCKERFILE)"
+      echo "Build context: $(params.CONTEXT)"
+
+      # BuildKit expects config.json, but Kubernetes secret mounts .dockerconfigjson
+      # Create proper docker config directory structure
+      mkdir -p /tekton/home/.docker
+      if [ -f /workspace/dockerconfig/.dockerconfigjson ]; then
+        cp /workspace/dockerconfig/.dockerconfigjson /tekton/home/.docker/config.json
+        echo "Docker config prepared for BuildKit"
+      else
+        echo "Warning: Docker config not found"
+      fi
+
+      buildctl \
+        --debug \
+        --addr=$(params.BUILDKIT_DAEMON_ADDRESS) \
+        --tlscacert /certs/ca.crt \
+        --tlscert /certs/tls.crt \
+        --tlskey /certs/tls.key \
+        build \
+        --progress=plain \
+        --frontend=dockerfile.v0 \
+        --opt filename=$(params.DOCKERFILE) \
+        --local context=$(params.CONTEXT) \
+        --local dockerfile=$(params.CONTEXT) \
+        --output type=image,name=$(params.IMAGE),push=true \
+        --export-cache type=inline \
+        --import-cache type=registry,ref=$(params.IMAGE)
+
+      echo "Image built and pushed successfully: $(params.IMAGE)"
+    volumeMounts:
+    - name: certs
+      readOnly: true
+      mountPath: /certs
+
+  volumes:
+  - name: certs
+    secret:
+      secretName: $(params.BUILDKIT_CLIENT_CERTS)

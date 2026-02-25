@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trafficserver
+  namespace: trafficserver
+  annotations:
+    lbipam.cilium.io/ips: "172.28.0.3"
+spec:
+  type: LoadBalancer
+  selector:
+    app: trafficserver
+  ports:
+    - name: proxy
+      port: 8080
+      targetPort: proxy
+    - name: ssl
+      port: 8443
+      targetPort: ssl

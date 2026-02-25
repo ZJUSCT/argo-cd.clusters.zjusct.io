@@ -1,0 +1,4 @@
+**/.claude
+tmp/
+**/tmp.yaml
+.DS_Store

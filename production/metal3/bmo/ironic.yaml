@@ -1,0 +1,42 @@
+# ironic.yaml
+apiVersion: ironic.metal3.io/v1alpha1
+kind: Ironic
+metadata:
+  name: ironic
+  namespace: baremetal-operator-system
+spec:
+  networking:
+    dhcp:
+      rangeBegin: "172.25.4.100"
+      rangeEnd: "172.25.4.200"
+      networkCIDR: "172.25.4.0/24"
+      dnsAddress: "172.25.4.1"
+      gatewayAddress: "172.25.4.42"
+      hosts:
+        - "6c:b3:11:73:ee:78,m600,172.25.4.60,1h"
+        - "9c:c2:c4:29:74:bd,m601,172.25.4.61,1h"
+        - "6c:b3:11:73:ea:a0,m602,172.25.4.62,1h"
+        - "c4:07:78:d9:bf:97,m603,172.25.4.63,1h"
+        - "6c:b3:11:73:f0:4c,m604,172.25.4.64,1h"
+        - "b4:05:5d:ad:d3:fa,root,172.25.4.65,1h"
+        - "80:61:5f:10:88:99,m700,172.25.4.70,1h"
+        - "80:61:5F:10:8C:C7,m701,172.25.4.71,1h"
+        - "9c:c2:c4:55:e3:3e,a700,172.25.4.72,1h"
+        - "4c:bb:47:2a:65:78,nvidia-spark,172.25.4.73,1h"
+      # we inject dnsmasq config here
+      # https://github.com/imp/dnsmasq/blob/master/dnsmasq.conf.example
+      # https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html
+      ignore:
+        - |
+          none
+          dhcp-option=option:domain-search,clusters.zjusct.io
+          domain=clusters.zjusct.io
+          dhcp-option=option:classless-static-route,0.0.0.0/0,172.25.4.42,10.0.0.0/8,172.25.4.254,172.25.0.0/16,172.25.4.254,172.28.0.0/16,172.25.4.254
+          dhcp-option=option:mtu,9000
+          dhcp-option=option:ntp-server,10.202.18.18
+    # ironic self maintained HA IP
+    ipAddress: "172.25.4.2"
+    ipAddressManager: "keepalived"
+    interface: "bond0"
+  tls:
+    certificateName: ironic-cert

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trafficserver
+  namespace: trafficserver
+spec:
+  replicas: 1
+  # Recreate is required: openebs-hostpath PVC is ReadWriteOnce; RollingUpdate
+  # would deadlock because the old pod holds the PVC while the new pod waits for it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: trafficserver
+  template:
+    metadata:
+      labels:
+        app: trafficserver
+    spec:
+      containers:
+        - name: trafficserver
+          image: hub.docker.com/trafficserver/trafficserver:latest
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "echo '1000' > /tmp/ca-serial.txt && chmod 666 /tmp/ca-serial.txt && mkdir -p /tmp/certifier"]
+          ports:
+            - name: proxy
+              containerPort: 8080
+            - name: ssl
+              containerPort: 8443
+          volumeMounts:
+            # Cache volume — must match storage.config path
+            - name: cache
+              mountPath: /opt/var/trafficserver
+            # Config files mounted individually to avoid clobbering defaults
+            - name: config
+              mountPath: /opt/etc/trafficserver/records.yaml
+              subPath: records.yaml
+            - name: config
+              mountPath: /opt/etc/trafficserver/cache.config
+              subPath: cache.config
+            - name: config
+              mountPath: /opt/etc/trafficserver/storage.config
+              subPath: storage.config
+            - name: config
+              mountPath: /opt/etc/trafficserver/plugin.config
+              subPath: plugin.config
+            - name: config
+              mountPath: /opt/etc/trafficserver/ip_allow.yaml
+              subPath: ip_allow.yaml
+            - name: config
+              mountPath: /opt/etc/trafficserver/ssl_multicert.config
+              subPath: ssl_multicert.config
+            - name: config
+              mountPath: /opt/etc/trafficserver/sni.yaml
+              subPath: sni.yaml
+            # CA cert for certifier.so SSL bumping
+            - name: ca-cert
+              mountPath: /opt/etc/trafficserver/ca
+            # Default server cert for Traffic Server's SSL listener (8443)
+            - name: server-cert
+              mountPath: /opt/etc/trafficserver/cert
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: trafficserver-cache
+        - name: config
+          configMap:
+            name: trafficserver-config
+        - name: ca-cert
+          secret:
+            secretName: trafficserver-ca
+        - name: server-cert
+          secret:
+            secretName: trafficserver-server-cert

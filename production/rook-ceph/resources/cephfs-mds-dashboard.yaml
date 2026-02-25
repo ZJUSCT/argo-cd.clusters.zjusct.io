@@ -1,0 +1,463 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cephfs-mds-dashboard
+  namespace: rook-ceph
+  labels:
+    grafana_dashboard: "1"
+data:
+  cephfs-mds.json: |
+    {
+      "__inputs": [
+        {
+          "name": "DS_PROMETHEUS",
+          "label": "Prometheus",
+          "type": "datasource",
+          "pluginId": "prometheus",
+          "pluginName": "Prometheus"
+        }
+      ],
+      "__requires": [
+        {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "7.4.0"},
+        {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"},
+        {"type": "panel", "id": "stat", "name": "Stat", "version": ""},
+        {"type": "panel", "id": "timeseries", "name": "Time series", "version": ""},
+        {"type": "panel", "id": "table", "name": "Table", "version": ""}
+      ],
+      "title": "CephFS MDS Performance",
+      "uid": "cephfs-mds-perf",
+      "description": "CephFS Metadata Server (MDS) performance metrics — latency, cache, and client sessions",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "timezone": "browser",
+      "tags": ["ceph", "cephfs", "mds"],
+      "templating": {
+        "list": [
+          {
+            "name": "datasource",
+            "label": "Datasource",
+            "type": "datasource",
+            "query": "prometheus",
+            "refresh": 1,
+            "current": {}
+          },
+          {
+            "name": "mds",
+            "label": "MDS Daemon",
+            "type": "query",
+            "datasource": {"type": "prometheus", "uid": "${datasource}"},
+            "query": "label_values(ceph_mds_request, ceph_daemon)",
+            "refresh": 2,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".*",
+            "current": {"selected": true, "text": "All", "value": "$__all"},
+            "sort": 1
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Journal Write Latency (avg)",
+          "description": "MDS journal flush latency — the dominant bottleneck for all mutating operations",
+          "type": "stat",
+          "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(rate(ceph_mds_log_jlat_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_log_jlat_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "jlat",
+              "refId": "A"
+            }
+          ],
+          "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "textMode": "auto", "colorMode": "background"},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 0.010},
+                  {"color": "red", "value": 0.020}
+                ]
+              },
+              "color": {"mode": "thresholds"}
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "MDS Request Rate",
+          "type": "stat",
+          "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(rate(ceph_mds_request{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "req/s",
+              "refId": "A"
+            }
+          ],
+          "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "value"},
+          "fieldConfig": {"defaults": {"unit": "reqps", "color": {"mode": "fixed", "fixedColor": "blue"}}}
+        },
+        {
+          "id": 3,
+          "title": "Connected Clients",
+          "type": "stat",
+          "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(ceph_mds_sessions_sessions_open{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "clients",
+              "refId": "A"
+            }
+          ],
+          "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "value"},
+          "fieldConfig": {"defaults": {"unit": "short", "color": {"mode": "fixed", "fixedColor": "purple"}}}
+        },
+        {
+          "id": 4,
+          "title": "Slow Replies (cumulative)",
+          "description": "Number of MDS replies that took longer than mds_slow_request_warn_age (default 30s)",
+          "type": "stat",
+          "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(ceph_mds_slow_reply{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "slow replies",
+              "refId": "A"
+            }
+          ],
+          "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background"},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 1},
+                  {"color": "red", "value": 10}
+                ]
+              },
+              "color": {"mode": "thresholds"}
+            }
+          }
+        },
+        {
+          "id": 10,
+          "title": "MDS Journal Write Latency",
+          "description": "Time for the MDS journal (metadata journal on RADOS) to flush each entry. This is the serialization point for all mutating operations — rename, setattr, rmdir, unlink.",
+          "type": "timeseries",
+          "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "rate(ceph_mds_log_jlat_sum{ceph_daemon=~\"$mds\"}[5m]) / rate(ceph_mds_log_jlat_count{ceph_daemon=~\"$mds\"}[5m])",
+              "legendFormat": "{{ceph_daemon}} jlat",
+              "refId": "A"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "custom": {"lineWidth": 2},
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 0.010},
+                  {"color": "red", "value": 0.020}
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 11,
+          "title": "MDS Average Reply Latency",
+          "description": "End-to-end latency for all MDS client requests combined",
+          "type": "timeseries",
+          "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "rate(ceph_mds_reply_latency_sum{ceph_daemon=~\"$mds\"}[5m]) / rate(ceph_mds_reply_latency_count{ceph_daemon=~\"$mds\"}[5m])",
+              "legendFormat": "{{ceph_daemon}} reply",
+              "refId": "A"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "s", "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 20,
+          "title": "Mutation Operation Latency",
+          "description": "Per-operation avg latency for write/mutating operations. rename and setattr are journal-bound and reflect RADOS metadata pool write latency.",
+          "type": "timeseries",
+          "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(rate(ceph_mds_server_req_rename_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_rename_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "rename",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_setattr_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_setattr_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "setattr",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_rmdir_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_rmdir_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "rmdir",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_unlink_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_unlink_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "unlink",
+              "refId": "D"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_mkdir_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_mkdir_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "mkdir",
+              "refId": "E"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_create_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_create_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "create",
+              "refId": "F"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_symlink_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_symlink_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "symlink",
+              "refId": "G"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "s", "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 21,
+          "title": "Read Operation Latency",
+          "description": "Per-operation avg latency for read/lookup operations. High readdir latency means directory entries are being re-fetched from RADOS (cache miss).",
+          "type": "timeseries",
+          "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(rate(ceph_mds_server_req_readdir_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_readdir_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "readdir",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_getattr_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_getattr_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "getattr",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_lookup_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_lookup_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "lookup",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_server_req_open_latency_sum{ceph_daemon=~\"$mds\"}[5m])) / sum(rate(ceph_mds_server_req_open_latency_count{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "open",
+              "refId": "D"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "s", "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 30,
+          "title": "Inode Cache",
+          "description": "Loaded inodes (in cache) vs eviction rate. High eviction rate relative to loaded inodes = cache thrashing → increase mds_cache_memory_limit.",
+          "type": "timeseries",
+          "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(ceph_mds_inodes{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "inodes loaded",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(ceph_mds_inodes_pinned{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "inodes pinned",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(ceph_mds_inodes_with_caps{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "inodes with caps",
+              "refId": "C"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "short", "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 31,
+          "title": "Directory Fetch Rate (Cache Miss)",
+          "description": "Rate at which the MDS must re-fetch directory contents from RADOS because they are not in cache. Directly drives readdir latency.",
+          "type": "timeseries",
+          "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(rate(ceph_mds_dir_fetch_complete{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "dir_fetch/s (complete)",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_dir_commit{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "dir_commit/s",
+              "refId": "B"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "ops", "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 40,
+          "title": "Cap Operations",
+          "description": "Capability grant/revoke rates. High revoke rate means the MDS is reclaiming caps from clients, which can stall client operations.",
+          "type": "timeseries",
+          "gridPos": {"x": 0, "y": 28, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(rate(ceph_mds_ceph_cap_op_grant{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "cap grant/s",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_ceph_cap_op_revoke{ceph_daemon=~\"$mds\"}[5m]))",
+              "legendFormat": "cap revoke/s",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(ceph_mds_caps{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "total caps held",
+              "refId": "C"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "short", "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 41,
+          "title": "Session Load",
+          "description": "MDS session load and stale session count. Stale sessions hold caps but are unresponsive, causing MDS to wait before reclaiming resources.",
+          "type": "timeseries",
+          "gridPos": {"x": 12, "y": 28, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(ceph_mds_sessions_sessions_open{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "sessions open",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(ceph_mds_sessions_sessions_stale{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "sessions stale",
+              "refId": "B"
+            },
+            {
+              "expr": "avg(ceph_mds_sessions_average_load{ceph_daemon=~\"$mds\"})",
+              "legendFormat": "avg session load",
+              "refId": "C"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "short", "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 50,
+          "title": "Per-Client Metadata Latency (Top 20)",
+          "description": "Client-reported average metadata latency per client ID. High values on specific clients can indicate kernel client issues, network problems, or that the client is running the heavy workload.",
+          "type": "table",
+          "gridPos": {"x": 0, "y": 36, "w": 24, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "topk(20, max by (client, ceph_daemon) (ceph_mds_client_metrics_cephfs_avg_metadata_latency{ceph_daemon=~\"$mds\"}))",
+              "legendFormat": "{{ceph_daemon}} / {{client}}",
+              "refId": "A",
+              "instant": true
+            }
+          ],
+          "options": {"sortBy": [{"displayName": "Value", "desc": true}]},
+          "fieldConfig": {
+            "defaults": {"unit": "s"},
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "ceph_daemon"}, "properties": [{"id": "displayName", "value": "MDS"}]},
+              {"matcher": {"id": "byName", "options": "client"}, "properties": [{"id": "displayName", "value": "Client"}]},
+              {"matcher": {"id": "byName", "options": "Value"}, "properties": [{"id": "displayName", "value": "Avg Metadata Latency"}]}
+            ]
+          },
+          "transformations": [{"id": "sortBy", "options": {"fields": [{"displayName": "Value", "desc": true}]}}]
+        },
+        {
+          "id": 51,
+          "title": "Client Cap Hit/Miss Ratio",
+          "description": "Per-client capability and dentry lease hit rates. A low hit rate means clients are frequently going to MDS for cap grants rather than serving from local cache.",
+          "type": "timeseries",
+          "gridPos": {"x": 0, "y": 44, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "sum(rate(ceph_mds_client_metrics_cephfs_cap_hits{ceph_daemon=~\"$mds\"}[5m])) / (sum(rate(ceph_mds_client_metrics_cephfs_cap_hits{ceph_daemon=~\"$mds\"}[5m])) + sum(rate(ceph_mds_client_metrics_cephfs_cap_miss{ceph_daemon=~\"$mds\"}[5m])))",
+              "legendFormat": "cap hit ratio",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(ceph_mds_client_metrics_cephfs_dentry_lease_hits{ceph_daemon=~\"$mds\"}[5m])) / (sum(rate(ceph_mds_client_metrics_cephfs_dentry_lease_hits{ceph_daemon=~\"$mds\"}[5m])) + sum(rate(ceph_mds_client_metrics_cephfs_dentry_lease_miss{ceph_daemon=~\"$mds\"}[5m])))",
+              "legendFormat": "dentry lease hit ratio",
+              "refId": "B"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1, "custom": {"lineWidth": 2}}}
+        },
+        {
+          "id": 52,
+          "title": "MDS Memory Usage",
+          "description": "RSS memory consumed by MDS processes. Compare against mds_cache_memory_limit (currently 2GB per daemon). If RSS approaches the limit, the cache is being evicted and inodes/dirfrags are re-fetched from RADOS on every access.",
+          "type": "timeseries",
+          "gridPos": {"x": 12, "y": 44, "w": 12, "h": 8},
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "targets": [
+            {
+              "expr": "ceph_mds_mem_rss{ceph_daemon=~\"$mds\"}",
+              "legendFormat": "{{ceph_daemon}} RSS",
+              "refId": "A"
+            }
+          ],
+          "options": {"tooltip": {"mode": "multi"}},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": {"lineWidth": 2},
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 1610612736},
+                  {"color": "red", "value": 1932735283}
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }

@@ -1,0 +1,20 @@
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: litellm-env-configmap
+data:
+  # https://docs.litellm.ai/docs/proxy/debugging
+  JSON_LOGS: "True"
+  LITELLM_LOG: "DEBUG"
+  # HTTP Proxy Request Debug
+  # https://docs.litellm.ai/docs/guides/security_settings
+  # HTTPS_PROXY: 'http://username:password@proxy_uri:port'
+  AIOHTTP_TRUST_ENV: 'True'
+  # OpenTelemetry configuration
+  # https://docs.litellm.ai/docs/observability/opentelemetry_integration
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-collector.opentelemetry.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/json"
+  OTEL_SERVICE_NAME: "litellm"
+  LITELLM_OTEL_INTEGRATION_ENABLE_METRICS: "true"
+  LITELLM_OTEL_INTEGRATION_ENABLE_EVENTS: "true"

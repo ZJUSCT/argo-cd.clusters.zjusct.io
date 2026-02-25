@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumBGPAdvertisement
+metadata:
+  name: lb-ip-advertisement
+  labels:
+    advertise: "bgp"
+spec:
+  advertisements:
+  - advertisementType: "Service"
+    service:
+      addresses:
+      - LoadBalancerIP
+    selector:
+      matchExpressions:
+      - key: somekey
+        operator: NotIn
+        values: ['never-used-value']

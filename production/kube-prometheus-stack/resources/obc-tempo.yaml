@@ -1,0 +1,8 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: tempo-data
+  namespace: kube-prometheus-stack
+spec:
+  storageClassName: ceph-bucket
+  bucketName: tempo-data

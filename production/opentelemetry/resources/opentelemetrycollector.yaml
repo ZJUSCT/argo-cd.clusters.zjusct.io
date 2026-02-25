@@ -1,0 +1,44 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+  namespace: opentelemetry
+spec:
+  image: "harbor.clusters.zjusct.io/ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.146.1"
+  mode: deployment
+  replicas: 1
+  config:
+    receivers:
+      otlp:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4318
+          grpc:
+            endpoint: 0.0.0.0:4317
+    exporters:
+      debug:
+        verbosity: detailed
+        sampling_initial: 5
+        sampling_thereafter: 200
+      otlp_grpc/tempo:
+        endpoint: "tempo.kube-prometheus-stack:4317"
+        tls:
+          insecure: true
+      otlp_http/loki:
+        endpoint: "http://loki.kube-prometheus-stack:3100"
+        logs_endpoint: "http://loki.kube-prometheus-stack:3100/otlp/v1/logs"
+        tls:
+          insecure: true
+      prometheusremotewrite:
+        endpoint: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack:9090/api/v1/write"
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          exporters: [debug, prometheusremotewrite]
+        traces:
+          receivers: [otlp]
+          exporters: [debug, otlp_grpc/tempo]
+        logs:
+          receivers: [otlp]
+          exporters: [debug, otlp_http/loki]

@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openclaw-config
+  namespace: dev-openclaw
+  labels:
+    app: openclaw
+data:
+  openclaw.json: |
+    {
+      "gateway": {
+        "port": 18789,
+        "mode": "local",
+        "auth": {
+          "mode": "token",
+          "token": "${OPENCLAW_GATEWAY_TOKEN}"
+        },
+        "trustedProxies": ["10.0.0.1"],
+        "controlUi": {
+          "enabled": true,
+          "allowInsecureAuth": true
+        }
+      },
+      "browser": {
+        "enabled": true,
+        "defaultProfile": "default",
+        "profiles": {
+          "default": {
+            "cdpUrl": "http://localhost:9222",
+            "color": "#4285F4"
+          }
+        }
+      },
+      "agents": {
+        "defaults": {
+          "workspace": "/home/node/.openclaw/workspace",
+          "model": {
+            "primary": "openrouter/openrouter/auto",
+            "fallbacks": [
+              "openrouter/anthropic/claude-haiku-3.5",
+              "anthropic/claude-sonnet-4-5"
+            ]
+          },
+          "models": {
+            "openrouter/openrouter/auto": {},
+            "openrouter/anthropic/claude-haiku-3.5": {},
+            "anthropic/claude-sonnet-4-5": {}
+          },
+          "userTimezone": "Asia/Shanghai",
+          "timeoutSeconds": 600,
+          "maxConcurrent": 1
+        },
+        "list": [
+          {
+            "id": "main",
+            "default": true,
+            "identity": {
+              "name": "OpenClaw",
+              "emoji": "🦞"
+            }
+          }
+        ]
+      },
+      "session": {
+        "scope": "per-sender",
+        "store": "/home/node/.openclaw/sessions",
+        "reset": {
+          "mode": "idle",
+          "idleMinutes": 60
+        }
+      },
+      "logging": {
+        "level": "info",
+        "consoleLevel": "info",
+        "consoleStyle": "compact",
+        "redactSensitive": "tools"
+      },
+      "tools": {
+        "profile": "full",
+        "web": {
+          "search": {
+            "enabled": false
+          },
+          "fetch": {
+            "enabled": true
+          }
+        }
+      },
+      "channels": {
+        "qqbot": {
+          "enabled": true,
+          "appId": "${QQBOT_APP_ID}",
+          "clientSecret": "${QQBOT_APP_SECRET}"
+        }
+      }
+    }

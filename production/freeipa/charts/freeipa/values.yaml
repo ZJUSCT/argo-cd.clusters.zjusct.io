@@ -1,0 +1,32 @@
+ipa:
+  replicas: 1
+  image:
+    repository: quay.io/freeipa/freeipa-server
+    tag: fedora-rawhide-4.13.1
+  server:
+    adminEmail: mail@example.com
+  domain: example.com
+  timezone: Asia/Shanghai
+
+  # Secret configuration - reference to external secret
+  secrets:
+    # Set to true to create a secret with random passwords, false to use existing secret
+    create: false
+    name: freeipa-admin-secrets
+    adminPasswordKey: admin-password
+    directoryPasswordKey: directory-password
+
+# Storage configuration
+storage:
+  storageClassName: ""
+  size: 10Gi
+
+# Network services configuration for LoadBalancer IPs
+network:
+  services:
+    ipa-01:
+      ipv4: ""  # Configure your IPv4 address here
+      ipv6: ""  # Configure your IPv6 address here
+    ipa-02:
+      ipv4: ""
+      ipv6: ""

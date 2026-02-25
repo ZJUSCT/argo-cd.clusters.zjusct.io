@@ -1,0 +1,22 @@
+# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+
+# https://github.com/bitnami-labs/sealed-secrets/releases
+resources:
+  - https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.34.0/controller.yaml
+
+helmCharts:
+  - name: coredns
+    repo: https://coredns.github.io/helm
+    includeCRDs: true
+    releaseName: coredns
+    version: 1.45.2
+    namespace: kube-system
+    valuesFile: values/coredns-1.45.2.yaml
+images:
+  - name: coredns/coredns
+    newName: docker.io/coredns/coredns
+transformers:
+  - ../../image-prefix.yaml

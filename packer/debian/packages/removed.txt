@@ -1,0 +1,12 @@
+ibverbs-providers
+ibverbs-utils
+infiniband-diags
+libfabric1
+libibmad5
+libibumad3
+libibverbs1
+mstflint
+opensm
+perftest
+rdma-core
+rdmacm-utils

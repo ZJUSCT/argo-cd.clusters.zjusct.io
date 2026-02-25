@@ -1,0 +1,44 @@
+# Config Management Plugin: Helm + Kustomize
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/config-management-plugins/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cmp-plugin
+  namespace: argo-cd
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: kustomized-helm
+    spec:
+      version: v1.0
+      init:
+        command: [sh, -c]
+        args:
+          - |
+            echo "Searching for Helm charts with dependencies..."
+            find . -name Chart.yaml -type f | while read chart; do
+              chartdir=$(dirname "$chart")
+              echo "Found chart at: $chartdir"
+              if grep -q "^dependencies:" "$chart"; then
+                echo "Building dependencies for chart in $chartdir"
+                (cd "$chartdir" && helm dependency build)
+              else
+                echo "No dependencies in $chartdir"
+              fi
+            done
+      generate:
+        command: [sh, -c]
+        args:
+          - |
+            if [ -f "kustomization.yaml" ] || [ -f "kustomization.yml" ] || [ -f "Kustomization" ]; then
+              echo "Running kustomize build with helm support..." >&2
+              kustomize build . --enable-helm --load-restrictor=LoadRestrictionsNone
+            else
+              echo "Error: No kustomization.yaml found" >&2
+              exit 1
+            fi
+      discover:
+        find:
+          glob: "**/kustomization.yaml"

@@ -1,0 +1,23 @@
+# Self-signed issuer for bootstrapping the CA
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: squid-selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+# CA Certificate for SSL bumping
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: squid-ca
+spec:
+  commonName: ZJUSCT Squid Proxy CA
+  isCA: true
+  issuerRef:
+    kind: Issuer
+    name: squid-selfsigned-issuer
+  secretName: squid-ca
+  privateKey:
+    algorithm: RSA
+    size: 2048

@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: opentelemetry
+resources:
+- resources/namespace.yaml
+- resources/opentelemetrycollector.yaml
+- resources/httproute.yaml
+- resources/grpcroute.yaml
+helmCharts:
+- name: opentelemetry-operator
+  repo: https://open-telemetry.github.io/opentelemetry-helm-charts
+  includeCRDs: true
+  releaseName: opentelemetry-operator
+  valuesFile: values/opentelemetry-operator-0.105.1.yaml
+  namespace: opentelemetry
+  version: 0.105.1
+- name: opentelemetry-ebpf-instrumentation
+  repo: https://open-telemetry.github.io/opentelemetry-helm-charts
+  includeCRDs: true
+  releaseName: opentelemetry-ebpf-instrumentation
+  valuesFile: values/opentelemetry-ebpf-instrumentation-0.4.3.yaml
+  namespace: opentelemetry
+  version: 0.4.3
+transformers:
+  - ../../image-prefix.yaml

@@ -1,0 +1,16 @@
+# https://github.com/CloudPirates-io/helm-charts/blob/main/charts/keycloak/values.yaml
+keycloak:
+  hostname: "https://keycloak.clusters.zjusct.io"
+  hostnameAdmin: "https://keycloak.clusters.zjusct.io"
+ingress:
+  enabled: true
+  hosts:
+    - host: keycloak.clusters.zjusct.io
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: keycloak.s.zjusct.io
+      paths:
+        - path: /
+          pathType: Prefix
+  className: "nginx"

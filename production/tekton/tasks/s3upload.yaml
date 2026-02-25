@@ -1,0 +1,63 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: s3upload
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.17.0"
+    tekton.dev/categories: Storage
+    tekton.dev/tags: s3,upload
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: >-
+    Upload a build artifact to Rook Ceph RGW object storage using MinIO Client
+    (mc). Credentials and endpoint are loaded from the ObjectBucketClaim-generated
+    Secret and ConfigMap named "packer-images" in the tekton namespace.
+  params:
+    - name: MC_IMAGE
+      description: MinIO Client container image
+      type: string
+      default: "minio/mc:latest"
+    - name: FILENAME
+      description: >-
+        Exact path (relative to the workspace root) to the file to upload
+        (e.g. images/cloud-init.qcow2). The task will check existence
+        and upload that file directly; no searching is performed.
+      type: string
+    - name: S3_PREFIX
+      description: >-
+        Destination prefix inside the bucket, with trailing slash
+        (e.g. ubuntu/). Leave empty to place files at bucket root.
+      type: string
+      default: ""
+  workspaces:
+    - name: source
+      description: Workspace containing the build artifact to upload
+  steps:
+    - name: upload
+      image: $(params.MC_IMAGE)
+      workingDir: $(workspaces.source.path)
+      envFrom:
+        - configMapRef:
+            name: packer-images
+        - secretRef:
+            name: packer-images
+      script: |
+        #!/bin/sh
+        set -xeu
+
+        SRC="$(params.FILENAME)"
+        if [ ! -f "${SRC}" ]; then
+          echo "ERROR: No file named '${SRC}' found under $(workspaces.source.path)"
+          exit 1
+        fi
+        echo "Found: ${SRC}"
+        ls -lh "${SRC}"
+
+
+        mc alias set ceph "http://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
+
+        mc cp "${SRC}" "ceph/${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
+        echo "Uploaded: s3://${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
+        mc ls ceph/${BUCKET_NAME}/$(params.S3_PREFIX) | tail -n 20

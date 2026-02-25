@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kubelet-csr-approver
+resources:
+- resources/namespace.yaml
+helmCharts:
+- name: kubelet-csr-approver
+  repo: https://postfinance.github.io/kubelet-csr-approver
+  includeCRDs: true
+  releaseName: kubelet-csr-approver
+  valuesFile: values/kubelet-csr-approver-1.2.13.yaml
+  version: 1.2.13
+  namespace: kubelet-csr-approver
+images:
+  - name: busybox
+    newName: docker.io/library/busybox
+transformers:
+  - ../../image-prefix.yaml

@@ -1,0 +1,28 @@
+# Alias Service for Envoy Gateway proxy
+# This provides a stable DNS name for the envoy proxy pods
+# Used by CoreDNS rewrite to enable pod-to-gateway connectivity
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy-proxy
+  namespace: envoy-gateway
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: proxy
+    app.kubernetes.io/name: envoy
+    gateway.envoyproxy.io/owning-gateway-name: envoy-gateway
+    gateway.envoyproxy.io/owning-gateway-namespace: envoy-gateway
+  ports:
+  - name: http
+    port: 80
+    targetPort: 10080
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 10443
+    protocol: TCP
+  - name: tls-passthrough
+    port: 444
+    targetPort: 10444
+    protocol: TCP

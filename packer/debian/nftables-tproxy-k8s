@@ -1,0 +1,175 @@
+#!/usr/sbin/nft -f
+
+# TProxy nftables 配置 - Cilium eBPF 兼容版（Keepalived HA）
+#
+# Cilium eBPF 模式下的流量处理：
+# - Socket-LB (cgroup eBPF) 在 netfilter 之前处理 ClusterIP 访问
+# - TC ingress eBPF 在 netfilter PREROUTING 之前处理 NodePort/LB 入向流量
+# - Pod 出向流量仍经过 netfilter，需要排除
+#
+# 保留地址说明：
+#   172.16.0.0/12 已覆盖所有 K8S 相关网段：
+#   - 172.25.4.x/24  节点 IP 及 Keepalived VIP (172.25.4.1)
+#   - 172.26.0.0/16  K8S Pod CIDR
+#   - 172.27.0.0/16  K8S Service CIDR
+#   无需单独列出上述网段，reserved_ip 一并排除
+#
+# HA 设计（Keepalived VIP = TPROXY_VIP）：
+#   tproxy 规则绑定到 TPROXY_VIP 地址的本地 socket：
+#   - 持有 VIP 的节点：172.25.4.1 为本地地址，socket 查找成功，tproxy 生效
+#   - 非 VIP 节点（tproxy 绑定到 VIP）：无本地 socket，规则静默跳过，流量直连
+#   - 非 VIP 节点（tproxy 绑定到 0.0.0.0）：0.0.0.0 通配匹配，各节点独立代理本地流量
+#   VIP 漂移时，新 VIP 节点的 tproxy 自动接管入向流量
+#
+# 规则逻辑：
+# 1. TProxy 自身接口 → 直连（防环路）
+# 2. Pod 源地址 → 直连（避免代理 K8S 工作负载）
+# 3. 本地/组播/广播地址 → 直连
+# 4. 回复包 → 直连
+# 5. 保留地址目标 → 直连（含节点/VIP/Pod/Service 网段）
+# 6. DNS → 直连
+# 7. 其余 TCP/UDP → TProxy 代理
+
+define TPROXY_VIP  = 172.25.4.1
+define TPROXY_PORT = 7892
+define FAKE_IP     = 198.18.0.0/16
+
+table inet tproxy {
+    # K8S Pod 网段（源地址检查）
+    # Pod 发出的流量直连，避免代理 K8S 工作负载
+    # 注：172.26.0.0/16 在 reserved_ip (172.16.0.0/12) 内，但这是 src 检查，性质不同
+    set k8s_pod_cidr {
+        type ipv4_addr
+        flags interval
+        elements = {
+            172.26.0.0/16,
+        }
+    }
+
+    # 保留地址（目标地址检查）
+    # 172.16.0.0/12 覆盖 172.25.4.x (节点/VIP)、172.26.0.0/16 (Pod)、172.27.0.0/16 (Service)
+    set reserved_ip {
+        type ipv4_addr
+        flags interval
+        auto-merge
+        elements = {
+            0.0.0.0/8,
+            10.0.0.0/8,
+            100.64.0.0/10,
+            127.0.0.0/8,
+            169.254.0.0/16,
+            172.16.0.0/12,
+            192.168.0.0/16,
+            224.0.0.0/4,
+            240.0.0.0/4
+        }
+    }
+
+    set reserved_ip6 {
+        type ipv6_addr
+        flags interval
+        auto-merge
+        elements = {
+            ::,
+            ::1,
+            ::ffff:0.0.0.0/96,
+            64:ff9b::/96,
+            100::/64,
+            2001::/32,
+            2001:db8::/32,
+            fc00::/7,
+            fe80::/10,
+            ff00::/8
+        }
+    }
+
+    # TProxy 代理接口（防环路）
+    set tproxy_ifaces {
+        type iface_name
+        elements = {
+            "tproxy",
+            "mihomo",
+        }
+    }
+
+    # TProxy 核心链
+    chain do_tproxy {
+        # 1. 排除 TProxy 自身接口（防环路）
+        meta l4proto { tcp, udp } iifname @tproxy_ifaces counter accept
+
+        # 2. 排除 K8S Pod 流量（源地址检查）
+        #    Pod 发出的任何流量都直连
+        meta l4proto { tcp, udp } ip saddr @k8s_pod_cidr counter return
+
+        # 3. 排除本地/组播/广播地址
+        fib daddr type { local, broadcast, anycast, multicast } counter return
+
+        # 4. 排除回复包
+        ct direction reply counter return
+
+        # 5. 排除保留地址（含 K8S 节点/VIP/Pod/Service 网段）
+        ip daddr @reserved_ip counter return
+        ip6 daddr @reserved_ip6 counter return
+
+        # 6. 排除 DNS（不劫持，走正常路由）
+        udp dport 53 counter return
+        udp6 dport 53 counter return
+
+        # 7. 标记流量并 TProxy（绑定到 VIP）
+        #    tproxy ip to ADDR:PORT 查找绑定到 ADDR（或 0.0.0.0）的本地 socket
+        #    - 持有 VIP 节点：172.25.4.1 为本地地址，代理生效
+        #    - 非 VIP 节点（绑定 VIP）：无 socket，静默跳过，流量直连
+        #    - 非 VIP 节点（绑定 0.0.0.0）：通配匹配，各节点独立代理
+        meta l4proto { tcp, udp } meta mark set 1 tproxy ip to $TPROXY_VIP:$TPROXY_PORT counter accept
+    }
+
+    # Hook 链
+    chain prerouting_tproxy {
+        type filter hook prerouting priority mangle; policy accept;
+        jump do_tproxy
+    }
+}
+
+# ==================== 使用说明 ====================
+#
+# 加载规则：
+#   sudo nft -f /path/to/nftables-tproxy-k8s
+#
+# 配置路由（必须，每节点执行）：
+#   sudo ip -4 rule add fwmark 1 lookup 100
+#   sudo ip -4 route add local 0.0.0.0/0 dev lo table 100
+#
+# tproxy 进程绑定地址选择：
+#   绑定到 VIP（推荐 HA 模式）：
+#     仅持有 VIP 的节点代理流量，与 Keepalived 联动
+#     需在 Keepalived notify_master/notify_backup 脚本中启停 tproxy
+#   绑定到 0.0.0.0（分布式模式）：
+#     所有节点各自代理本地流量，VIP 节点额外处理入向流量
+#
+# 验证：
+#   sudo nft list table inet tproxy
+#
+# 删除：
+#   sudo nft delete table inet tproxy
+#
+# ==================== 与 Cilium eBPF 的协作 ====================
+#
+# 流量路径：
+#
+# Pod → ClusterIP:
+#   connect() → Socket-LB (cgroup eBPF) → 目标已重写为 Pod IP
+#             → netfilter → TC egress → Pod
+#   nftables 看到的是 Pod IP（在 reserved_ip 172.16.0.0/12 内），直连
+#
+# Pod → 互联网：
+#   connect() → netfilter PREROUTING → 源地址命中 k8s_pod_cidr → return（直连）
+#
+# NodePort 入向：
+#   NIC → TC ingress (Cilium eBPF，先于 netfilter) → 目标已 DNAT 为 Pod IP
+#   nftables PREROUTING 看到的目标是 Pod IP（在 reserved_ip 内），直连
+#
+# 节点进程 → 互联网：
+#   不命中任何排除规则 → TProxy 代理（经 TPROXY_VIP:TPROXY_PORT）
+#
+# VRRP 心跳（Keepalived）：
+#   目标 224.0.0.18 属于组播（224.0.0.0/4 在 reserved_ip 内），直连，不受影响

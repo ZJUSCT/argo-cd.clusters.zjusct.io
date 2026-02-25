@@ -1,0 +1,165 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cephfs-mds-performance
+  namespace: rook-ceph
+  labels:
+    prometheus: rook-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: cephfs.mds.latency
+      interval: 30s
+      rules:
+        # ── Journal latency ──────────────────────────────────────────────────
+        # The MDS journal is the serialization point for all mutating ops.
+        # Sustained jlat > 20ms blocks rename/setattr/rmdir on the client.
+        - alert: CephMDSJournalLatencyWarning
+          expr: |
+            (
+              rate(ceph_mds_log_jlat_sum[5m])
+              /
+              rate(ceph_mds_log_jlat_count[5m])
+            ) > 0.020
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MDS {{ $labels.ceph_daemon }}: journal latency {{ $value | humanizeDuration }} (> 20ms)"
+            description: >
+              The MDS metadata journal flush latency is {{ $value | humanizeDuration }}.
+              This is the primary bottleneck for rename, setattr, rmdir, and mkdir operations.
+              Investigate: OSD write latency on the cephfs-metadata pool, BlueStore WAL placement,
+              and whether mds_cache_memory_limit is causing excessive RADOS round-trips.
+
+        - alert: CephMDSJournalLatencyCritical
+          expr: |
+            (
+              rate(ceph_mds_log_jlat_sum[5m])
+              /
+              rate(ceph_mds_log_jlat_count[5m])
+            ) > 0.100
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "MDS {{ $labels.ceph_daemon }}: journal latency {{ $value | humanizeDuration }} (> 100ms)"
+            description: >
+              MDS journal latency exceeds 100ms. All metadata mutations are severely stalled.
+              Check: ceph osd perf, OSD status, and network connectivity to metadata pool OSDs.
+
+        # ── Per-operation latency ────────────────────────────────────────────
+        - alert: CephMDSReaddirLatencyHigh
+          expr: |
+            (
+              rate(ceph_mds_server_req_readdir_latency_sum[5m])
+              /
+              rate(ceph_mds_server_req_readdir_latency_count[5m])
+            ) > 0.010
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MDS {{ $labels.ceph_daemon }}: readdir latency {{ $value | humanizeDuration }} (> 10ms)"
+            description: >
+              High readdir latency indicates directory entries are being re-fetched from RADOS
+              on each request (cache miss). Consider increasing mds_cache_memory_limit.
+              Current cache: check ceph_mds_mem_rss vs limit (2GB per daemon).
+
+        - alert: CephMDSRenameLatencyHigh
+          expr: |
+            (
+              rate(ceph_mds_server_req_rename_latency_sum[5m])
+              /
+              rate(ceph_mds_server_req_rename_latency_count[5m])
+            ) > 0.050
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MDS {{ $labels.ceph_daemon }}: rename latency {{ $value | humanizeDuration }} (> 50ms)"
+            description: >
+              Rename latency is journal-bound. This value closely tracks MDS journal latency.
+              If jlat is normal but rename is still slow, investigate MDS lock contention
+              via: ceph tell mds.<daemon> dump_blocked_ops
+
+        # ── Cache pressure ───────────────────────────────────────────────────
+        - alert: CephMDSCacheMemoryHigh
+          expr: |
+            ceph_mds_mem_rss > 1.75 * 1024 * 1024 * 1024
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MDS {{ $labels.ceph_daemon }}: RSS {{ $value | humanize1024 }}B (> 1.75 GiB of 2 GiB limit)"
+            description: >
+              MDS memory usage is approaching the 2GiB mds_cache_memory_limit.
+              The cache will start evicting inodes, causing dir_fetch (RADOS round-trips)
+              on subsequent access and increasing readdir/getattr latency.
+              Consider: ceph config set mds mds_cache_memory_limit 3758096384
+
+        # ── Client health ────────────────────────────────────────────────────
+        - alert: CephMDSStaleSessionsHigh
+          expr: |
+            sum by (ceph_daemon) (ceph_mds_sessions_sessions_stale) > 5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MDS {{ $labels.ceph_daemon }}: {{ $value }} stale client sessions"
+            description: >
+              Stale sessions hold capability locks but are unresponsive.
+              The MDS must wait for stale session timeout before reclaiming caps,
+              which blocks other clients from acquiring the same caps.
+              Identify stale clients: ceph tell mds.<daemon> session ls --format json-pretty
+
+        - alert: CephMDSSlowRepliesIncreasing
+          expr: |
+            increase(ceph_mds_slow_reply[10m]) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MDS {{ $labels.ceph_daemon }}: slow replies detected ({{ $value }} in last 10m)"
+            description: >
+              MDS is reporting requests that took longer than mds_slow_request_warn_age (default 30s).
+              This is a strong signal of severe MDS or OSD overload.
+              Run: ceph tell mds.<daemon> dump_blocked_ops
+
+    - name: cephfs.mds.recording
+      interval: 30s
+      rules:
+        # ── Recording rules — pre-compute expensive expressions ─────────────
+        - record: cephfs:mds_journal_latency:rate5m
+          expr: |
+            rate(ceph_mds_log_jlat_sum[5m])
+            /
+            rate(ceph_mds_log_jlat_count[5m])
+
+        - record: cephfs:mds_readdir_latency:rate5m
+          expr: |
+            rate(ceph_mds_server_req_readdir_latency_sum[5m])
+            /
+            rate(ceph_mds_server_req_readdir_latency_count[5m])
+
+        - record: cephfs:mds_rename_latency:rate5m
+          expr: |
+            rate(ceph_mds_server_req_rename_latency_sum[5m])
+            /
+            rate(ceph_mds_server_req_rename_latency_count[5m])
+
+        - record: cephfs:mds_rmdir_latency:rate5m
+          expr: |
+            rate(ceph_mds_server_req_rmdir_latency_sum[5m])
+            /
+            rate(ceph_mds_server_req_rmdir_latency_count[5m])
+
+        - record: cephfs:mds_unlink_latency:rate5m
+          expr: |
+            rate(ceph_mds_server_req_unlink_latency_sum[5m])
+            /
+            rate(ceph_mds_server_req_unlink_latency_count[5m])
+
+        - record: cephfs:mds_request_rate:rate5m
+          expr: |
+            sum by (ceph_daemon) (rate(ceph_mds_request[5m]))

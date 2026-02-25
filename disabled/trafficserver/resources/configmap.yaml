@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trafficserver-config
+  namespace: trafficserver
+data:
+  # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/records.yaml.en.html
+  records.yaml: |
+    records:
+      url_remap:
+        remap_required: 0
+      reverse_proxy:
+        enabled: 0
+      ssl:
+        server:
+          cert:
+            path: /opt/etc/trafficserver/cert
+          private_key:
+            path: /opt/etc/trafficserver/cert
+      http:
+        connect_ports: "443"
+        server_ports: "8080 8443:ssl"
+  ssl_multicert.config: |
+    dest_ip=* ssl_cert_name=tls.crt ssl_key_name=tls.key
+  # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/sni.yaml.en.html
+  sni.yaml: |
+    sni:
+    - fqdn: '*'
+      forward_route: localhost:8080
+  # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/cache.config.en.html
+  cache.config: |
+    url_regex=.*/(Packages|Sources)(\.bz2|\.gz|\.xz)?$ ttl-in-cache=0m
+    url_regex=.*/Release(\.gpg)?$                      ttl-in-cache=0m
+    url_regex=.*/InRelease$                            ttl-in-cache=0m
+    url_regex=.*/(Translation-.*)(\.bz2|\.gz|\.xz)?$   ttl-in-cache=0m
+  # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/storage.config.en.html
+  storage.config: |
+    var/trafficserver 256G
+  # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/plugin.config.en.html
+  # https://docs.trafficserver.apache.org/admin-guide/plugins/certifier.en.html
+  plugin.config: |
+    certifier.so --store=/tmp --max=1000 --sign-cert=/opt/etc/trafficserver/ca/tls.crt --sign-key=/opt/etc/trafficserver/ca/tls.key --sign-serial=/tmp/ca-serial.txt
+  # https://docs.trafficserver.apache.org/en/latest/admin-guide/files/ip_allow.yaml.en.html
+  ip_allow.yaml: |
+    ip_allow:
+      - apply: in
+        ip_addrs: 0/0
+        action: allow
+        methods: ALL
+      - apply: in
+        ip_addrs: ::/0
+        action: allow
+        methods: ALL

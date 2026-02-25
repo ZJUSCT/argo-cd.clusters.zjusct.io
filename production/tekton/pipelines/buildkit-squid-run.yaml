@@ -1,0 +1,35 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: buildkit-squid-run-
+  namespace: tekton
+spec:
+  pipelineRef:
+    name: buildkit
+  taskRunTemplate:
+    podTemplate:
+      securityContext:
+        fsGroup: 65532
+  params:
+    - name: git-url
+      value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+    - name: git-revision
+      value: "master"
+    - name: image-reference
+      value: "harbor.clusters.zjusct.io/library/squid:latest"
+    - name: dockerfile-path
+      value: "Dockerfile"
+    - name: context-dir
+      value: "production/squid/image"
+  workspaces:
+    - name: shared-data
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-credentials
+      secret:
+        secretName: harbor-credentials

@@ -1,0 +1,12 @@
+# Service Account Token for Headlamp dashboard access
+# This creates a long-lived token for the Helm-managed headlamp ServiceAccount
+# Users can retrieve the token with:
+#   kubectl get secret headlamp-token -n headlamp -o jsonpath='{.data.token}' | base64 -d
+apiVersion: v1
+kind: Secret
+metadata:
+  name: headlamp-token
+  namespace: headlamp
+  annotations:
+    kubernetes.io/service-account.name: headlamp
+type: kubernetes.io/service-account-token

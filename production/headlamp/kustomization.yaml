@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: headlamp
+resources:
+- resources/namespace.yaml
+- resources/token.yaml
+helmCharts:
+- name: headlamp
+  repo: https://kubernetes-sigs.github.io/headlamp/
+  includeCRDs: true
+  releaseName: headlamp
+  valuesFile: values/headlamp-0.40.0.yaml
+  version: 0.40.0
+  namespace: headlamp
+transformers:
+  - ../../image-prefix.yaml

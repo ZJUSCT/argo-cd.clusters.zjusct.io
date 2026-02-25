@@ -1,0 +1,70 @@
+{
+    "params": {
+        "host_set": "localhost",
+        "launch_by_daemon": false,
+        "version": "3.2",
+        "top": "/home/bowling/cephfs-bench/testdir",
+        "operation": "stat",
+        "files_per_thread": 1000,
+        "threads": 4,
+        "file_size": 4,
+        "file_size_distr": -1,
+        "files_per_dir": 100,
+        "share_dir": "N",
+        "fname_prefix": "",
+        "fname_suffix": "",
+        "hash_to_dir": "N",
+        "fsync_after_modify": "N",
+        "pause_between_files": "0.0",
+        "auto_pause": "False",
+        "cleanup_delay_usec_per_file": "0",
+        "finish_all_requests": "N",
+        "stonewall": "Y",
+        "verify_read": "Y",
+        "xattr_size": "0",
+        "xattr_count": "0",
+        "permute_host_dirs": "N",
+        "network_sync_dir": "/home/bowling/cephfs-bench/testdir/network_shared",
+        "min_directories_per_sec": 50,
+        "total_hosts": 1,
+        "startup_timeout": 4,
+        "host_timeout": 4
+    },
+    "results": {
+        "elapsed": 0.03954577445983887,
+        "files": 4000,
+        "records": 0,
+        "filesPerSec": 101473.15507123883,
+        "thread": {
+            "00": {
+                "elapsed": 0.0393216609954834,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 25431.275655289915
+            },
+            "01": {
+                "elapsed": 0.03954577445983887,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 25287.15175411625
+            },
+            "02": {
+                "elapsed": 0.03943991661071777,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 25355.02318299148
+            },
+            "03": {
+                "elapsed": 0.03937053680419922,
+                "files": 1000,
+                "records": 0,
+                "filesPerSec": 25399.70447884117
+            }
+        },
+        "totalhreads": 4,
+        "pctFilesDone": 100.0,
+        "startTime": 1771488638.2565403,
+        "status": "Success",
+        "date": "2026-02-19T08:10:38.000Z"
+    }
+}

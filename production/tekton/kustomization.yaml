@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tekton
+resources:
+  - https://infra.tekton.dev/tekton-releases/operator/latest/release.yaml
+  - resources/config.yaml
+  - resources/dashboard.yaml
+  - resources/httproute.yaml
+  - resources/buildkit-client-cert.yaml
+  - resources/sealedsecret-harbor.yaml
+  - resources/obc-packer-images.yaml
+  - tasks/buildkit.yaml
+  - tasks/run-script.yaml
+  - tasks/s3upload.yaml
+  - pipelines/buildkit.yaml
+  - pipelines/packer.yaml
+patches:
+  # https://github.com/tektoncd/operator/blob/main/docs/AirGapImageConfiguration.md
+  - target:
+      kind: Deployment
+      name: tekton-operator
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: TEKTON_REGISTRY_OVERRIDE
+          value: harbor.clusters.zjusct.io/ghcr.io
+transformers:
+  - ../../image-prefix.yaml

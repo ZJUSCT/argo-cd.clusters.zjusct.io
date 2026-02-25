@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: squid
+  labels:
+    app: squid
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # Required due to RWO PVC
+  selector:
+    matchLabels:
+      app: squid
+  template:
+    metadata:
+      labels:
+        app: squid
+    spec:
+      initContainers:
+        - name: init-squid
+          image: library/squid:latest # will be prefixed with harbor
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Initializing SSL certificate database..."
+              /usr/lib/squid/security_file_certgen -c -s /var/lib/squid/ssl_db -M 20MB
+              chown -R proxy:proxy /var/lib/squid/ssl_db
+              echo "Initializing cache directories..."
+              squid -z -f /etc/squid/squid.conf
+              echo "Initialization complete"
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+            - name: config
+              mountPath: /etc/squid/squid.conf
+              subPath: squid.conf
+              readOnly: true
+            - name: ca-cert
+              mountPath: /etc/squid/ca
+              readOnly: true
+            - name: ssl-db
+              mountPath: /var/lib/squid
+      containers:
+        - name: squid
+          image: library/squid:latest # will be prefixed with harbor
+          command: ["squid", "-NYCd", "1"]
+          ports:
+            - containerPort: 3128
+              name: proxy
+              protocol: TCP
+          env:
+            - name: TZ
+              value: "Asia/Shanghai"
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+            - name: config
+              mountPath: /etc/squid/squid.conf
+              subPath: squid.conf
+              readOnly: true
+            - name: ca-cert
+              mountPath: /etc/squid/ca
+              readOnly: true
+            - name: ssl-db
+              mountPath: /var/lib/squid
+          readinessProbe:
+            tcpSocket:
+              port: 3128
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3128
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "34Gi"
+              cpu: "8"
+            limits:
+              memory: "40Gi"
+              cpu: "16"
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: squid-cache
+        - name: config
+          configMap:
+            name: squid-config
+        - name: ca-cert
+          secret:
+            secretName: squid-ca
+        - name: ssl-db
+          emptyDir: {}

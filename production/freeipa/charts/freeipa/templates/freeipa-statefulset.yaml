@@ -1,0 +1,172 @@
+{{- range $i := until (int .Values.ipa.replicas) }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ipa-{{ printf "%02d" (add $i 1) }}
+spec:
+  selector:
+    matchLabels:
+      app: freeipa # has to match .spec.template.metadata.labels
+  serviceName: "freeipa"
+  replicas: 1
+  minReadySeconds: 10 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: freeipa # has to match .spec.selector.matchLabels
+    spec:
+      resources:
+        requests:
+          memory: "512Mi"
+          cpu: "250m"
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
+      terminationGracePeriodSeconds: 10
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - freeipa
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: freeipa
+          image: {{ $.Values.ipa.image.repository }}:{{ $.Values.ipa.image.tag }}
+          readinessProbe:
+            exec:
+              command: ["/usr/bin/systemctl", "is-active", "--quiet", "ipa"]
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /ipa/ui/
+              port: 443
+              scheme: HTTPS
+              httpHeaders:
+              - name: Host
+                value: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: 443
+              scheme: HTTPS
+              httpHeaders:
+              - name: Host
+                value: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
+            # NOTE: if initial installation fails, try increasing this value:
+            # FreeIPA uses systemd to start httpd, pki, etc., which can take a long time
+            failureThreshold: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+          env:
+            - name: DEBUG_NO_EXIT
+              value: "1"
+            - name: DEBUG_TRACE
+              value: "1"
+            - name: TZ
+              value: "{{ $.Values.ipa.timezone }}"
+            - name: IPA_SERVER_IP
+              value: no-update
+            - name: IPA_SERVER_HOSTNAME
+              value: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
+            - name: IPA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.ipa.secrets.name }}
+                  key: {{ $.Values.ipa.secrets.adminPasswordKey }}
+            - name: IPA_DM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.ipa.secrets.name }}
+                  key: {{ $.Values.ipa.secrets.directoryPasswordKey }}
+
+          {{- if eq $i 0 }}
+
+            - name: IPA_SERVER_INSTALL_OPTS
+              valueFrom:
+                secretKeyRef:
+                  name: ipa-{{ printf "%02d" (add $i 1) }}-install-secrets
+                  key: IPA_OPTIONS
+
+          {{- else }}
+
+            - name: IPA_SERVER_INSTALL_OPTS
+              valueFrom:
+                secretKeyRef:
+                  name: ipa-{{ printf "%02d" (add $i 1) }}-install-secrets
+                  key: IPA_REPLICA_OPTIONS
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.ipa.secrets.name }}
+                  key: {{ $.Values.ipa.secrets.adminPasswordKey }}
+          args: [ "ipa-replica-install" ]
+          {{- end }}
+
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - SYS_TIME
+                - NET_BIND_SERVICE
+            seccompProfile:
+              type: Unconfined
+          stdin: true
+          tty: true
+          ports:
+            - containerPort: 53 # dns
+            - containerPort: 53 # dns
+              protocol: UDP
+            - containerPort: 80 # http
+            - containerPort: 88 # kerberos
+            - containerPort: 88 # kerberos
+              protocol: UDP
+            - containerPort: 123 # ntp
+            - containerPort: 123 # ntp
+              protocol: UDP
+            - containerPort: 389 # ldap
+            - containerPort: 443 # https
+            - containerPort: 464 # kpasswd
+            - containerPort: 464 # kpasswd
+              protocol: UDP
+            - containerPort: 636 # ldaps
+          volumeMounts:
+            - name: ipa-data
+              mountPath: /data
+            - name: cgroups
+              mountPath: /sys/fs/cgroup
+            - name: run
+              mountPath: /run
+            - name: run-systemd
+              mountPath: /run/systemd
+            - name: tmp
+              mountPath: /tmp
+      hostname: "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
+      volumes:
+        - name: ipa-data
+          persistentVolumeClaim:
+            claimName: ipa-{{ printf "%02d" (add $i 1) }}-data
+        - name: cgroups
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: run
+          emptyDir:
+            medium: Memory
+        - name: run-systemd
+          emptyDir:
+            medium: Memory
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: data
+{{- end }}

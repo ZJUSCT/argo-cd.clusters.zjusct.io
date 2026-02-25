@@ -1,0 +1,52 @@
+# https://cert-manager.io/docs/tutorials/acme/nginx-ingress
+# https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: mail@zjusct.io
+    profile: tlsserver
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    solvers:
+    - dns01:
+        cloudflare:
+          apiTokenSecretRef:
+            name: cloudflare-api-token-secret
+            key: api-token
+---
+# cloudflare DNS-01 validate, letsencrypt certificate
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: mail@zjusct.io
+    profile: tlsserver
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - dns01:
+        cloudflare:
+          apiTokenSecretRef:
+            name: cloudflare-api-token-secret
+            key: api-token
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: clusters-zjusct-io-cert
+  namespace: cert-manager
+spec:
+  secretName: clusters-zjusct-io-cert
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - "clusters.zjusct.io"
+  - "*.clusters.zjusct.io"

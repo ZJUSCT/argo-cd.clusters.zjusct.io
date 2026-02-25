@@ -1,0 +1,94 @@
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/
+# https://argo-cd.readthedocs.io/en/stable/user-guide/projects/#the-default-project
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: "*"
+      server: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/app-any-namespace/#allowing-additional-namespaces-in-an-appproject
+  # let argo deploy applications in any namespace
+  sourceNamespaces:
+    - "*"
+---
+# https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/applicationset-specification/
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: production
+spec:
+  generators:
+    - git:
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git
+        revision: HEAD
+        directories:
+          - path: production/*
+  template:
+    metadata:
+      name: '{{path.basename}}'
+      namespace: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        name: in-cluster
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          # https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#manage-argo-cd-using-argo-cd
+          # must use ServerSideApply
+          - ServerSideApply=true
+---
+# https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/applicationset-specification/
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev
+spec:
+  generators:
+    - git:
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git
+        revision: HEAD
+        directories:
+          - path: dev/*
+  template:
+    metadata:
+      name: '{{path.basename}}'
+      namespace: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git
+        targetRevision: HEAD
+        path: '{{path}}'
+        # Use kustomized-helm plugin for applications with Helm dependencies
+        plugin:
+          name: kustomized-helm-v1.0
+      destination:
+        name: in-cluster
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          # https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#manage-argo-cd-using-argo-cd
+          # must use ServerSideApply
+          - ServerSideApply=true

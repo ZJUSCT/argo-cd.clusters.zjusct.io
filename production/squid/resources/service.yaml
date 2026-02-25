@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: squid
+  labels:
+    app: squid
+  annotations:
+    lbipam.cilium.io/ips: "172.28.0.4"
+spec:
+  type: LoadBalancer
+  selector:
+    app: squid
+  ports:
+    - name: proxy
+      port: 3128
+      targetPort: 3128
+      protocol: TCP

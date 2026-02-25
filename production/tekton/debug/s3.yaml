@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-s3
+  namespace: tekton
+  labels:
+    app: debug-s3
+spec:
+  restartPolicy: Never
+  containers:
+    - name: s3
+      image: harbor.clusters.zjusct.io/public.ecr.aws/aws-cli/aws-cli
+      imagePullPolicy: IfNotPresent
+      command: ["sh", "-c", "sleep infinity"]
+      envFrom:
+        - configMapRef:
+            name: packer-images
+        - secretRef:
+            name: packer-images
+      volumeMounts:
+        - name: packer-cm
+          mountPath: /etc/packer-images/config
+          readOnly: true
+        - name: packer-secret
+          mountPath: /etc/packer-images/secret
+          readOnly: true
+      #  - name: workspace
+      #    mountPath: /workspace
+  volumes:
+    - name: packer-cm
+      configMap:
+        name: packer-images
+    - name: packer-secret
+      secret:
+        secretName: packer-images
+    # - name: workspace
+    #   persistentVolumeClaim:
+    #     claimName: pvc-24f21591b1

@@ -1,0 +1,237 @@
+#cloud-config
+# https://docs.cloud-init.io/en/latest/reference/modules.html
+# https://docs.cloud-init.io/en/latest/reference/examples.html
+
+# https://docs.cloud-init.io/en/latest/reference/modules.html#users-and-groups
+users:
+  - name: root
+    # Password: ubuntu
+    hashed_passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrq5gq9D17lmgpNzk2xwgOkzYabiyDYZkjpwdKl5R7B bowling
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7FZqOes1C4K87s+fQBDbQJr2Sy4jnI0PMrJYQ2vkfp ckyasb
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMgUUki5hc9cQtT21hkOQ0EByOLwOgm++MjgNKDmy6aP jiahefang
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIxbBx0fU/VLj1TH/uRVzszY/2GQvw1cnS7Ng1xqV4Jb yihao
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFLWhdaV/o6iOdVNzBiL+SDO1qLqlqXrabaSxO0QevBp shouss
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO9wjW2N09v0YzCd0gnhhlQ1uMtQjMGBWbpl6I/2CYoO star
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDBBPqHWQILtXhbKK4kO7w7ZJYz+ic204Cf3vQh8vUQm xyang
+    ssh_redirect_user: false
+    lock_passwd: false
+# https://docs.cloud-init.io/en/latest/reference/modules.html#set-passwords
+ssh_pwauth: true
+# https://docs.cloud-init.io/en/latest/reference/modules.html#ssh
+disable_root: false
+# https://docs.cloud-init.io/en/latest/reference/modules.html#bootcmd
+bootcmd:
+  - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - ['sed', '-i', 's/^Components: main$/Components: main contrib non-free non-free-firmware/', '/etc/apt/sources.list.d/debian.sources']
+  - sed -i -e 's/deb.debian.org/mirrors.zju.edu.cn/g' /etc/apt/mirrors/debian.list /etc/apt/mirrors/debian-security.list
+# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
+ca_certs:
+  trusted:
+    # Cache Proxy CA
+    - |
+      -----BEGIN CERTIFICATE-----
+      MIIDEDCCAfigAwIBAgIUNXZxL6wleVbCUKejb+FHKRPwU6QwDQYJKoZIhvcNAQEL
+      BQAwIDEeMBwGA1UEAxMVWkpVU0NUIFNxdWlkIFByb3h5IENBMB4XDTI2MDIxODEz
+      NDIyNloXDTI2MDUxOTEzNDIyNlowIDEeMBwGA1UEAxMVWkpVU0NUIFNxdWlkIFBy
+      b3h5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs4GfDEih4myZ
+      ykMQOAY/AdM2W9xo5Q4luK8/bLOxa2CYi4BxRrhA7EBvHMhJpBF7FAbWdn/Kzt79
+      yAMkNUGvG32f3R/gdQC4rJoWKFAdOEwj7TmIHLK6smwQ8uXA2qJNAD8FstR7XmMD
+      qMlbkp2XOV7rbIF+YeDiAQ+00fM9TBDC4X2acYtGyxtI+9k93bXTNXMkThK8NFxm
+      k0KmsYnFMEmFQ9TIbiUvDNr+j/Tqj7Hw1CJz+4pod38cZPeXY71U+pBTg9lWpEi3
+      97aIIvPB0vvdoVI82v6kFaoPVOrXcpeZdJ22Spu/vxECcBUeJVRmVMmXWUepbOJp
+      8U/mEvbnkwIDAQABo0IwQDAOBgNVHQ8BAf8EBAMCAqQwDwYDVR0TAQH/BAUwAwEB
+      /zAdBgNVHQ4EFgQUCMQoUV5+UuHWCSmuX0bA+AndP6owDQYJKoZIhvcNAQELBQAD
+      ggEBAFgqj89+jbaf0+u+KJDphkTiJSAc1dm4O2G09bbNHxpp5oRr3NT/WWxgyifL
+      9indbnByyXd2ywT5LRXTRhF+RMu6Xf4PO/2sI9k73RVrT3mvdcn96apJXrUb3omp
+      vMpisbakaaREY6GJPfln273uJcQGOyg57kaG2ASMucuJlo70w9JQUx/icF5gjxFl
+      L6FXhdYs5L6KZorYdQLw3OPdmS5Vu22EMlW6GPhFCIXZIHPLdcFEF3toqTKlHRiJ
+      wl/J5hxlSQWIDUZZi28Dm/NkV650nN3MsdAJP33mRwGkFeZSdv3w2Lgnajewj/4m
+      XljL5sQrprvcir5cDWXSAgno1NA=
+      -----END CERTIFICATE-----
+# https://docs.cloud-init.io/en/latest/reference/modules.html#apt-configure
+apt:
+  http_proxy: http://172.28.0.4:3128
+  https_proxy: http://172.28.0.4:3128
+  # primary and security do not support enable components, so use sources_list
+  primary:
+    - arches: [default]
+      uri: https://mirrors.zju.edu.cn/debian/
+  security:
+    - arches: [default]
+      uri: https://mirrors.zju.edu.cn/debian-security/
+  sources:
+    # 先从官方源获得公钥，然后使用 gpg --show-keys <key_file> 获得公钥的 keyid 填入
+    docker:
+      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 # https://mirrors.zju.edu.cn/docker-ce/linux/debian/gpg
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
+    kubernetes:
+      keyid: DE15B14486CD377B9E876E1A234654DA9A296436 # https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://mirrors.tuna.tsinghua.edu.cn/kubernetes/core:/stable:/v1.35/deb/ /
+    nvidia:
+      keyid: 02182E60104FCDC26EAE1B8597A5D4CB8793F200 # https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/8793F200.pub
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/ /
+    nvidia-container:
+      keyid: C95B321B61E88C1809C4F759DDCAE044F796ECB0 # https://nvidia.github.io/libnvidia-container/gpgkey
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://nvidia.github.io/libnvidia-container/stable/deb/amd64/ /
+    doca:
+      keyid: CAE649B3B3929F8470D4D33BA024F6F0E6D6A281 # https://linux.mellanox.com/public/repo/doca/GPG-KEY-Mellanox.pub
+      keyserver: hkps://keyserver.ubuntu.com/
+      source: deb [signed-by=$KEY_FILE] https://linux.mellanox.com/public/repo/doca/latest/debian13/x86_64/ ./
+# https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
+packages:
+  - 7zip
+  - apt-file
+  - aptitude
+  - apt-transport-https
+  - aria2
+  - attr
+  - autoconf
+  - autofs
+  - automake
+  - bash-completion
+  - bat
+  - bc
+  - bear
+  - bison
+  - btop
+  - build-essential
+  - cargo
+  - ceph-common
+  - clang
+  - clangd
+  - clang-format
+  - clang-tidy
+  - cloud-init
+  - cmake
+  - cpu-checker
+  - cpufetch
+  - csh
+  - curl
+  - duf
+  - etckeeper
+  - ethtool
+  - eza
+  - fd-find
+  - ffmpeg
+  - file
+  - fish
+  - fq
+  - freeipa-client
+  - fzf
+  - gawk
+  - gdu
+  - git
+  - git-extras
+  - git-lfs
+  - golang
+  - hdparm
+  - htop
+  - httpie
+  - hwinfo
+  - hwloc
+  - hyperfine
+  - iotop
+  - iperf3
+  - ipmitool
+  - jq
+  - ldap-utils
+  - libsss-sudo
+  - libvirt-clients
+  - libvirt-daemon-system
+  - linux-cpupower
+  - linux-perf
+  - lldpd
+  - lmod
+  - lrzsz
+  - lxcfs
+  - mc
+  - meson
+  - neovim
+  - netplan.io
+  - net-tools
+  - network-manager
+  - nfs-common
+  - nfs-kernel-server
+  - ninja-build
+  - nmap
+  - npm
+  - numactl
+  - nvme-cli
+  - nvtop
+  - openssh-server
+  - pciutils
+  - pipx
+  - pkg-config
+  - procps
+  - psmisc
+  - python3
+  - python3-full
+  - python3-pip
+  - python3-venv
+  - python-is-python3
+  - qemu-system-misc
+  - qemu-user
+  - redfishtool
+  - ripgrep
+  - rpm2cpio
+  - rsync
+  - rustc
+  - smartmontools
+  - snmp
+  - squashfs-tools
+  - sshfs
+  - sssd-ldap
+  - sssd-tools
+  - stress
+  - sudo
+  - systemd-container
+  - systemd-coredump
+  - systemd-networkd
+  - systemd-resolved
+  - systemd-timesyncd
+  - tcpdump
+  - tmux
+  - traceroute
+  - tree
+  - tshark
+  - unrar
+  - usbutils
+  - vim
+  - wget
+  - wireshark
+  - yq
+  - zip
+  - zoxide
+  - zsh
+  # docker
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+  # k8s
+  - kubectl
+  - kubelet
+  - kubeadm
+  # nvidia https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html
+  - nvidia-open
+  # nvidia-container
+  - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
+  # doca https://developer.nvidia.com/doca-downloads
+  - doca-all # For BuildField Devices
+# https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
+# package_update: true
+# package_upgrade: true
+# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-locale
+# locale: en_US.UTF-8
+# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-timezone
+timezone: "Asia/Shanghai"
+# https://docs.cloud-init.io/en/latest/reference/modules.html#set-hostname
+preserve_hostname: true

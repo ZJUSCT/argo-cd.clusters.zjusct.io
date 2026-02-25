@@ -1,0 +1,119 @@
+# Global settings for all subcharts
+global:
+  security:
+    # Allow custom registry images for postgresql-ha subchart
+    allowInsecureImages: true
+
+gzctf:
+  # Use SealedSecret instead of auto-generated secret
+  secret:
+    create: false
+    existingSecret: gzctf-secret
+
+  image:
+    repository: harbor.clusters.zjusct.io/ghcr.io/gztimewalker/gzctf/gzctf
+
+  config:
+    database:
+      password: "testing"
+    xorKey: "testing"
+    storage:
+      enabled: true # Use MinIO for file storage
+    containerProvider:
+      publicEntry: "gzctf.clusters.zjusct.io"
+    forwardedOptions:
+      trustedNetworks:
+        - "10.0.0.0/8"
+        - "172.26.0.0/16"
+        - "172.27.0.0/16"
+        - "172.28.0.0/16"
+
+  ingress:
+    enabled: false
+
+  httpRoute:
+    enabled: true
+    parentRefs:
+      - name: envoy-gateway
+        namespace: default
+    hostnames:
+      - gzctf.s.zjusct.io
+      - gzctf.clusters.zjusct.io
+
+  pvc:
+    # When using MinIO (enabled above), set create to false
+    # MinIO will be used for S3 storage, emptyDir for /app/files
+    create: false
+    storageClassName: "ceph-block"
+    accessMode: ReadWriteOnce
+    size: "10Gi"
+
+# https://github.com/microsoft/garnet/blob/main/charts/garnet/values.yaml
+garnet:
+  enabled: true
+  image:
+    registry: harbor.clusters.zjusct.io
+    repository: ghcr.io/microsoft/garnet
+
+# https://github.com/DandyDeveloper/charts/blob/master/charts/redis-ha/values.yaml
+redis-ha:
+  enabled: false # Disabled as we're using garnet
+  image:
+    repository: harbor.clusters.zjusct.io/hub.docker.com/library/redis
+
+postgresql:
+  enabled: false # Disabled as we're using postgresql-ha
+  image:
+    registry: harbor.clusters.zjusct.io
+    repository: hub.docker.com/library/postgres
+
+# https://github.com/bitnami/charts/blob/main/bitnami/postgresql-ha/values.yaml
+# NOTE: Secrets are managed via SealedSecrets (see postgresql-ha-*-sealed-secret.yaml)
+postgresql-ha:
+  enabled: true
+
+  postgresql:
+    image:
+      registry: harbor.clusters.zjusct.io
+      repository: hub.docker.com/bitnamilegacy/postgresql-repmgr
+  pgpool:
+    image:
+      registry: harbor.clusters.zjusct.io
+      repository: hub.docker.com/bitnamilegacy/pgpool
+  metrics:
+    image:
+      registry: harbor.clusters.zjusct.io
+      repository: hub.docker.com/bitnamilegacy/postgres-exporter
+  volumePermissions:
+    image:
+      registry: harbor.clusters.zjusct.io
+      repository: hub.docker.com/bitnamilegacy/os-shell
+
+  # Persistence configuration
+  persistence:
+    storageClass: ceph-block
+    size: 2Gi
+
+# https://github.com/minio/minio/blob/master/helm/minio/values.yaml
+minio:
+  enabled: true
+
+  image:
+    repository: harbor.clusters.zjusct.io/quay.io/minio/minio
+
+  # MinIO root credentials
+  rootUser: "minioadmin"
+  rootPassword: "minioadmin123"
+
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hosts:
+      - ctf-minio.clusters.zjusct.io
+      - ctf-minio.s.zjusct.io
+
+  # MinIO buckets to create
+  buckets:
+    - name: gzctf-bucket
+      policy: none
+      purge: false

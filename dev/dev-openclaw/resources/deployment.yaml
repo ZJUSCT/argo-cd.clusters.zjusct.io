@@ -1,0 +1,174 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+  namespace: dev-openclaw
+  labels:
+    app: openclaw
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: openclaw
+  template:
+    metadata:
+      labels:
+        app: openclaw
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+
+      containers:
+        # Main OpenClaw container
+        - name: openclaw
+          image: harbor.clusters.zjusct.io/library/openclaw:latest
+          imagePullPolicy: Always
+          command:
+            - node
+            - dist/index.js
+          args:
+            - gateway
+            - --bind
+            - lan
+            - --port
+            - "18789"
+
+          envFrom:
+            - secretRef:
+                name: openclaw-env-secret
+
+          ports:
+            - name: http
+              containerPort: 18789
+              protocol: TCP
+
+          livenessProbe:
+            tcpSocket:
+              port: 18789
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            tcpSocket:
+              port: 18789
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          startupProbe:
+            tcpSocket:
+              port: 18789
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            # Removed readOnlyRootFilesystem to allow qqbot plugin to write data
+
+          volumeMounts:
+            - name: config
+              mountPath: /home/node/.openclaw/openclaw.json
+              subPath: openclaw.json
+              readOnly: true
+            - name: workspace
+              mountPath: /home/node/.openclaw/workspace
+            - name: clawd-data
+              mountPath: /home/node/clawd
+            - name: tmp
+              mountPath: /tmp
+
+        # Chromium sidecar
+        - name: chromium
+          image: harbor.clusters.zjusct.io/hub.docker.com/zenika/alpine-chrome:124
+          command:
+            - chromium-browser
+          args:
+            - --headless
+            - --disable-gpu
+            - --no-sandbox
+            - --disable-dev-shm-usage
+            - --remote-debugging-address=0.0.0.0
+            - --remote-debugging-port=9222
+            - --user-data-dir=/tmp/chromium
+
+          env:
+            - name: XDG_CACHE_HOME
+              value: /tmp
+
+          livenessProbe:
+            tcpSocket:
+              port: 9222
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          readinessProbe:
+            tcpSocket:
+              port: 9222
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          startupProbe:
+            tcpSocket:
+              port: 9222
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 12
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      volumes:
+        - name: config
+          configMap:
+            name: openclaw-config
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: openclaw-workspace
+        - name: clawd-data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

@@ -1,0 +1,93 @@
+# https://github.com/bitwarden/helm-charts/tree/main/charts/self-host/values.yaml
+
+secrets:
+  secretName: custom-secret
+
+general:
+  domain: "bitwarden.clusters.zjusct.io"
+
+  disableUserRegistration: "true"
+
+  admins: "zhubaolin228@gmail.com,mr.haoxx@gmail.com"
+
+  ingress:
+    enabled: true
+    className: "nginx"
+
+  email:
+    replyToEmail: "mail@zjusct.io"
+    smtpHost: "smtp.zoho.com"
+    smtpPort: "465"
+    smtpSsl: "true"
+
+sharedStorageClassName: "cephfs"
+
+# https://github.com/bitwarden/helm-charts/tree/main/charts/self-host#argo-cd-support
+# Set the Argo CD annotations on the Kubernetes jobs
+jobs:
+  db:
+    preInstallMigrator:
+      annotations:
+        argocd.argoproj.io/hook: Sync
+  setup:
+    annotations:
+      argocd.argoproj.io/hook: PreSync
+  secret:
+    annotations:
+      argocd.argoproj.io/hook: PreSync
+  cleanup:
+    enabled: false
+# Set the Argo CD annotations on the database resources
+database:
+  enabled: true
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  podSecurityContext:
+    fsGroup: 10001
+    fsGroupChangePolicy: "OnRootMismatch"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 2Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
+  volume:
+    backups:
+      annotations:
+        argocd.argoproj.io/sync-wave: "-1"
+    data:
+      annotations:
+        argocd.argoproj.io/sync-wave: "-1"
+    log:
+      annotations:
+        argocd.argoproj.io/sync-wave: "-1"
+
+component:
+  api:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/api
+  admin:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/admin
+  attachments:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/attachments
+  events:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/events
+  icons:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/icons
+  identity:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/identity
+  notifications:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/notifications
+  sso:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/sso
+  web:
+    image:
+      repository: harbor.clusters.zjusct.io/ghcr.io/bitwarden/web

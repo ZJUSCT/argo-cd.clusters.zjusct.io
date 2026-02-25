@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: litellm
+resources:
+- resources/namespace.yaml
+- resources/httproute.yaml
+- resources/sealedsecret-masterkey.yaml
+- resources/sealedsecret-api-keys.yaml
+- resources/configmap-api-debug-env.yaml
+
+helmCharts:
+- name: litellm-helm
+  repo: oci://docker.litellm.ai/berriai
+  version: 0.1.837
+  releaseName: litellm
+  namespace: litellm
+  includeCRDs: true
+  valuesFile: values/litellm-helm-0.1.837.yaml
+
+transformers:
+  - ../../image-prefix.yaml

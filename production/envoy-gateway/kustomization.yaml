@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: envoy-gateway
+resources:
+- resources/namespace.yaml
+- resources/envoy-gateway.yaml
+- resources/envoy-proxy-service.yaml
+- resources/envoyproxy.yaml
+helmCharts:
+- name: gateway-helm
+  repo: oci://docker.io/envoyproxy/
+  includeCRDs: true
+  releaseName: envoy-gateway
+  valuesFile: values/gateway-helm-1.7.0.yaml
+  namespace: envoy-gateway
+  version: 1.7.0
+# NOTE: image-prefix transformer removed to break circular dependency
+# envoy-gateway must be able to pull from docker.io even when Harbor is down
+# transformers:
+#   - ../../image-prefix.yaml

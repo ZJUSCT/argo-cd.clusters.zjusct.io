@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: otel-collector
+  labels:
+    app: opentelemetry-collector
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway
+  hostnames:
+    - otel.clusters.zjusct.io
+    - otel.s.zjusct.io
+  rules:
+    - backendRefs:
+        - name: otel-collector-collector
+          port: 4318
+          weight: 1
