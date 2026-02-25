@@ -14,10 +14,8 @@ build {
   }
 
   provisioner "shell" {
-    inline = [
-      "echo 'Waiting for cloud-init to complete...'",
-      "cloud-init status --wait --long",
-      "echo 'System is ready!'"
+    scripts = [
+      "scripts/00-wait-cloud-init.sh"
     ]
     # https://cloudinit.readthedocs.io/en/latest/explanation/failure_states.html#cloud-init-error-codes
     # allow cloud-init recoverable errors
