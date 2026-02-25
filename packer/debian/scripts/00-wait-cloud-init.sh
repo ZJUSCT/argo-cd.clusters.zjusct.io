@@ -10,10 +10,6 @@ if [ ${EXIT_CODE} -ne 0 ]; then
     echo "=========================================="
     echo "cloud-init failed with exit code: ${EXIT_CODE}"
     echo "=========================================="
-    echo "cloud-init status:"
-    cloud-init status
-    echo ""
-    echo "=========================================="
     echo "journalctl -u cloud-init --no-pager -n 100:"
     journalctl -u cloud-init --no-pager || true
     echo ""
