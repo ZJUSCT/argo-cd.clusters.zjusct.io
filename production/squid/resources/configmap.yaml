@@ -64,8 +64,6 @@ data:
     refresh_pattern \/InRelease$ 0 0% 0 refresh-ims
     refresh_pattern \/(Translation-.*)(|\.bz2|\.gz|\.xz)$ 0 0% 0 refresh-ims
     refresh_pattern .               0       20%     4320
-    # do not cache developer.download.nvidia.com
-    refresh_pattern -i ^https?:\/\/developer\.download\.nvidia\.com\/ 0 0% 0 refresh-ims
     # >>> from default squid.conf file
 
     # current largest file: nvhpc runfile is 8.2GB
