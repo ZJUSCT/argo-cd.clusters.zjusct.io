@@ -15,7 +15,7 @@ data:
           "mode": "token",
           "token": "${OPENCLAW_GATEWAY_TOKEN}"
         },
-        "trustedProxies": ["10.0.0.1"],
+        "trustedProxies": ["10.0.0.1"], // TODO：疑似没用，但必须得填一个？
         "controlUi": {
           "enabled": true,
           "allowInsecureAuth": true
@@ -86,11 +86,28 @@ data:
           }
         }
       },
+      "plugins": {
+        "enabled": true,
+        "allow": ["dingtalk", "qqbot"]
+      },
       "channels": {
         "qqbot": {
           "enabled": true,
           "appId": "${QQBOT_APP_ID}",
           "clientSecret": "${QQBOT_APP_SECRET}"
-        }
+        },
+        // 未使用
+        // "dingtalk": {
+        //   "enabled": true,
+        //   "clientId": "dingxxxxxx",
+        //   "clientSecret": "your-app-secret",
+        //   "robotCode": "dingxxxxxx",
+        //   "corpId": "dingxxxxxx",
+        //   "agentId": "123456789",
+        //   "dmPolicy": "open",
+        //   "groupPolicy": "open",
+        //   "debug": false,
+        //   "messageType": "markdown"
+        // }
       }
     }

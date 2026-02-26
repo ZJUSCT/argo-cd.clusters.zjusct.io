@@ -20,7 +20,9 @@ RUN npm config set cache /tmp/.npm
 WORKDIR /app
 
 # Install the QQBot plugin
-RUN node dist/index.js plugins install @sliverp/qqbot@latest
+RUN node dist/index.js plugins install \
+    @sliverp/qqbot@latest
+    @soimy/dingtalk
 
 # Verify plugin installation
 RUN node dist/index.js plugins list || true
