@@ -214,6 +214,9 @@ install_tarball_from_github "bitnami-labs/sealed-secrets" 'kubeseal-*-linux-amd6
 # https://github.com/kubernetes-sigs/kustomize
 install_tarball_from_github "kubernetes-sigs/kustomize" 'kustomize_*_linux_amd64.tar.gz'
 
+# https://kubevirt.io/
+install_bin_from_github "kubevirt/kubevirt" "virtctl-v*-linux-amd64" "virtctl"
+
 # https://helm.sh/docs/intro/install/
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
 
