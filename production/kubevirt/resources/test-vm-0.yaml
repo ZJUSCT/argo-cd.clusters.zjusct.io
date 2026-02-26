@@ -18,7 +18,7 @@ spec:
       source:
         registry:
           url: docker://quay.io/containerdisks/debian:latest
-  runStrategy: Halted
+  runStrategy: Always
   template:
     metadata:
       labels:
