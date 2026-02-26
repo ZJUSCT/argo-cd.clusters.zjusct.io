@@ -1,0 +1,77 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: test-vm-0
+  namespace: kubevirt
+spec:
+  dataVolumeTemplates:
+  - metadata:
+      name: test-vm-0-rootdisk
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 30Gi
+        storageClassName: ceph-block
+      source:
+        registry:
+          url: docker://quay.io/containerdisks/debian:latest
+  runStrategy: Halted
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: test-vm-0
+    spec:
+      domain:
+        cpu:
+          cores: 4
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: rootdisk
+          - disk:
+              bus: virtio
+            name: cloudinitdisk
+          interfaces:
+          - masquerade: {}
+            name: default
+          rng: {}
+        memory:
+          guest: 4Gi
+      networks:
+      - name: default
+        pod: {}
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - dataVolume:
+          name: test-vm-0-rootdisk
+        name: rootdisk
+      - cloudInitNoCloud:
+          userData: |-
+            #cloud-config
+            users:
+              - name: root
+                hashed_passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
+                ssh_authorized_keys:
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrq5gq9D17lmgpNzk2xwgOkzYabiyDYZkjpwdKl5R7B bowling
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7FZqOes1C4K87s+fQBDbQJr2Sy4jnI0PMrJYQ2vkfp ckyasb
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMgUUki5hc9cQtT21hkOQ0EByOLwOgm++MjgNKDmy6aP jiahefang
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIxbBx0fU/VLj1TH/uRVszY/2GQvw1cnS7Ng1xqV4Jb yihao
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFLWhdaV/o6iOdVNzBiL+SDO1qLqlqXrabaSxO0QevBp shouss
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO9wjW2N09v0YzCd0gnhhlQ1uMtQjMGBWbpl6I/2CYoO star
+                  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDBBPqHWQILtXhbKK4kO7w7ZJYz+ic204Cf3vQh8vUQm xyang
+                ssh_redirect_user: false
+                lock_passwd: false
+            ssh_pwauth: true
+            disable_root: false
+            bootcmd:
+              - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
+              - ['sed', '-i', 's/^Components: main$/Components: main contrib non-free non-free-firmware/', '/etc/apt/sources.list.d/debian.sources']
+              - sed -i -e 's/deb.debian.org/mirrors.zju.edu.cn/g' /etc/apt/mirrors/debian.list /etc/apt/mirrors/debian-security.list
+            timezone: "Asia/Shanghai"
+            preserve_hostname: true
+        name: cloudinitdisk
