@@ -105,13 +105,34 @@ install_bin_from_github() {
     rm -rf "$tmpdir"
 }
 
-# install_tarball_from_github OWNER/REPO TARBALL_PATTERN
-# Downloads a .tar.gz asset and extracts its contents to /usr/local/bin.
+# install_tarball_from_github OWNER/REPO TARBALL_PATTERN [FILE_PATTERN]
+# Downloads a .tar.gz asset, extracts it, and installs files to /usr/local/bin.
+# - By default, only executable files are installed.
+# - If FILE_PATTERN is provided, only files matching that pattern are installed.
 install_tarball_from_github() {
-    local tmpdir
+    local repo="$1"
+    local pattern="$2"
+    local file_pattern="${3:-}"
+
+    local tmpdir extract_dir
     tmpdir=$(mktemp -d)
-    gh_release_download --repo "$1" --pattern "$2" --dir "$tmpdir"
-    tar xzvfC "$tmpdir"/*.tar.gz /usr/local/bin
+    extract_dir="$tmpdir/extract"
+    mkdir -p "$extract_dir"
+
+    gh_release_download --repo "$repo" --pattern "$pattern" --dir "$tmpdir"
+
+    # Extract to subdirectory
+    tar xzvf "$tmpdir"/*.tar.gz -C "$extract_dir"
+
+    # Install files based on pattern
+    if [ -n "$file_pattern" ]; then
+        # Install files matching the specified pattern
+        find "$extract_dir" -name "$file_pattern" -type f -exec install -m 755 {} /usr/local/bin/ \;
+    else
+        # Default: only install executable files
+        find "$extract_dir" -type f -executable -exec install -m 755 {} /usr/local/bin/ \;
+    fi
+
     rm -rf "$tmpdir"
 }
 
@@ -186,6 +207,15 @@ install_bin_from_github "argoproj/argo-cd" "argocd-linux-amd64" "argocd"
 # https://docs.cilium.io/en/stable/observability/hubble/setup
 install_tarball_from_github "cilium/cilium-cli" "cilium-linux-amd64.tar.gz"
 install_tarball_from_github "cilium/hubble" "hubble-linux-amd64.tar.gz"
+
+# https://github.com/bitnami-labs/sealed-secrets
+install_tarball_from_github "bitnami-labs/sealed-secrets" 'kubeseal-*-linux-amd64.tar.gz'
+
+# https://github.com/kubernetes-sigs/kustomize
+install_tarball_from_github "kubernetes-sigs/kustomize" 'kustomize_*_linux_amd64.tar.gz'
+
+# https://helm.sh/docs/intro/install/
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
 
 ########################################################################
 # Misc
@@ -263,5 +293,3 @@ fi
 
 # fish
 ln -s /usr/share/lmod/lmod/init/profile.fish /etc/fish/conf.d/z00_lmod.fish
-
-
