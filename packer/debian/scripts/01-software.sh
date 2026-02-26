@@ -116,6 +116,13 @@ install_tarball_from_github() {
 }
 
 ########################################################################
+# APT Update
+# we should update index before installing any package, otherwise we may get "Unable to locate package"
+########################################################################
+
+apt-get update -y
+
+########################################################################
 # ctld
 # unknown source
 ########################################################################

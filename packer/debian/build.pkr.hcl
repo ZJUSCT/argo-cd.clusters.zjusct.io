@@ -44,14 +44,17 @@ build {
 
   source "source.qemu.ubuntu" {
     iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/debian/cloud-init.qcow2"
+    #iso_url = "http://radosgw.clusters.zjusct.io/packer-images/debian/cloud-init.qcow2"
 
     output_directory = "output-customize"
     vm_name          = "customize.qcow2"
   }
 
+  # https://developer.hashicorp.com/packer/docs/provisioners/file#directory-uploads
+  # Notice rsync syntax
   provisioner "file" {
-    source = "rootfs/"
-    destination = "/tmp/rootfs"
+    source = "rootfs"
+    destination = "/tmp"
   }
 
   provisioner "shell" {

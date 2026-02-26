@@ -10,6 +10,9 @@ set -xeou pipefail
 # - Simpler and more predictable: each file has exact perms we specify
 ########################################################################
 
+# check if source files exist
+tree /tmp/rootfs
+
 # MOTD
 rm -f /etc/update-motd.d/*
 install -D -m 0755 -o root -g root /tmp/rootfs/etc/update-motd.d/00-nice-motd /etc/update-motd.d/00-nice-motd
