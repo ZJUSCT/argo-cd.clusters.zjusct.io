@@ -36,9 +36,7 @@ install -D -m 0640 -o root -g adm /tmp/rootfs/etc/audit/rules.d/zjusct.rules /et
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/udev/hwdb.d/50-net-naming-denylist.hwdb /etc/udev/hwdb.d/50-net-naming-denylist.hwdb
 
 # mirrors
-npm config set registry https://registry.npmmirror.com
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/uv/uv.toml /etc/uv/uv.toml
-install -D -m 0644 -o root -g root /tmp/rootfs/etc/npmrc /etc/npmrc
 install -D -m 0644 -o root -g root /tmp/rootfs/opt/conda/.condarc /opt/conda/.condarc
 
 # otelcol-contrib

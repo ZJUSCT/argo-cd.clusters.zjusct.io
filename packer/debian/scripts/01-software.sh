@@ -162,7 +162,8 @@ install_pkg_from_github "apptainer/apptainer" "apptainer_*_amd64.deb"
 # https://geminicli.com/docs/get-started/installation/
 ########################################################################
 
-npm i -g \
+npm config --global set registry https://registry.npmmirror.com
+npm install --global \
     opencode-ai \
     @anthropic-ai/claude-code \
     @openai/codex \
@@ -194,7 +195,7 @@ unset _bin
 # https://docs.astral.sh/uv/getting-started/installation/
 ########################################################################
 
-pip config --site \
+pip config --global \
     set global.index-url https://mirrors.zju.edu.cn/pypi/web/simple
 
 pip install --break-system-packages \

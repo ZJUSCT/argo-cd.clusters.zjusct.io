@@ -4,7 +4,7 @@ set -euo pipefail
 echo 'Waiting for cloud-init to complete...'
 
 EXIT_CODE=0
-cloud-init status --wait --long || EXIT_CODE=$?
+cloud-init status --wait --format json || EXIT_CODE=$?
 
 if [ ${EXIT_CODE} -ne 0 ]; then
     echo "=========================================="

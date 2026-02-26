@@ -208,7 +208,6 @@ packages:
   - sudo
   - systemd-container
   - systemd-coredump
-  - systemd-networkd
   - systemd-resolved
   - systemd-timesyncd
   - tcpdump

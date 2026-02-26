@@ -107,7 +107,6 @@ cloud-init
 etckeeper
 systemd-container
 systemd-coredump
-systemd-networkd
 systemd-resolved
 systemd-timesyncd
 
