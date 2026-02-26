@@ -12,7 +12,12 @@ spec:
     - otel-grpc.clusters.zjusct.io
     - otel-grpc.s.zjusct.io
   rules:
-    - backendRefs:
+    - matches:
+        - method:
+            type: RegularExpression
+            service: ".*"
+            method: ".*"
+      backendRefs:
         - name: otel-collector-collector
           port: 4317
           weight: 1

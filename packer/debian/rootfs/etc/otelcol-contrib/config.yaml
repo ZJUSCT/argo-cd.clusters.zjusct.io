@@ -241,21 +241,21 @@ service:
     logs:
       receivers: [otlp, filelog/docker, filelog]
       processors: [memory_limiter, batch, resourcedetection]
-      exporters: [otlp_grpc]
+      exporters: [otlp_http]
     logs/journald:
       receivers: [journald]
       processors: [memory_limiter, batch, transform/journald, resourcedetection]
-      exporters: [otlp_grpc]
+      exporters: [otlp_http]
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch, resourcedetection]
-      exporters: [otlp_grpc]
+      exporters: [otlp_http]
     metrics:
       # not enabled by default:
       # - podman_stats
       receivers: [otlp, docker_stats, hostmetrics/fast, hostmetrics/slow]
       processors: [memory_limiter, batch, resourcedetection]
-      exporters: [otlp_grpc]
+      exporters: [otlp_http]
   # https://opentelemetry.io/docs/collector/internal-telemetry/#activate-internal-telemetry-in-the-collector
   # internal is enabled by default, close it
   telemetry:
