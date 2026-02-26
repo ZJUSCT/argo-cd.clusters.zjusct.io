@@ -1,0 +1,76 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: misc
+spec:
+  image: "harbor.clusters.zjusct.io/ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.146.1"
+  mode: deployment
+  replicas: 1
+  config:
+    receivers:
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/netflowreceiver
+      netflow:
+        scheme: netflow # compatible with Huawei NetStream v9
+        port: 2055
+        sockets: 16
+        workers: 32
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver
+      syslog:
+        udp:
+          listen_address: 0.0.0.0:514
+          add_attributes: true
+          one_log_per_packet: true
+        protocol: rfc3164
+        # we configure all infrastructure to use the same timezone UTC +8
+        location: Asia/Shanghai
+        operators:
+          # syslog receiver still contains some deprecated semantics conventions, should be fixed in the future
+          # move "hostname" to resource["host.name"]
+          - type: move
+            from: attributes["hostname"]
+            to: resource["host.name"]
+          # move attributes["message"] to body
+          - type: move
+            from: attributes["message"]
+            to: body
+        #  - type: router
+        #    routes:
+        #      - output: huawei_add_resource
+        #        # before escape: %%\d+[^\/]+\/\d+\/.+\(.+\)
+        #        expr: 'attributes.appname matches "%%\\d+[^\\/]+\\/\\d+\\/.+\\(.+\\)"'
+        #    default: noop
+        #  - id: huawei_add_resource
+        #    type: add
+        #    field: resource["device.manufacturer"]
+        #    value: Huawei
+        #    output: huawei_regex_parser
+        #  - id: huawei_regex_parser
+        #    type: regex_parser
+        #    parse_from: attributes.appname
+        #    parse_to: attributes.huawei
+        #    regex: '%%(?P<version>\d+)(?P<module_name>[^\/]+)\/(?P<serverity>\d+)\/(?P<brief>.+)\((?P<type>.+)\)'
+        #  - id: noop
+        #    type: noop
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/collectdreceiver
+      #  collectd:
+    processors:
+      # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+      batch:
+      # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/memorylimiterprocessor
+      memory_limiter:
+        # 75% of maximum memory up to 2G
+        limit_mib: 1536
+        # 25% of limit up to 2G
+        spike_limit_mib: 512
+        check_interval: 5s
+    exporters:
+      # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+      otlp_grpc:
+        endpoint: "aggregator-collector.opentelemetry.svc.cluster.local:4317"
+
+    service:
+      pipelines:
+        logs:
+          receivers: [syslog, netflow]
+          processors: [memory_limiter, batch]
+          exporters: [otlp_grpc]

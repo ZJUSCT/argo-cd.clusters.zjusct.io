@@ -9,14 +9,14 @@ spec:
       sinks:
         - type: OpenTelemetry
           openTelemetry:
-            host: otel-collector-collector.opentelemetry.svc.cluster.local
+            host: aggregator-collector.opentelemetry.svc.cluster.local
             port: 4317
     tracing:
       samplingRate: 100
       provider:
         type: OpenTelemetry
         backendRefs:
-        - name: otel-collector-collector
+        - name: aggregator-collector
           namespace: opentelemetry
           port: 4317
     accessLog:
@@ -28,5 +28,5 @@ spec:
           sinks:
             - type: OpenTelemetry
               openTelemetry:
-                host: otel-collector-collector.opentelemetry.svc.cluster.local
+                host: aggregator-collector.opentelemetry.svc.cluster.local
                 port: 4317

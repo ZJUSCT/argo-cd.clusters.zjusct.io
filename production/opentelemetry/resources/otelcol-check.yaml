@@ -1,0 +1,112 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: check
+# https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver
+# OpenTelemetry Checkers:
+# - sshcheck
+# - tcpcheck
+# - tlscheck
+# - httpcheck
+# - icmpcheck
+spec:
+  image: "harbor.clusters.zjusct.io/ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.146.1"
+  mode: deployment
+  replicas: 1
+  config:
+    receivers:
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tlscheckreceiver
+      tlscheck:
+        targets:
+          # ZJUSCT
+          - endpoint: clusters.zjusct.io:443
+          - endpoint: s.zjusct.io:443
+          - endpoint: clusters.zju.edu.cn:443
+          - endpoint: www.clusters.zjusct.io:443
+          # Falcon
+          - endpoint: git.zju.edu.cn:443
+          - endpoint: mirror.zju.edu.cn:443
+          - endpoint: mirrors.zju.edu.cn:443
+          # ZJU
+          - endpoint: www.cc98.org:443
+          - endpoint: www.nexushd.org:443
+          - endpoint: www.zjuers.com:443
+          # Teammate
+          - endpoint: star-home.top:4430
+          - endpoint: www.bowling233.top:443
+          - endpoint: note.bowling233.top:443
+          # Public
+          - endpoint: www.baidu.com:443
+          - endpoint: www.qq.com:443
+          - endpoint: www.bilibili.com:443
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/httpcheckreceiver
+      # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcpcheckreceiver
+      # https://github.com/open-telemetry/opentelemetry-collector/blob/main/config/configtls/README.md
+      httpcheck:
+        targets:
+          - method: GET
+            endpoints:
+              - https://172.25.3.5
+              - https://172.25.3.9
+              - https://172.25.3.10
+              - https://172.25.3.11
+              - https://172.25.3.23
+              - https://172.25.3.24
+              - https://172.25.3.60
+              - https://172.25.3.61
+              - https://172.25.3.62
+              - https://172.25.3.63
+              - https://172.25.3.64
+              - https://172.25.3.70
+              - https://172.25.3.71
+              - https://172.25.3.80
+            tls:
+              insecure_skip_verify: true
+          - method: GET
+            endpoints:
+              - https://www.cc98.org/
+              - https://mirror.zju.edu.cn/
+              - https://www.zju.edu.cn/
+              - https://www.clusters.zjusct.io/
+              - https://www.baidu.com/
+              - https://www.qq.com/
+              - https://www.zhihu.com/
+              - https://www.bilibili.com/
+      tcpcheck:
+        targets:
+          - endpoint: 172.25.4.10:22
+          - endpoint: 172.25.4.40:22
+          - endpoint: 172.25.4.60:22
+          - endpoint: 172.25.4.61:22
+          - endpoint: 172.25.4.62:22
+          - endpoint: 172.25.4.63:22
+          - endpoint: 172.25.4.64:22
+          - endpoint: 172.25.4.70:22
+          - endpoint: 172.25.4.71:22
+          - endpoint: 172.25.4.80:22
+          - endpoint: git.zju.edu.cn:22
+          - endpoint: levante.dkrz.de:22
+          - endpoint: bridges2.psc.edu:22
+
+    processors:
+      # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+      batch:
+      # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/memorylimiterprocessor
+      memory_limiter:
+        # 75% of maximum memory up to 2G
+        limit_mib: 1536
+        # 25% of limit up to 2G
+        spike_limit_mib: 512
+        check_interval: 5s
+
+    exporters:
+      # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+      otlp_grpc:
+        endpoint: "aggregator-collector.opentelemetry.svc.cluster.local:4317"
+
+    service:
+      pipelines:
+        metrics/tls:
+          receivers: [tlscheck, httpcheck, tcpcheck]
+          processors: [memory_limiter, batch]
+          exporters: [otlp_grpc]

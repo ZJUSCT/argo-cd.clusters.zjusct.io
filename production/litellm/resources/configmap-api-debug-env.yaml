@@ -13,7 +13,7 @@ data:
   AIOHTTP_TRUST_ENV: 'True'
   # OpenTelemetry configuration
   # https://docs.litellm.ai/docs/observability/opentelemetry_integration
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-collector.opentelemetry.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://aggregator-collector.opentelemetry.svc.cluster.local:4318"
   OTEL_EXPORTER_OTLP_PROTOCOL: "http/json"
   OTEL_SERVICE_NAME: "litellm"
   LITELLM_OTEL_INTEGRATION_ENABLE_METRICS: "true"

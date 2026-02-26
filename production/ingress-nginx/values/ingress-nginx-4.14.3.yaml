@@ -55,7 +55,7 @@ controller:
   # Ref.: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
   config:
     enable-opentelemetry: "true"
-    otlp-collector-host: "otel-collector-collector.opentelemetry.svc.cluster.local"
+    otlp-collector-host: "aggregator-collector.opentelemetry.svc.cluster.local"
     otlp-collector-port: "4317"
     otel-service-name: "nginx-ingress"
     otel-sampler: "AlwaysOn"

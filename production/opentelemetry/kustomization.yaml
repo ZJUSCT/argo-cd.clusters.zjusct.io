@@ -3,7 +3,11 @@ kind: Kustomization
 namespace: opentelemetry
 resources:
 - resources/namespace.yaml
-- resources/opentelemetrycollector.yaml
+- resources/otelcol-aggregator.yaml
+- resources/otelcol-check.yaml
+- resources/otelcol-misc.yaml
+- resources/otelcol-snmp.yaml
+- resources/sealedsecret-otelcol.yaml
 - resources/httproute.yaml
 - resources/grpcroute.yaml
 helmCharts:

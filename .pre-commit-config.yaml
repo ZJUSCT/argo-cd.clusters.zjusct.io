@@ -44,13 +44,21 @@ repos:
   # Kustomize + Helm GitOps validation
   - repo: local
     hooks:
+      - id: check-secrets
+        name: Check for plaintext secrets
+        entry: scripts/check-secrets.sh
+        language: script
+        pass_filenames: true
+        always_run: false
+        files: \.(yaml|yml)$
+        exclude: (charts/|\.git/|node_modules/)
       - id: kustomize-helm-check
         name: Kustomize + Helm Configuration Check
         entry: scripts/pre-commit-check.py
         language: script
         pass_filenames: true
         always_run: false
-        files: (kustomization\.yaml|values/.*\.yaml)$
+        files: ^(dev|production)/.*\.(yaml|yml)$
         require_serial: true
 ci:
   autofix_commit_msg: |

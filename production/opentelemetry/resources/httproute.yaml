@@ -13,6 +13,6 @@ spec:
     - otel-http.s.zjusct.io
   rules:
     - backendRefs:
-        - name: otel-collector-collector
+        - name: aggregator-collector
           port: 4318
           weight: 1

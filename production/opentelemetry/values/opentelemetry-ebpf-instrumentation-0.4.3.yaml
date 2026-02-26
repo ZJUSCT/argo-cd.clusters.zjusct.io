@@ -176,9 +176,9 @@ config:
   # default value of Opentelemetry eBPF Instrumentation configuration
   data:
     otel_traces_export:
-      endpoint: "http://otel-collector-collector.opentelemetry.svc.cluster.local:4317"
+      endpoint: "http://aggregator-collector.opentelemetry.svc.cluster.local:4317"
     otel_metrics_export:
-      endpoint: "http://otel-collector-collector.opentelemetry.svc.cluster.local:4318"
+      endpoint: "http://aggregator-collector.opentelemetry.svc.cluster.local:4318"
     attributes:
       kubernetes:
         enable: true
