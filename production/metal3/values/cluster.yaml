@@ -81,3 +81,8 @@ nodes:
     mac: "9c:c2:c4:79:da:c2"
     bmc:
       address: redfish://172.25.3.72
+
+  - name: m800
+    mac: "50:79:73:1F:53:AC"
+    bmc:
+      address: redfish://172.25.3.80
