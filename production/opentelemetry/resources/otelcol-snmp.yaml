@@ -7,17 +7,9 @@ spec:
   image: "harbor.clusters.zjusct.io/ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.146.1"
   mode: deployment
   replicas: 1
-  env:
-    - name: SNMP_AUTH_KEY
-      valueFrom:
-        secretKeyRef:
-          name: otel-collector-secrets
-          key: snmp-auth-key
-    - name: SNMP_PRIVATE_KEY
-      valueFrom:
-        secretKeyRef:
-          name: otel-collector-secrets
-          key: snmp-private-key
+  envFrom:
+    - secretRef:
+        name: otel-collector-secrets
   config:
     receivers:
       snmp/pdu-30966-1:
