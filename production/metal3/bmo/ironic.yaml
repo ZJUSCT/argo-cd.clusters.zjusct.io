@@ -23,6 +23,7 @@ spec:
         - "80:61:5F:10:8C:C7,m701,172.25.4.71,1h"
         - "9c:c2:c4:55:e3:3e,a700,172.25.4.72,1h"
         - "4c:bb:47:2a:65:78,nvidia-spark,172.25.4.73,1h"
+        - "50:79:73:1F:53:AC,m800,172.25.4.80,1h"
       # we inject dnsmasq config here
       # https://github.com/imp/dnsmasq/blob/master/dnsmasq.conf.example
       # https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html
