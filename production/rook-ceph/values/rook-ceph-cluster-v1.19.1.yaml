@@ -223,8 +223,8 @@ cephClusterSpec:
       # and clients will be required to connect to the Ceph cluster with the v2 port (3300).
       # Requires a kernel that supports msgr v2 (kernel 5.11 or CentOS 8.4 or newer).
       requireMsgr2: false
-  #   # enable host networking
-  #   provider: host
+    #   # enable host networking
+    #   provider: host
     provider: host
     addressRanges:
       public:
@@ -314,15 +314,15 @@ cephClusterSpec:
                 - key: ceph
                   operator: In
                   values: ["yes"]
-  #   # The above placement information can also be specified for mon, osd, and mgr components
-  #   mon:
-  #   # Monitor deployments may contain an anti-affinity rule for avoiding monitor
-  #   # collocation on the same node. This is a required rule when host network is used
-  #   # or when AllowMultiplePerNode is false. Otherwise this anti-affinity rule is a
-  #   # preferred rule with weight: 50.
-  #   osd:
-  #   mgr:
-  #   cleanup:
+    #   # The above placement information can also be specified for mon, osd, and mgr components
+    #   mon:
+    #   # Monitor deployments may contain an anti-affinity rule for avoiding monitor
+    #   # collocation on the same node. This is a required rule when host network is used
+    #   # or when AllowMultiplePerNode is false. Otherwise this anti-affinity rule is a
+    #   # preferred rule with weight: 50.
+    #   osd:
+    #   mgr:
+    #   cleanup:
     mon:
       nodeAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
@@ -796,10 +796,10 @@ cephFileSystems:
         activeStandby: true
         resources:
           limits:
-            memory: "8Gi"
+            memory: "200Gi"
           requests:
             cpu: "1000m"
-            memory: "8Gi"
+            memory: "80Gi"
         priorityClassName: system-cluster-critical
     storageClass:
       enabled: true
