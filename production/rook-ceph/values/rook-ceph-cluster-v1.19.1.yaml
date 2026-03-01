@@ -21,7 +21,22 @@ configOverride: |
   auth_allow_insecure_global_id_reclaim = false
   mds_session_blocklist_on_timeout = false
   mds_session_blocklist_on_evict = false
- # configOverride: |
+
+  [osd]
+  # OSD 队列和线程优化（解决队列瓶颈）
+  osd_op_num_shards_hdd = 8
+  osd_op_num_shards_ssd = 16
+  osd_op_num_threads_per_shard_hdd = 5
+  osd_op_num_threads_per_shard_ssd = 4
+
+  # 网络缓冲区优化（解决接收延迟瓶颈）
+  ms_tcp_rcvbuf = 4194304
+  ms_async_op_threads = 5
+
+  # BlueStore 缓存优化
+  bluestore_cache_size_hdd = 4294967296
+  bluestore_cache_size_ssd = 8589934592
+# configOverride: |
 #   [global]
 #   mon_allow_pool_delete = true
 #   osd_pool_default_size = 3
@@ -472,6 +487,10 @@ cephClusterSpec:
             config:
               deviceClass: hdd
 
+          - name: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957
+            config:
+              deviceClass: ssd
+
       - name: m600
         devices:
           - name: /dev/disk/by-id/ata-ST2000DM001-1CH164_Z1E5B3FZ
@@ -558,6 +577,10 @@ cephClusterSpec:
               databaseSizeMB: "51200"
 
           - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG10860250960CGN
+            config:
+              deviceClass: ssd
+
+          - name: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_MX_00000000000030027
             config:
               deviceClass: ssd
 
