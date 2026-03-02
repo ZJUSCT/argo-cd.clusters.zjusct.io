@@ -792,14 +792,14 @@ cephFileSystems:
           parameters:
             pg_autoscale_mode: "off"
       metadataServer:
-        activeCount: 2
+        activeCount: 3
         activeStandby: true
         resources:
           limits:
-            memory: "200Gi"
+            memory: "192Gi"
           requests:
             cpu: "1000m"
-            memory: "80Gi"
+            memory: "96Gi"
         priorityClassName: system-cluster-critical
     storageClass:
       enabled: true
