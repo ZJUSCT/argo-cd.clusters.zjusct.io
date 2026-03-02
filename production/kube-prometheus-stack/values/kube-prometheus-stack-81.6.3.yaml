@@ -1328,30 +1328,59 @@ grafana:
           options:
             path: /var/lib/grafana/dashboards/ceph
 
-  ## Additional dashboards to download from grafana.com at startup
-  ## revision: must be specified explicitly; omitting it silently falls back to revision 1
+  ## Additional dashboards to download at startup
+  ## Using ceph-mixin dashboards from upstream Ceph
   dashboards:
     ceph:
       ceph-cluster:
-        gnetId: 2842
-        revision: 18
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/ceph-cluster.json
         datasource: Prometheus
-      ceph-osd:
-        gnetId: 5336
-        revision: 9
+      ceph-cluster-advanced:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/ceph-cluster-advanced.json
         datasource: Prometheus
-      ceph-pools:
-        gnetId: 5342
-        revision: 9
+      ceph-osds-overview:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/osds-overview.json
+        datasource: Prometheus
+      ceph-osd-device-details:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/osd-device-details.json
+        datasource: Prometheus
+      ceph-pool-overview:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/pool-overview.json
+        datasource: Prometheus
+      ceph-pool-detail:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/pool-detail.json
+        datasource: Prometheus
+      ceph-rbd-overview:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/rbd-overview.json
+        datasource: Prometheus
+      ceph-rbd-details:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/rbd-details.json
         datasource: Prometheus
       ceph-cephfs:
-        gnetId: 9340
-        revision: 1
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/cephfsdashboard.json
         datasource: Prometheus
-      ceph-cephfs-mds:
-        gnetId: 12701
-        revision: 3
+      ceph-radosgw-overview:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/radosgw-overview.json
         datasource: Prometheus
+      ceph-radosgw-detail:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/radosgw-detail.json
+        datasource: Prometheus
+      ceph-radosgw-sync-overview:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/radosgw-sync-overview.json
+        datasource: Prometheus
+      ceph-host-overview:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/hosts-overview.json
+        datasource: Prometheus
+      ceph-host-details:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/host-details.json
+        datasource: Prometheus
+      ceph-multi-cluster-overview:
+        url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/multi-cluster-overview.json
+        datasource: Prometheus
+      # Example of adding dashboard from grafana lab
+      # ceph-cephfs:
+      #   gnetId: 9340
+      #   revision: 1
 
   # Administrator credentials when not using an existing secret (see below)
   adminUser: admin
@@ -4196,9 +4225,7 @@ prometheus:
 
     ## External labels to add to any time series or alerts when communicating with external systems
     ##
-    externalLabels:
-      cluster: production
-      region: zjusct
+    externalLabels: {}
 
     ## enable --web.enable-remote-write-receiver flag on prometheus-server
     ##
@@ -4466,10 +4493,6 @@ prometheus:
     ## additionalRemoteWrite is appended to remoteWrite
     additionalRemoteWrite: []
 
-    ## Enable Prometheus to receive remote write data from external sources (e.g., OpenTelemetry Collector)
-    remoteWriteReceiver:
-      enabled: true
-
     ## Enable/Disable Grafana dashboards provisioning for prometheus remote write feature
     remoteWriteDashboards: false
 
@@ -4647,7 +4670,7 @@ prometheus:
     ## This is experimental and may change significantly without backward compatibility in any release.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#thanosspec
     ##
-    # thanos: {}
+    thanos: {}
       # secretProviderClass:
       #   provider: gcp
       #   parameters:
