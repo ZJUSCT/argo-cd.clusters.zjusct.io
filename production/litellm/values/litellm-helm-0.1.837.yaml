@@ -128,6 +128,15 @@ proxy_config:
     ####################################################################
     # 字节跳动 - 火山方舟 - Pro
     ####################################################################
+    - model_name: plan/volcengine/ark-code-latest
+      litellm_params:
+        model: ark-code-latest
+        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: volcengine
+        tools:
+          web_search: 1
+        drop_params: True
     - model_name: plan/volcengine/doubao-seed-2.0-code
       litellm_params:
         model: doubao-seed-2.0-code
