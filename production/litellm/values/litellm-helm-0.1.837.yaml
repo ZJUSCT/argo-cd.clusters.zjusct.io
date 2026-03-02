@@ -128,128 +128,200 @@ proxy_config:
     ####################################################################
     # 字节跳动 - 火山方舟 - Pro
     ####################################################################
-    - model_name: plan/volcengine/ark-code-latest
+    # OpenAI API
+    - model_name: plan/volcengine/ark-code-latest/openai
       litellm_params:
         model: ark-code-latest
         api_base: https://ark.cn-beijing.volces.com/api/coding/v3
         api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: volcengine
-        tools:
-          web_search: 1
-        drop_params: True
-    - model_name: plan/volcengine/doubao-seed-2.0-code
+        custom_llm_provider: openai
+    - model_name: plan/volcengine/doubao-seed-2.0-code/openai
       litellm_params:
         model: doubao-seed-2.0-code
         api_base: https://ark.cn-beijing.volces.com/api/coding/v3
         api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: volcengine
-        tools:
-          web_search: 1
-        drop_params: True
-    - model_name: plan/volcengine/doubao-seed-code
+        custom_llm_provider: openai
+    - model_name: plan/volcengine/doubao-seed-code/openai
       litellm_params:
         model: doubao-seed-code
         api_base: https://ark.cn-beijing.volces.com/api/coding/v3
         api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: volcengine
-        tools:
-          web_search: 1
-        drop_params: True
-    - model_name: plan/volcengine/glm-4.7
+        custom_llm_provider: openai
+    - model_name: plan/volcengine/glm-4.7/openai
       litellm_params:
         model: glm-4.7
         api_base: https://ark.cn-beijing.volces.com/api/coding/v3
         api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: volcengine
-        tools:
-          web_search: 1
-    - model_name: plan/volcengine/kimi-k2-thinking
+        custom_llm_provider: openai
+    - model_name: plan/volcengine/kimi-k2-thinking/openai
       litellm_params:
         model: kimi-k2-thinking
         api_base: https://ark.cn-beijing.volces.com/api/coding/v3
         api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        tools:
-          web_search: 1
-    - model_name: plan/volcengine/kimi-k2.5
+        custom_llm_provider: openai
+    - model_name: plan/volcengine/kimi-k2.5/openai
       litellm_params:
         model: kimi-k2.5
         api_base: https://ark.cn-beijing.volces.com/api/coding/v3
         api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: volcengine
-        tools:
-          web_search: 1
+        custom_llm_provider: openai
+    # Anthropic API
+    - model_name: plan/volcengine/ark-code-latest/anthropic
+      litellm_params:
+        model: ark-code-latest
+        api_base: https://ark.cn-beijing.volces.com/api/coding
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/volcengine/doubao-seed-2.0-code/anthropic
+      litellm_params:
+        model: doubao-seed-2.0-code
+        api_base: https://ark.cn-beijing.volces.com/api/coding
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/volcengine/doubao-seed-code/anthropic
+      litellm_params:
+        model: doubao-seed-code
+        api_base: https://ark.cn-beijing.volces.com/api/coding
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/volcengine/glm-4.7/anthropic
+      litellm_params:
+        model: glm-4.7
+        api_base: https://ark.cn-beijing.volces.com/api/coding
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/volcengine/kimi-k2-thinking/anthropic
+      litellm_params:
+        model: kimi-k2-thinking
+        api_base: https://ark.cn-beijing.volces.com/api/coding
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/volcengine/kimi-k2.5/anthropic
+      litellm_params:
+        model: kimi-k2.5
+        api_base: https://ark.cn-beijing.volces.com/api/coding
+        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+        custom_llm_provider: anthropic
 
     ####################################################################
     # 稀宇科技 - MiniMax - Max-极速版
     ####################################################################
-    - model_name: plan/minimax/MiniMax-M2.5-highspeed
+    # Anthropic API
+    - model_name: plan/minimax/MiniMax-M2.5-highspeed/anthropic
       litellm_params:
         model: MiniMax-M2.5-highspeed
         api_base: https://api.minimaxi.com/anthropic
         api_key: os.environ/PLAN_MINIMAX_API_KEY
         custom_llm_provider: anthropic
-        tools:
-          web_search: 1
-    - model_name: plan/minimax/MiniMax-M2.5
+    # OpenAI API
+    - model_name: plan/minimax/MiniMax-M2.5-highspeed/openai
       litellm_params:
-        model: MiniMax-M2.5
-        api_base: https://api.minimaxi.com/anthropic
+        model: MiniMax-M2.5-highspeed
+        api_base: https://api.minimaxi.com/v1
         api_key: os.environ/PLAN_MINIMAX_API_KEY
-        custom_llm_provider: anthropic
-        tools:
-          web_search: 1
+        custom_llm_provider: openai
 
     ####################################################################
     # 阿里云 - 百炼 - Pro
     ####################################################################
-    - model_name: plan/bailian/qwen3.5-plus
+    # Anthropic API
+    - model_name: plan/bailian/qwen3.5-plus/anthropic
       litellm_params:
         model: qwen3.5-plus
         api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
         api_key: os.environ/PLAN_BAILIAN_API_KEY
         custom_llm_provider: anthropic
-        tools:
-          web_search: 1
-    - model_name: plan/bailian/qwen3-max-2026-01-23
-      litellm_params:
-        model: qwen3-max-2026-01-23
-        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
-        api_key: os.environ/PLAN_BAILIAN_API_KEY
-        custom_llm_provider: anthropic
-        tools:
-          web_search: 1
-    - model_name: plan/bailian/qwen3-coder-next
-      litellm_params:
-        model: qwen3-coder-next
-        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
-        api_key: os.environ/PLAN_BAILIAN_API_KEY
-        custom_llm_provider: anthropic
-        tools:
-          web_search: 1
-    - model_name: plan/bailian/qwen3-coder-plus
-      litellm_params:
-        model: qwen3-coder-plus
-        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
-        api_key: os.environ/PLAN_BAILIAN_API_KEY
-        custom_llm_provider: anthropic
-        tools:
-          web_search: 1
-    - model_name: plan/bailian/glm-4.7
-      litellm_params:
-        model: glm-4.7
-        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
-        api_key: os.environ/PLAN_BAILIAN_API_KEY
-        custom_llm_provider: anthropic
-        tools:
-          web_search: 1
-    - model_name: plan/bailian/kimi-k2.5
+    - model_name: plan/bailian/kimi-k2.5/anthropic
       litellm_params:
         model: kimi-k2.5
         api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
         api_key: os.environ/PLAN_BAILIAN_API_KEY
         custom_llm_provider: anthropic
-        tools:
-          web_search: 1
+    - model_name: plan/bailian/glm-5/anthropic
+      litellm_params:
+        model: glm-5
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/bailian/MiniMax-M2.5/anthropic
+      litellm_params:
+        model: MiniMax-M2.5
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/bailian/qwen3-max-2026-01-23/anthropic
+      litellm_params:
+        model: qwen3-max-2026-01-23
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/bailian/qwen3-coder-next/anthropic
+      litellm_params:
+        model: qwen3-coder-next
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/bailian/qwen3-coder-plus/anthropic
+      litellm_params:
+        model: qwen3-coder-plus
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/bailian/glm-4.7/anthropic
+      litellm_params:
+        model: glm-4.7
+        api_base: https://coding.dashscope.aliyuncs.com/apps/anthropic
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: anthropic
+    # OpenAI API
+    - model_name: plan/bailian/qwen3.5-plus/openai
+      litellm_params:
+        model: qwen3.5-plus
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/bailian/kimi-k2.5/openai
+      litellm_params:
+        model: kimi-k2.5
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/bailian/glm-5/openai
+      litellm_params:
+        model: glm-5
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/bailian/MiniMax-M2.5/openai
+      litellm_params:
+        model: MiniMax-M2.5
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/bailian/qwen3-max-2026-01-23/openai
+      litellm_params:
+        model: qwen3-max-2026-01-23
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/bailian/qwen3-coder-next/openai
+      litellm_params:
+        model: qwen3-coder-next
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/bailian/qwen3-coder-plus/openai
+      litellm_params:
+        model: qwen3-coder-plus
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/bailian/glm-4.7/openai
+      litellm_params:
+        model: glm-4.7
+        api_base: https://coding.dashscope.aliyuncs.com/v1
+        api_key: os.environ/PLAN_BAILIAN_API_KEY
+        custom_llm_provider: openai
 
     ####################################################################
     # API 计费
