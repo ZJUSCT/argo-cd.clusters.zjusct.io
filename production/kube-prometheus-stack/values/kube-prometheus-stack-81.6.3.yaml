@@ -1655,6 +1655,75 @@ grafana:
     log:
       level: warn
 
+  envFromSecret: grafana-secrets
+
+  # Static alerting configuration
+  alerting:
+    contactpoints.yaml:
+      secret:
+        apiVersion: 1
+        contactPoints:
+          - orgId: 1
+            name: DingTalk
+            receivers:
+              - uid: dingtalk-webhook
+                type: webhook
+                settings:
+                  url: "{{ env \"DINGTALK_WEBHOOK_URL\" }}"
+                disableResolveMessage: false
+    rules.yaml:
+      apiVersion: 1
+      groups:
+        - name: pod_memory
+          folder: Kubernetes
+          interval: 1m
+          rules:
+            - uid: pod-memory-oom-warning
+              title: Pod Memory Usage Above 90%
+              condition: A
+              data:
+                - refId: A
+                  queryType: ''
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+                  datasourceUid: prometheus
+                  model:
+                    editorMode: code
+                    expr: |
+                      (
+                        container_memory_working_set_bytes{
+                          cluster="",
+                          container!="",
+                          container!="POD"
+                        }
+                        /
+                        container_spec_memory_limit_bytes{
+                          cluster="",
+                          container!="",
+                          container!="POD"
+                        }
+                      ) >= 0.9
+                    legendFormat: "{{ container }}/{{ pod }}"
+                    refId: A
+              noDataState: NoData
+              execErrState: Alerting
+              for: 2m
+              annotations:
+                summary: "Pod {{ $labels.container }} in namespace {{ $labels.namespace }} is approaching memory limit"
+                description: "Memory usage is {{ $value | humanizePercentage }} of limit ({{ $labels.container }}/{{ $labels.pod }} in {{ $labels.namespace }})"
+              labels:
+                severity: warning
+
+    policies.yaml:
+      apiVersion: 1
+      policies:
+        - orgId: 1
+          receiver: dingtalk-webhook
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+
     # - sourceLabels: [__meta_kubernetes_pod_node_name]
     #   separator: ;
     #   regex: ^(.*)$
