@@ -1669,51 +1669,70 @@ grafana:
               - uid: dingtalk-webhook
                 type: webhook
                 settings:
-                  url: "{{ env \"DINGTALK_WEBHOOK_URL\" }}"
+                  url: "${DINGTALK_WEBHOOK_URL}"
                 disableResolveMessage: false
     rules.yaml:
       apiVersion: 1
       groups:
-        - name: pod_memory
+        - orgId: 1
+          name: eval_group_1m
           folder: Kubernetes
           interval: 1m
           rules:
             - uid: pod-memory-oom-warning
-              title: Pod Memory Usage Above 90%
-              condition: A
+              title: Pod Memory Usage Above 80%
+              condition: C
               data:
                 - refId: A
-                  queryType: ''
                   relativeTimeRange:
-                    from: 300
+                    from: 600
                     to: 0
-                  datasourceUid: prometheus
+                  datasourceUid: prom
                   model:
                     editorMode: code
-                    expr: |
-                      (
-                        container_memory_working_set_bytes{
-                          cluster="",
-                          container!="",
-                          container!="POD"
-                        }
-                        /
-                        container_spec_memory_limit_bytes{
-                          cluster="",
-                          container!="",
-                          container!="POD"
-                        }
-                      ) >= 0.9
-                    legendFormat: "{{ container }}/{{ pod }}"
+                    expr: "(\n  # 1. 以 Pod 为单位计算 Working Set (取 Max 是为了处理同一个 Pod 里的多容器)\n  max by (cluster, namespace, pod) (\n    container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container!=\"\", image!=\"\"}\n  )\n) \n/ \n(\n  # 2. 以 Pod 为单位计算 Limit 总额\n  max by (cluster, namespace, pod) (\n    cluster:namespace:pod_memory:active:kube_pod_container_resource_limits{resource=\"memory\"}\n  )\n)\n# 3. 关联 Workload 信息，方便你在告警标题里看到是哪个 Deployment\n* on(cluster, namespace, pod) group_left(workload, workload_type) \nnamespace_workload_pod:kube_pod_owner:relabel{workload_type=~\"(deployment|statefulset|daemonset|job)\"}"
+                    instant: true
+                    intervalMs: 1000
+                    legendFormat: __auto
+                    maxDataPoints: 43200
+                    range: false
                     refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                        - evaluator:
+                            params:
+                                - 0.8
+                            type: gt
+                          operator:
+                            type: and
+                          query:
+                            params:
+                                - C
+                          reducer:
+                            params: []
+                            type: last
+                          type: query
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
               noDataState: NoData
-              execErrState: Alerting
-              for: 2m
+              execErrState: Error
+              for: 1m
+              keepFiringFor: 1m
               annotations:
-                summary: "Pod {{ $labels.container }} in namespace {{ $labels.namespace }} is approaching memory limit"
-                description: "Memory usage is {{ $value | humanizePercentage }} of limit ({{ $labels.container }}/{{ $labels.pod }} in {{ $labels.namespace }})"
+                description: 'In namespace *{{ "{{" }} $labels.namespace {{ "}}" }}*, the Pod *{{ "{{" }} $labels.pod {{ "}}" }}* (belonging to {{ "{{" }} $labels.workload_type {{ "}}" }} *{{ "{{" }} $labels.workload {{ "}}" }}*) is using {{ "{{" }} $value | humanizePercentage {{ "}}" }} of its memory limit. This Pod is at high risk of being OOM Killed. Please check for memory leaks or increase the resource limits.'
+                summary: 'Memory usage > 80% for Pod {{ "{{" }} $labels.pod {{ "}}" }} ({{ "{{" }} $labels.workload {{ "}}" }})'
               labels:
                 severity: warning
+              notification_settings:
+                receiver: DingTalk
 
     policies.yaml:
       apiVersion: 1
