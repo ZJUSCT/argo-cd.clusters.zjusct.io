@@ -1732,12 +1732,12 @@ grafana:
               notification_settings:
                 receiver: DingTalk
 
-    policies.yaml:
-      apiVersion: 1
-      policies:
-        - orgId: 1
-          receiver: dingtalk-webhook
-          group_by: ['...']
+    # policies.yaml:
+    #   apiVersion: 1
+    #   policies:
+    #     - orgId: 1
+    #       receiver: DingTalk
+    #       group_by: ['...']
 
     # - sourceLabels: [__meta_kubernetes_pod_node_name]
     #   separator: ;
