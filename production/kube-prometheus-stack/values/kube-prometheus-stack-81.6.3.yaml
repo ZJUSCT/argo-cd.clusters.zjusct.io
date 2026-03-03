@@ -1724,8 +1724,6 @@ grafana:
                     type: threshold
               noDataState: NoData
               execErrState: Error
-              for: 1m
-              keepFiringFor: 1m
               annotations:
                 description: 'In namespace *{{ "{{" }} $labels.namespace {{ "}}" }}*, the Pod *{{ "{{" }} $labels.pod {{ "}}" }}* (belonging to {{ "{{" }} $labels.workload_type {{ "}}" }} *{{ "{{" }} $labels.workload {{ "}}" }}*) is using {{ "{{" }} $value | humanizePercentage {{ "}}" }} of its memory limit. This Pod is at high risk of being OOM Killed. Please check for memory leaks or increase the resource limits.'
                 summary: 'Memory usage > 80% for Pod {{ "{{" }} $labels.pod {{ "}}" }} ({{ "{{" }} $labels.workload {{ "}}" }})'
@@ -1739,9 +1737,7 @@ grafana:
       policies:
         - orgId: 1
           receiver: dingtalk-webhook
-          group_wait: 30s
-          group_interval: 5m
-          repeat_interval: 4h
+          group_by: ['...']
 
     # - sourceLabels: [__meta_kubernetes_pod_node_name]
     #   separator: ;
