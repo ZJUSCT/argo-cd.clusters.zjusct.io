@@ -1742,7 +1742,7 @@ grafana:
                   datasourceUid: loki
                   model:
                     editorMode: code
-                    expr: "sum by (k8s_namespace, reason, object_kind, object_name, event_message) (\n  count_over_time(\n    {service_name=\"k8s-events\"}\n    | json watch_type=\"type\", event_type=\"object.type\", reason=\"object.reason\", event_message=\"object.note\", k8s_namespace=\"object.metadata.namespace\", object_kind=\"object.regarding.kind\", object_name=\"object.regarding.name\"\n    | watch_type=\"ADDED\"\n    | event_type=\"Warning\"\n    [5m]\n  )\n)"
+                    expr: "sum by (k8s_namespace, reason, object_kind, object_name, event_message) (\n  count_over_time(\n    {service_name=\"k8s-events\"}\n    | json watch_type=\"type\", event_type=\"object.type\", reason=\"object.reason\", event_message=\"object.note\", k8s_namespace=\"object.metadata.namespace\", object_kind=\"object.regarding.kind\", object_name=\"object.regarding.name\"\n    | watch_type=~\"ADDED|MODIFIED\"\n    | event_type=\"Warning\"\n    [5m]\n  )\n)"
                     instant: true
                     intervalMs: 1000
                     legendFormat: __auto
