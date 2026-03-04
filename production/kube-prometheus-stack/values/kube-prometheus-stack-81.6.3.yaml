@@ -1680,7 +1680,7 @@ grafana:
           interval: 1m
           rules:
             - uid: pod-memory-oom-warning
-              title: Pod Memory Usage Above 80%
+              title: Pod Memory Usage Above 90%
               condition: C
               data:
                 - refId: A
@@ -1703,7 +1703,7 @@ grafana:
                     conditions:
                         - evaluator:
                             params:
-                                - 0.8
+                                - 0.9
                             type: gt
                           operator:
                             type: and
@@ -1726,7 +1726,7 @@ grafana:
               execErrState: Error
               annotations:
                 description: 'In namespace *{{ "{{" }} $labels.namespace {{ "}}" }}*, the Pod *{{ "{{" }} $labels.pod {{ "}}" }}* (belonging to {{ "{{" }} $labels.workload_type {{ "}}" }} *{{ "{{" }} $labels.workload {{ "}}" }}*) is using {{ "{{" }} $value | humanizePercentage {{ "}}" }} of its memory limit. This Pod is at high risk of being OOM Killed. Please check for memory leaks or increase the resource limits.'
-                summary: 'Memory usage > 80% for Pod {{ "{{" }} $labels.pod {{ "}}" }} ({{ "{{" }} $labels.workload {{ "}}" }})'
+                summary: 'Memory usage > 90% for Pod {{ "{{" }} $labels.pod {{ "}}" }} ({{ "{{" }} $labels.workload {{ "}}" }})'
               labels:
                 severity: warning
               notification_settings:
