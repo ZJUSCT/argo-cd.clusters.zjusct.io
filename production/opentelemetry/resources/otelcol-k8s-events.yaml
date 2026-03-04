@@ -1,0 +1,42 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: k8s-events
+spec:
+  image: "harbor.clusters.zjusct.io/ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.146.1"
+  mode: deployment
+  replicas: 1
+  serviceAccount: k8s-events-collector
+  config:
+    receivers:
+      k8sobjects/events:
+        auth_type: serviceAccount
+        include_initial_state: false
+        objects:
+          - name: events
+            mode: watch
+            group: events.k8s.io
+            exclude_watch_type: [DELETED]
+
+    processors:
+      resource/k8s_events:
+        attributes:
+          - key: service.name
+            value: k8s-events
+            action: upsert
+      batch:
+      memory_limiter:
+        limit_mib: 256
+        spike_limit_mib: 64
+        check_interval: 5s
+
+    exporters:
+      otlp_grpc:
+        endpoint: "aggregator-collector.opentelemetry.svc.cluster.local:4317"
+
+    service:
+      pipelines:
+        logs/events:
+          receivers: [k8sobjects/events]
+          processors: [memory_limiter, resource/k8s_events, batch]
+          exporters: [otlp_grpc]

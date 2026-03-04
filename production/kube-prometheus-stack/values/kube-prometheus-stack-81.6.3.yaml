@@ -1739,10 +1739,10 @@ grafana:
                   relativeTimeRange:
                     from: 600
                     to: 0
-                  datasourceUid: prom
+                  datasourceUid: loki
                   model:
                     editorMode: code
-                    expr: "sum by (cluster, namespace, reason) (\n  increase(kube_event_count{type=\"Warning\"}[5m])\n)"
+                    expr: "sum by (k8s_namespace, reason, object_kind, object_name, event_message) (\n  count_over_time(\n    {service_name=\"k8s-events\"}\n    | json watch_type=\"type\", event_type=\"object.type\", reason=\"object.reason\", event_message=\"object.note\", k8s_namespace=\"object.metadata.namespace\", object_kind=\"object.regarding.kind\", object_name=\"object.regarding.name\"\n    | watch_type=\"ADDED\"\n    | event_type=\"Warning\"\n    [5m]\n  )\n)"
                     instant: true
                     intervalMs: 1000
                     legendFormat: __auto
@@ -1777,8 +1777,8 @@ grafana:
               noDataState: NoData
               execErrState: Error
               annotations:
-                description: 'In namespace *{{ "{{" }} $labels.namespace {{ "}}" }}*, reason *{{ "{{" }} $labels.reason {{ "}}" }}* has {{ "{{" }} $value {{ "}}" }} warning event(s) in the last 5m.'
-                summary: 'K8S warning events detected in {{ "{{" }} $labels.namespace {{ "}}" }} (reason: {{ "{{" }} $labels.reason {{ "}}" }})'
+                description: 'Namespace *{{ "{{" }} $labels.k8s_namespace {{ "}}" }}*, object *{{ "{{" }} $labels.object_kind {{ "}}" }}/{{ "{{" }} $labels.object_name {{ "}}" }}* emitted *{{ "{{" }} $labels.reason {{ "}}" }}* ({{ "{{" }} $value {{ "}}" }} event(s) in last 5m). Message: {{ "{{" }} $labels.event_message {{ "}}" }}'
+                summary: 'K8S warning event: {{ "{{" }} $labels.k8s_namespace {{ "}}" }}/{{ "{{" }} $labels.object_kind {{ "}}" }}/{{ "{{" }} $labels.object_name {{ "}}" }} ({{ "{{" }} $labels.reason {{ "}}" }})'
               labels:
                 severity: warning
               notification_settings:
@@ -2763,38 +2763,6 @@ kubeStateMetrics:
 kube-state-metrics:
   ## set to true to add the release label so scraping of the servicemonitor with kube-prometheus-stack works out of the box
   releaseLabel: true
-
-  # Include `events` so kube-state-metrics exposes kube_event_* series for Grafana event alerting.
-  collectors:
-    - certificatesigningrequests
-    - configmaps
-    - cronjobs
-    - daemonsets
-    - deployments
-    - endpointslices
-    - events
-    - horizontalpodautoscalers
-    - ingresses
-    - jobs
-    - leases
-    - limitranges
-    - mutatingwebhookconfigurations
-    - namespaces
-    - networkpolicies
-    - nodes
-    - persistentvolumeclaims
-    - persistentvolumes
-    - poddisruptionbudgets
-    - pods
-    - replicasets
-    - replicationcontrollers
-    - resourcequotas
-    - secrets
-    - services
-    - statefulsets
-    - storageclasses
-    - validatingwebhookconfigurations
-    - volumeattachments
 
   ## Enable scraping via kubernetes-service-endpoints
   ## Disabled by default as we service monitor is enabled below

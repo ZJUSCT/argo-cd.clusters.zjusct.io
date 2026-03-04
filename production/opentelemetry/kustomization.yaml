@@ -7,6 +7,8 @@ resources:
 - resources/otelcol-check.yaml
 - resources/otelcol-misc.yaml
 - resources/otelcol-snmp.yaml
+- resources/otelcol-k8s-events.yaml
+- resources/otelcol-k8s-events-rbac.yaml
 - resources/sealedsecret-otelcol.yaml
 - resources/httproute.yaml
 - resources/grpcroute.yaml
