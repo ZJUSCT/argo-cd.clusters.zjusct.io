@@ -1749,6 +1749,20 @@ grafana:
                     maxDataPoints: 43200
                     range: false
                     refId: A
+                - refId: B
+                  datasourceUid: __expr__
+                  model:
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    reducer: last
+                    refId: B
+                    settings:
+                        mode: dropNN
+                    type: reduce
                 - refId: C
                   datasourceUid: __expr__
                   model:
@@ -1769,7 +1783,7 @@ grafana:
                     datasource:
                         type: __expr__
                         uid: __expr__
-                    expression: A
+                    expression: B
                     intervalMs: 1000
                     maxDataPoints: 43200
                     refId: C
@@ -1777,8 +1791,8 @@ grafana:
               noDataState: NoData
               execErrState: Error
               annotations:
-                description: 'Namespace *{{ "{{" }} $labels.k8s_namespace {{ "}}" }}*, object *{{ "{{" }} $labels.object_kind {{ "}}" }}/{{ "{{" }} $labels.object_name {{ "}}" }}* emitted *{{ "{{" }} $labels.reason {{ "}}" }}* ({{ "{{" }} $value {{ "}}" }} event(s) in last 5m). Message: {{ "{{" }} $labels.event_message {{ "}}" }}'
-                summary: 'K8S warning event: {{ "{{" }} $labels.k8s_namespace {{ "}}" }}/{{ "{{" }} $labels.object_kind {{ "}}" }}/{{ "{{" }} $labels.object_name {{ "}}" }} ({{ "{{" }} $labels.reason {{ "}}" }})'
+                description: 'Namespace *{{ "{{" }} or $values.B.Labels.k8s_namespace "n/a" {{ "}}" }}*, object *{{ "{{" }} or $values.B.Labels.object_kind "Unknown" {{ "}}" }}/{{ "{{" }} or $values.B.Labels.object_name "Unknown" {{ "}}" }}* emitted *{{ "{{" }} or $values.B.Labels.reason "UnknownReason" {{ "}}" }}* ({{ "{{" }} printf "%.0f" $values.B.Value {{ "}}" }} event(s) in last 5m). Message: {{ "{{" }} or $values.B.Labels.event_message "n/a" {{ "}}" }}'
+                summary: 'K8S warning event: {{ "{{" }} or $values.B.Labels.k8s_namespace "n/a" {{ "}}" }}/{{ "{{" }} or $values.B.Labels.object_kind "Unknown" {{ "}}" }}/{{ "{{" }} or $values.B.Labels.object_name "Unknown" {{ "}}" }} ({{ "{{" }} or $values.B.Labels.reason "UnknownReason" {{ "}}" }})'
               labels:
                 severity: warning
               notification_settings:
