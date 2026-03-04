@@ -33,6 +33,8 @@ spec:
     exporters:
       otlp_grpc:
         endpoint: "aggregator-collector.opentelemetry.svc.cluster.local:4317"
+        tls:
+          insecure: true
 
     service:
       pipelines:
