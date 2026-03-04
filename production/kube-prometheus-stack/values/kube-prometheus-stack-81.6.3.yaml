@@ -1731,6 +1731,58 @@ grafana:
                 severity: warning
               notification_settings:
                 receiver: DingTalk
+            - uid: k8s-warning-events
+              title: Kubernetes Warning Events Detected
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: prom
+                  model:
+                    editorMode: code
+                    expr: "sum by (cluster, namespace, reason) (\n  increase(kube_event_count{type=\"Warning\"}[5m])\n)"
+                    instant: true
+                    intervalMs: 1000
+                    legendFormat: __auto
+                    maxDataPoints: 43200
+                    range: false
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                        - evaluator:
+                            params:
+                                - 0
+                            type: gt
+                          operator:
+                            type: and
+                          query:
+                            params:
+                                - C
+                          reducer:
+                            params: []
+                            type: last
+                          type: query
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              noDataState: NoData
+              execErrState: Error
+              annotations:
+                description: 'In namespace *{{ "{{" }} $labels.namespace {{ "}}" }}*, reason *{{ "{{" }} $labels.reason {{ "}}" }}* has {{ "{{" }} $value {{ "}}" }} warning event(s) in the last 5m.'
+                summary: 'K8S warning events detected in {{ "{{" }} $labels.namespace {{ "}}" }} (reason: {{ "{{" }} $labels.reason {{ "}}" }})'
+              labels:
+                severity: warning
+              notification_settings:
+                receiver: DingTalk
 
     # policies.yaml:
     #   apiVersion: 1
@@ -2711,6 +2763,38 @@ kubeStateMetrics:
 kube-state-metrics:
   ## set to true to add the release label so scraping of the servicemonitor with kube-prometheus-stack works out of the box
   releaseLabel: true
+
+  # Include `events` so kube-state-metrics exposes kube_event_* series for Grafana event alerting.
+  collectors:
+    - certificatesigningrequests
+    - configmaps
+    - cronjobs
+    - daemonsets
+    - deployments
+    - endpointslices
+    - events
+    - horizontalpodautoscalers
+    - ingresses
+    - jobs
+    - leases
+    - limitranges
+    - mutatingwebhookconfigurations
+    - namespaces
+    - networkpolicies
+    - nodes
+    - persistentvolumeclaims
+    - persistentvolumes
+    - poddisruptionbudgets
+    - pods
+    - replicasets
+    - replicationcontrollers
+    - resourcequotas
+    - secrets
+    - services
+    - statefulsets
+    - storageclasses
+    - validatingwebhookconfigurations
+    - volumeattachments
 
   ## Enable scraping via kubernetes-service-endpoints
   ## Disabled by default as we service monitor is enabled below
