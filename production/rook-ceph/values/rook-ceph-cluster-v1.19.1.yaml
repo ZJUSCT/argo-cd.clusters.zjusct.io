@@ -380,7 +380,7 @@ cephClusterSpec:
         memory: "4Gi"
     osd:
       limits:
-        memory: "16Gi"
+        memory: "80Gi"
       requests:
         cpu: "1000m"
         memory: "12Gi"
@@ -422,7 +422,7 @@ cephClusterSpec:
         memory: "100Mi"
     exporter:
       limits:
-        memory: "128Mi"
+        memory: "1024Mi"
       requests:
         cpu: "50m"
         memory: "50Mi"
