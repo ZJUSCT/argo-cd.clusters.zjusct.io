@@ -218,6 +218,7 @@ packages:
   - tshark
   - unrar
   - usbutils
+  - util-linux
   - vim
   - wget
   - wireshark

@@ -18,7 +18,7 @@ for disk in /dev/sd[a-z] /dev/sd[a-z][a-z]; do
     fstype=$(blkid -o value -s TYPE "$disk" 2>/dev/null || true)
 
     # Format the disk as ext4 if it doesn't have a filesystem
-    if [ -z "$fstype" ]; then
+    if [ -z "$fstype" ] && command -v blkid >/dev/null 2>&1; then
         echo "Formatting $disk as ext4"
         mkfs.ext4 -F "$disk"
         fstype="ext4"
@@ -48,7 +48,7 @@ for disk in /dev/nvme*n1; do
     fstype=$(blkid -o value -s TYPE "$disk" 2>/dev/null || true)
 
     # Format the disk as ext4 if it doesn't have a filesystem
-    if [ -z "$fstype" ]; then
+    if [ -z "$fstype" ] && command -v blkid >/dev/null 2>&1; then
         echo "Formatting $disk as ext4"
         mkfs.ext4 -F "$disk"
         fstype="ext4"
