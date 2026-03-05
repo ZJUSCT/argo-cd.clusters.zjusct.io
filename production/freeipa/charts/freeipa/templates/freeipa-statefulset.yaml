@@ -21,15 +21,9 @@ spec:
           memory: "8Gi"
           cpu: "4096m"
       hostAliases:
-      {{- range $j := until (int $.Values.ipa.replicas) }}
-      {{- $nodeName := printf "ipa-%02d" (add $j 1) }}
-      {{- $ipv4 := index $.Values.network.services $nodeName "ipv4" }}
-      {{- if $ipv4 }}
-        - ip: "{{ $ipv4 }}"
+        - ip: "127.0.1.1"
           hostnames:
-            - "{{ $nodeName }}.{{ $.Values.ipa.domain }}"
-      {{- end }}
-      {{- end }}
+            - "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
       terminationGracePeriodSeconds: 10
       affinity:
         podAntiAffinity:
