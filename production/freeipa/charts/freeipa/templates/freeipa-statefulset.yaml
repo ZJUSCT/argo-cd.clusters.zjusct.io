@@ -20,11 +20,15 @@ spec:
         requests:
           memory: "8Gi"
           cpu: "4096m"
-      {{- if eq $i 0 }}
       hostAliases:
-        - ip: "127.0.0.1"
+      {{- range $j := until (int $.Values.ipa.replicas) }}
+      {{- $nodeName := printf "ipa-%02d" (add $j 1) }}
+      {{- $ipv4 := index $.Values.network.services $nodeName "ipv4" }}
+      {{- if $ipv4 }}
+        - ip: "{{ $ipv4 }}"
           hostnames:
-            - "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
+            - "{{ $nodeName }}.{{ $.Values.ipa.domain }}"
+      {{- end }}
       {{- end }}
       terminationGracePeriodSeconds: 10
       affinity:
