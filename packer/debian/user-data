@@ -102,6 +102,7 @@ apt:
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 packages:
   - 7zip
+  - acl
   - apt-file
   - aptitude
   - apt-transport-https
