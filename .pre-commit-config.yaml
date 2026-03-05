@@ -3,23 +3,12 @@
 # Setup: pre-commit install
 # Run manually: pre-commit run --all-files
 repos:
-  # YAML linting
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:
       - id: yamllint
         args: [--format, colored, -d, relaxed]
         exclude: .*\/templates\/.*\.yaml$
-  # - repo: https://github.com/google/yamlfmt
-  #   rev: v0.21.0
-  #   hooks:
-  #     - id: yamlfmt
-  #       exclude: .*\/templates\/.*\.yaml$
-  # Markdown linting
-  # - repo: https://github.com/markdownlint/markdownlint
-  #   rev: v0.15.0
-  #   hooks:
-  #     - id: markdownlint
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
@@ -28,7 +17,6 @@ repos:
     rev: 2.1.1
     hooks:
       - id: bashate
-  # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

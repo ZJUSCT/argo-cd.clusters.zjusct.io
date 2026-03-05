@@ -1327,6 +1327,14 @@ grafana:
           editable: true
           options:
             path: /var/lib/grafana/dashboards/ceph
+        - name: zjusct
+          orgId: 1
+          folder: ZJUSCT
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/zjusct
 
   ## Additional dashboards to download at startup
   ## Using ceph-mixin dashboards from upstream Ceph
@@ -1334,49 +1342,43 @@ grafana:
     ceph:
       ceph-cluster-advanced:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/ceph-cluster-advanced.json
-        datasource: Prometheus
       ceph-cluster:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/ceph-cluster.json
-        datasource: Prometheus
       ceph-cephfs-overview:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/cephfs-overview.json
-        datasource: Prometheus
       ceph-host-details:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/host-details.json
-        datasource: Prometheus
       ceph-host-overview:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/hosts-overview.json
-        datasource: Prometheus
       ceph-osd-device-details:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/osd-device-details.json
-        datasource: Prometheus
       ceph-osds-overview:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/osds-overview.json
-        datasource: Prometheus
       ceph-pool-detail:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/pool-detail.json
-        datasource: Prometheus
       ceph-pool-overview:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/pool-overview.json
-        datasource: Prometheus
       ceph-radosgw-detail:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/radosgw-detail.json
-        datasource: Prometheus
       ceph-radosgw-overview:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/radosgw-overview.json
-        datasource: Prometheus
       ceph-radosgw-sync-overview:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/radosgw-sync-overview.json
-        datasource: Prometheus
       ceph-rbd-details:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/rbd-details.json
-        datasource: Prometheus
       ceph-rbd-overview:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/rbd-overview.json
-        datasource: Prometheus
       ceph-rgw-s3-analytics:
         url: https://raw.githubusercontent.com/ceph/ceph/v19.2.3/monitoring/ceph-mixin/dashboards_out/rgw-s3-analytics.json
-        datasource: Prometheus
+    zjusct:
+      cephfs-mds:
+        url: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io/-/raw/master/production/kube-prometheus-stack/dashboards/cephfs-mds.json
+      otelcol-journald-receiver:
+        url: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io/-/raw/master/production/kube-prometheus-stack/dashboards/otelcol-journald-receiver.json
+      otelcol-host-metrics-receiver:
+        url: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io/-/raw/master/production/kube-prometheus-stack/dashboards/otelcol-host-metrics-receiver.json
+      zjusct-cluster:
+        url: https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io/-/raw/master/production/kube-prometheus-stack/dashboards/zjusct-cluster.json
 
   # Administrator credentials when not using an existing secret (see below)
   adminUser: admin
