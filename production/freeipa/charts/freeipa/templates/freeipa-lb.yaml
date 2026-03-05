@@ -21,8 +21,10 @@ metadata:
   {{- end }}
 spec:
   type: LoadBalancer
+  publishNotReadyAddresses: true
   selector:
     app: freeipa
+    statefulset.kubernetes.io/pod-name: ipa-{{ printf "%02d" (add $i 1) }}-0
   ipFamilyPolicy: SingleStack
   ipFamilies:
     - IPv4
@@ -36,6 +38,9 @@ spec:
     - name: "443"
       port: 443
       targetPort: 443
+    - name: "8443"
+      port: 8443
+      targetPort: 8443
     - name: "389"
       port: 389
       targetPort: 389

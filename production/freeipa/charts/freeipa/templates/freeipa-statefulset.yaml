@@ -18,12 +18,14 @@ spec:
     spec:
       resources:
         requests:
-          memory: "512Mi"
-          cpu: "250m"
+          memory: "8Gi"
+          cpu: "4096m"
+      {{- if eq $i 0 }}
       hostAliases:
         - ip: "127.0.0.1"
           hostnames:
             - "ipa-{{ printf "%02d" (add $i 1) }}.{{ $.Values.ipa.domain }}"
+      {{- end }}
       terminationGracePeriodSeconds: 10
       affinity:
         podAntiAffinity:
@@ -136,6 +138,7 @@ spec:
               protocol: UDP
             - containerPort: 389 # ldap
             - containerPort: 443 # https
+            - containerPort: 8443 # pki tomcat https (dogtag)
             - containerPort: 464 # kpasswd
             - containerPort: 464 # kpasswd
               protocol: UDP

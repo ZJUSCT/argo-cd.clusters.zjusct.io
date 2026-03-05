@@ -6,6 +6,8 @@ ipa:
   server:
     adminEmail: mail@example.com
   domain: example.com
+  # Bootstrap FreeIPA server hostname prefix used by replica install
+  bootstrapServer: ipa-01
   timezone: Asia/Shanghai
 
   # Secret configuration - reference to external secret
@@ -25,8 +27,8 @@ storage:
 network:
   services:
     ipa-01:
-      ipv4: ""  # Configure your IPv4 address here
-      ipv6: ""  # Configure your IPv6 address here
+      ipv4: "" # Configure your IPv4 address here
+      ipv6: "" # Configure your IPv6 address here
     ipa-02:
       ipv4: ""
       ipv6: ""
