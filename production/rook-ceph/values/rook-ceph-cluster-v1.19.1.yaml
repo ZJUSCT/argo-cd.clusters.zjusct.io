@@ -858,12 +858,14 @@ cephObjectStores:
     spec:
       metadataPool:
         failureDomain: host
+        deviceClass: hdd
         replicated:
           size: 2
         parameters:
           pg_autoscale_mode: "off"
       dataPool:
         failureDomain: host
+        deviceClass: hdd
         replicated:
           size: 2
         parameters:
