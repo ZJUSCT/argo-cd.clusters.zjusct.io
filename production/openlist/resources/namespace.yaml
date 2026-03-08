@@ -1,6 +1,6 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: dev-openlist
+  name: openlist
   labels:
     app.kubernetes.io/name: openlist
