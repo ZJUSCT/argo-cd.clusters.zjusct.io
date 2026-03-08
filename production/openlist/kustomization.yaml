@@ -4,6 +4,7 @@ namespace: openlist
 resources:
   - resources/namespace.yaml
   - resources/pvc.yaml
+  - resources/obc-openlist-prod-data.yaml
   - resources/service.yaml
   - resources/deployment.yaml
   - resources/httproute.yaml
