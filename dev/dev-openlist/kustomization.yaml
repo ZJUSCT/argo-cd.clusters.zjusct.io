@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dev-openlist
+resources:
+  - resources/namespace.yaml
+  - resources/pvc.yaml
+  - resources/service.yaml
+  - resources/deployment.yaml
+  - resources/httproute.yaml
+images:
+  - name: openlistteam/openlist
+    newName: docker.io/openlistteam/openlist
+transformers:
+  - ../../image-prefix.yaml

@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openlist
+  labels:
+    app: openlist
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: openlist
+  template:
+    metadata:
+      labels:
+        app: openlist
+    spec:
+      containers:
+        - name: openlist
+          image: openlistteam/openlist:v4.1.10
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: UMASK
+              value: "022"
+          ports:
+            - name: http
+              containerPort: 5244
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5244
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5244
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          startupProbe:
+            httpGet:
+              path: /
+              port: 5244
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /opt/openlist/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openlist-data
