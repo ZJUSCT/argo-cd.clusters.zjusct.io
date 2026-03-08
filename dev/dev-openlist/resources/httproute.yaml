@@ -8,10 +8,19 @@ spec:
   parentRefs:
     - name: envoy-gateway
       namespace: envoy-gateway
+      group: gateway.networking.k8s.io
+      kind: Gateway
   hostnames:
     - openlist.clusters.zjusct.io
     - openlist.s.zjusct.io
   rules:
-    - backendRefs:
-        - name: openlist
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: openlist
           port: 5244
+          weight: 1

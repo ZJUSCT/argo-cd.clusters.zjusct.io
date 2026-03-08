@@ -16,6 +16,12 @@ spec:
       labels:
         app: openlist
     spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        runAsNonRoot: true
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: openlist
           image: openlistteam/openlist:v4.1.10
