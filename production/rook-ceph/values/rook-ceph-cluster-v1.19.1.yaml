@@ -36,6 +36,11 @@ configOverride: |
   # BlueStore 缓存优化
   bluestore_cache_size_hdd = 4294967296
   bluestore_cache_size_ssd = 8589934592
+
+  [mon]
+  mon_osd_prime_pg_temp = false
+  mon_osdmap_full_prune_enabled = false
+
 # configOverride: |
 #   [global]
 #   mon_allow_pool_delete = true
