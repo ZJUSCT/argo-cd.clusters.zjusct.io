@@ -52,7 +52,7 @@ toolbox:
   # -- Enable Ceph debugging pod deployment. See [toolbox](../Troubleshooting/ceph-toolbox.md)
   enabled: true
   # -- Toolbox image, defaults to the image used by the Ceph cluster
-  image: quay.io/ceph/ceph:v19.2.3
+  image: #quay.io/ceph/ceph:v19.2.3
   # -- Toolbox tolerations
   tolerations: []
   # -- Toolbox affinity
@@ -181,7 +181,7 @@ cephClusterSpec:
     allowMultiplePerNode: false
     modules:
       - name: pg_autoscaler
-        enabled: false
+        enabled: true
       - name: balancer
         enabled: true
       - name: rook
@@ -229,7 +229,6 @@ cephClusterSpec:
       # Requires a kernel that supports msgr v2 (kernel 5.11 or CentOS 8.4 or newer).
       requireMsgr2: false
     #   # enable host networking
-    #   provider: host
     provider: host
     addressRanges:
       public:
@@ -319,15 +318,15 @@ cephClusterSpec:
                 - key: ceph
                   operator: In
                   values: ["yes"]
-    #   # The above placement information can also be specified for mon, osd, and mgr components
-    #   mon:
-    #   # Monitor deployments may contain an anti-affinity rule for avoiding monitor
-    #   # collocation on the same node. This is a required rule when host network is used
-    #   # or when AllowMultiplePerNode is false. Otherwise this anti-affinity rule is a
-    #   # preferred rule with weight: 50.
-    #   osd:
-    #   mgr:
-    #   cleanup:
+  #   # The above placement information can also be specified for mon, osd, and mgr components
+  #   mon:
+  #   # Monitor deployments may contain an anti-affinity rule for avoiding monitor
+  #   # collocation on the same node. This is a required rule when host network is used
+  #   # or when AllowMultiplePerNode is false. Otherwise this anti-affinity rule is a
+  #   # preferred rule with weight: 50.
+  #   osd:
+  #   mgr:
+  #   cleanup:
     mon:
       nodeAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
@@ -685,6 +684,9 @@ cephBlockPools:
       failureDomain: host
       replicated:
         size: 2
+      parameters:
+        pg_autoscale_mode: "on"
+        pg_num_min: "32"
       # Enables collecting RBD per-image IO statistics by enabling dynamic OSD performance counters. Defaults to false.
       # For reference: https://docs.ceph.com/docs/latest/mgr/prometheus/#rbd-io-statistics
       enableRBDStats: true
@@ -757,13 +759,16 @@ cephFileSystems:
         replicated:
           size: 2
         parameters:
-          pg_autoscale_mode: "off"
+          pg_autoscale_mode: "on"
+          pg_num_min: "16"
       dataPools:
         - failureDomain: host
           replicated:
             size: 2
-          # Optional and highly recommended, 'data0' by default, see https://github.com/rook/rook/blob/master/Documentation/CRDs/Shared-Filesystem/ceph-filesystem-crd.md#pools
           name: data0
+          parameters:
+            pg_autoscale_mode: "on"
+            pg_num_min: "32"
         - name: cephfs-hdd-data
           failureDomain: host
           enableCrushUpdates: true
@@ -771,7 +776,8 @@ cephFileSystems:
           replicated:
             size: 2
           parameters:
-            pg_autoscale_mode: "off"
+            pg_autoscale_mode: "on"
+            pg_num_min: "32"
         - name: cephfs-nvme-data
           failureDomain: host
           deviceClass: nvme
@@ -779,7 +785,8 @@ cephFileSystems:
           replicated:
             size: 2
           parameters:
-            pg_autoscale_mode: "off"
+            pg_autoscale_mode: "on"
+            pg_num_min: "128"
         - name: cephfs-ssd-data
           failureDomain: host
           deviceClass: ssd
@@ -787,7 +794,8 @@ cephFileSystems:
           replicated:
             size: 2
           parameters:
-            pg_autoscale_mode: "off"
+            pg_autoscale_mode: "on"
+            pg_num_min: "32"
         - name: cephfs-home
           failureDomain: host
           deviceClass: nvme
@@ -795,7 +803,8 @@ cephFileSystems:
           replicated:
             size: 2
           parameters:
-            pg_autoscale_mode: "off"
+            pg_autoscale_mode: "on"
+            pg_num_min: "16"
       metadataServer:
         activeCount: 3
         activeStandby: true
@@ -833,6 +842,7 @@ cephFileSystems:
         # will set default as `ext4`. Note that `xfs` is not recommended due to potential deadlock
         # in hyperconverged settings where the volume is mounted on the same node as the osds.
         csi.storage.k8s.io/fstype: ext4
+
 # -- Settings for the filesystem snapshot class
 # @default -- See [CephFS Snapshots](../Storage-Configuration/Ceph-CSI/ceph-csi-snapshot.md#cephfs-snapshots)
 cephFileSystemVolumeSnapshotClass:
@@ -844,6 +854,7 @@ cephFileSystemVolumeSnapshotClass:
   labels: {}
   # see https://rook.io/docs/rook/v1.10/Storage-Configuration/Ceph-CSI/ceph-csi-snapshot/#cephfs-snapshots for available configuration
   parameters: {}
+
 # -- Settings for the block pool snapshot class
 # @default -- See [RBD Snapshots](../Storage-Configuration/Ceph-CSI/ceph-csi-snapshot.md#rbd-snapshots)
 cephBlockPoolsVolumeSnapshotClass:
@@ -855,6 +866,7 @@ cephBlockPoolsVolumeSnapshotClass:
   labels: {}
   # see https://rook.io/docs/rook/v1.10/Storage-Configuration/Ceph-CSI/ceph-csi-snapshot/#rbd-snapshots for available configuration
   parameters: {}
+
 # -- A list of CephObjectStore configurations to deploy
 # @default -- See [below](#ceph-object-stores)
 cephObjectStores:
@@ -863,18 +875,22 @@ cephObjectStores:
     spec:
       metadataPool:
         failureDomain: host
+        enableCrushUpdates: true
         deviceClass: hdd
         replicated:
           size: 2
         parameters:
-          pg_autoscale_mode: "off"
+          pg_autoscale_mode: "on"
+          pg_num_min: "8"
       dataPool:
         failureDomain: host
+        enableCrushUpdates: true
         deviceClass: hdd
         replicated:
           size: 2
         parameters:
-          pg_autoscale_mode: "off"
+          pg_autoscale_mode: "on"
+          pg_num_min: "32"
       preservePoolsOnDelete: true
       gateway:
         port: 80

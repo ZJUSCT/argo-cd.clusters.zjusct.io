@@ -66,7 +66,7 @@
 - 不要假设外部源码比本地配置更重要
 - 本地仓库的实际配置优先于通用最佳实践
 
-## Git 署名
+## Git
 
 Agent 提交 Git 时，必须用模型名署名 `Co-authored-by:`。举例：
 
@@ -74,6 +74,12 @@ Agent 提交 Git 时，必须用模型名署名 `Co-authored-by:`。举例：
 - QWen 模型署名 `Co-authored-by: Qwen-Coder <qwen-coder@alibabacloud.com>`
 
 模型应当根据自身的具体情况进行署名。
+
+Agent 提交 Git 时必须按格式编写提交信息。示例：
+
+```
+feat(agent): update helm chart for nginx ingress
+```
 
 ## 工具使用
 
