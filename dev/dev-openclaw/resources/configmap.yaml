@@ -27,6 +27,9 @@ data:
         },
         "reload": {
           "mode": "off"
+        },
+        "commands": {
+          "restart": false
         }
       },
       "browser": {
@@ -143,8 +146,8 @@ data:
         }
       },
       "logging": {
-        "level": "info",
-        "consoleLevel": "info",
+        "level": "debug",
+        "consoleLevel": "debug",
         "consoleStyle": "compact",
         "redactSensitive": "tools"
       },
