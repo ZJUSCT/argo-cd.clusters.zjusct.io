@@ -71,7 +71,7 @@
 Agent 提交 Git 时，必须用模型名署名 `Co-authored-by:`。举例：
 
 - Claude 模型署名 `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
-- QWen 模型署名 `Co-authored-by: Qwen-Coder <qwen-coder@alibabacloud.com>`
+- Qwen 模型署名 `Co-authored-by: Qwen-Coder <qwen-coder@alibabacloud.com>`
 
 模型应当根据自身的具体情况进行署名。
 

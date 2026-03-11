@@ -164,7 +164,6 @@ packages:
   - linux-cpupower
   - linux-perf
   - lldpd
-  - lmod
   - lrzsz
   - lxcfs
   - mc
