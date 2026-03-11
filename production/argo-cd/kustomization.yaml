@@ -6,7 +6,6 @@ resources:
 - resources/configmap-plugin.yaml
 - resources/namespace.yaml
 - resources/sealedsecret-password.yaml
-- resources/sealedsecret-repo.yaml
 helmCharts:
 - name: argo-cd
   repo: https://argoproj.github.io/argo-helm
