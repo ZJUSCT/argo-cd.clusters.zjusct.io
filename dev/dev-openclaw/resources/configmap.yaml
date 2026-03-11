@@ -18,7 +18,11 @@ data:
         "trustedProxies": ["10.0.0.1"], // TODO：疑似没用，但必须得填一个？
         "controlUi": {
           "enabled": true,
-          "allowInsecureAuth": true
+          "allowInsecureAuth": true,
+          "allowedOrigins": [
+            "https://openclaw.clusters.zjusct.io",
+            "https://openclaw.s.zjusct.io"
+          ],
         }
       },
       "browser": {
