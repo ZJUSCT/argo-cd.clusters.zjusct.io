@@ -31,20 +31,85 @@ data:
           }
         }
       },
+      "models": {
+        "providers": {
+          "litellm": {
+            "baseUrl": "https://litellm.clusters.zjusct.io/v1",
+            "apiKey": "${LITELLM_API_KEY}",
+            "api": "openai-completions",
+            "models": [
+              {
+                  "id": "plan/volcengine/ark-code-latest/openai",
+                  "name": "plan/volcengine/ark-code-latest/openai"
+              },
+              {
+                  "id": "plan/volcengine/doubao-seed-2.0-code/openai",
+                  "name": "plan/volcengine/doubao-seed-2.0-code/openai"
+              },
+              {
+                  "id": "plan/volcengine/doubao-seed-code/openai",
+                  "name": "plan/volcengine/doubao-seed-code/openai"
+              },
+              {
+                  "id": "plan/volcengine/glm-4.7/openai",
+                  "name": "plan/volcengine/glm-4.7/openai"
+              },
+              {
+                  "id": "plan/volcengine/kimi-k2-thinking/openai",
+                  "name": "plan/volcengine/kimi-k2-thinking/openai"
+              },
+              {
+                  "id": "plan/volcengine/kimi-k2.5/openai",
+                  "name": "plan/volcengine/kimi-k2.5/openai"
+              },
+              {
+                  "id": "plan/minimax/MiniMax-M2.5-highspeed/openai",
+                  "name": "plan/minimax/MiniMax-M2.5-highspeed/openai"
+              },
+              {
+                  "id": "plan/bailian/qwen3.5-plus/openai",
+                  "name": "plan/bailian/qwen3.5-plus/openai"
+              },
+              {
+                  "id": "plan/bailian/kimi-k2.5/openai",
+                  "name": "plan/bailian/kimi-k2.5/openai"
+              },
+              {
+                  "id": "plan/bailian/glm-5/openai",
+                  "name": "plan/bailian/glm-5/openai"
+              },
+              {
+                  "id": "plan/bailian/MiniMax-M2.5/openai",
+                  "name": "plan/bailian/MiniMax-M2.5/openai"
+              },
+              {
+                  "id": "plan/bailian/qwen3-max-2026-01-23/openai",
+                  "name": "plan/bailian/qwen3-max-2026-01-23/openai"
+              },
+              {
+                  "id": "plan/bailian/qwen3-coder-next/openai",
+                  "name": "plan/bailian/qwen3-coder-next/openai"
+              },
+              {
+                  "id": "plan/bailian/qwen3-coder-plus/openai",
+                  "name": "plan/bailian/qwen3-coder-plus/openai"
+              },
+              {
+                  "id": "plan/bailian/glm-4.7/openai",
+                  "name": "plan/bailian/glm-4.7/openai"
+              }
+            ]
+          }
+        }
+      },
       "agents": {
         "defaults": {
           "workspace": "/home/node/.openclaw/workspace",
           "model": {
-            "primary": "openrouter/openrouter/auto",
+            "primary": "litellm/plan/volcengine/ark-code-latest/openai",
             "fallbacks": [
-              "openrouter/anthropic/claude-haiku-3.5",
-              "anthropic/claude-sonnet-4-5"
+              "litellm/plan/minimax/MiniMax-M2.5-highspeed/openai",
             ]
-          },
-          "models": {
-            "openrouter/openrouter/auto": {},
-            "openrouter/anthropic/claude-haiku-3.5": {},
-            "anthropic/claude-sonnet-4-5": {}
           },
           "userTimezone": "Asia/Shanghai",
           "timeoutSeconds": 600,

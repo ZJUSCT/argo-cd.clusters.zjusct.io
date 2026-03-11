@@ -1,6 +1,8 @@
 # Custom OpenClaw image with pre-installed plugins
 # Base image
-ARG OPENCLAW_VERSION=latest
+
+# Select version tag from https://github.com/openclaw/openclaw/pkgs/container/openclaw/versions?filters%5Bversion_type%5D=tagged
+ARG OPENCLAW_VERSION=2026.3.8
 FROM harbor.clusters.zjusct.io/ghcr.io/openclaw/openclaw:${OPENCLAW_VERSION}
 
 # Switch to root to create directories and set permissions
@@ -14,6 +16,7 @@ USER node
 
 # Configure npm to use /tmp for cache
 RUN npm config set cache /tmp/.npm
+RUN npm config set registry https://registry.npmmirror.com
 
 # Install plugins
 # The plugin installation needs to happen in the context where openclaw is installed
