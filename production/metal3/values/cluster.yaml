@@ -49,11 +49,11 @@ nodes:
     bmc:
       address: redfish://172.25.3.64
 
-  # - name: root
-  #   mac: "b4:05:5d:ad:d3:fa"
-  #   bmc:
-  #     address: redfish://172.25.3.65
-  #   bootMode: legacy
+  - name: root
+    mac: "b4:05:5d:ad:d3:fa"
+    bmc:
+      address: redfish://172.25.3.65
+    bootMode: legacy
 
   # Inspection-only nodes
   - name: atlas800
