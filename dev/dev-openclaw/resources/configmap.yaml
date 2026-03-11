@@ -15,10 +15,11 @@ data:
           "mode": "token",
           "token": "${OPENCLAW_GATEWAY_TOKEN}"
         },
-        "trustedProxies": ["10.0.0.1"], // TODO：疑似没用，但必须得填一个？
+        // "trustedProxies": ["10.0.0.1"], // 只有当 auth.mode 设为 trusted-proxy 时才会生效
         "controlUi": {
           "enabled": true,
-          "allowInsecureAuth": true,
+          // "allowInsecureAuth": true, // 仅对 localhost 有效
+          "dangerouslyDisableDeviceAuth": true,
           "allowedOrigins": [
             "https://openclaw.clusters.zjusct.io",
             "https://openclaw.s.zjusct.io"
