@@ -24,7 +24,7 @@ spec:
       containers:
         # Main OpenClaw container
         - name: openclaw
-          image: harbor.clusters.zjusct.io/library/openclaw:latest
+          image: harbor.clusters.zjusct.io/library/openclaw@sha256:5502a4206a75fd5600767f75862893e0fe9d59902d845d528fd00b63b0eb6c2e
           imagePullPolicy: Always
           command:
             - node
