@@ -153,7 +153,10 @@ data:
       },
       "plugins": {
         "enabled": true,
-        "allow": ["dingtalk", "qqbot"]
+        "allow": [
+          // "dingtalk",
+          "qqbot"
+        ]
       },
       "channels": {
         "qqbot": {
@@ -161,7 +164,6 @@ data:
           "appId": "${QQBOT_APP_ID}",
           "clientSecret": "${QQBOT_APP_SECRET}"
         },
-        // 未使用
         // "dingtalk": {
         //   "enabled": true,
         //   "clientId": "dingxxxxxx",
