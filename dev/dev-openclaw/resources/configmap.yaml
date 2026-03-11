@@ -24,6 +24,9 @@ data:
             "https://openclaw.clusters.zjusct.io",
             "https://openclaw.s.zjusct.io"
           ],
+        },
+        "reload": {
+          "mode": "off"
         }
       },
       "browser": {
