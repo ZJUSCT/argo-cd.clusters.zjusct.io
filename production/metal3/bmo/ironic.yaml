@@ -5,8 +5,6 @@ metadata:
   name: ironic
   namespace: baremetal-operator-system
 spec:
-  deployRamdisk:
-    disableDownloader: true
   networking:
     dhcp:
       rangeBegin: "172.25.4.100"
