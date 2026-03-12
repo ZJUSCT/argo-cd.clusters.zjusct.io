@@ -39,6 +39,9 @@ install -D -m 0640 -o root -g adm /tmp/rootfs/etc/audit/rules.d/zjusct.rules /et
 # udev
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/udev/hwdb.d/50-net-naming-denylist.hwdb /etc/udev/hwdb.d/50-net-naming-denylist.hwdb
 
+# netplan
+install -D -m 0600 -o root -g root /tmp/rootfs/etc/netplan/99-zjusct-network-manager.yaml /etc/netplan/99-zjusct-network-manager.yaml
+
 # mirrors
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/uv/uv.toml /etc/uv/uv.toml
 install -D -m 0644 -o root -g root /tmp/rootfs/opt/conda/.condarc /opt/conda/.condarc
