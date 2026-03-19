@@ -26,6 +26,7 @@ install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/docker.socket.
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/mount-local.service /etc/systemd/system/mount-local.service
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/otelcol-contrib.service.d/override.conf /etc/systemd/system/otelcol-contrib.service.d/override.conf
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/sssd.service.d/override.conf /etc/systemd/systemd/otelcol-contrib.service.d/override.conf
+install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/resolved.conf.d/disable-llmnr.conf /etc/systemd/resolved.conf.d/disable-llmnr.conf
 
 # sudoers (must be 0440)
 install -D -m 0440 -o root -g root /tmp/rootfs/etc/sudoers.d/audit /etc/sudoers.d/audit
