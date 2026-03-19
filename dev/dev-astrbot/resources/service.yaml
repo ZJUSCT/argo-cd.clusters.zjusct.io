@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: astrbot
+  labels:
+    app: astrbot-stack
+spec:
+  type: ClusterIP
+  selector:
+    app: astrbot-stack
+  ports:
+    - name: astrbot-web
+      port: 6185
+      targetPort: 6185
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: napcat
+  labels:
+    app: astrbot-stack
+spec:
+  type: ClusterIP
+  selector:
+    app: astrbot-stack
+  ports:
+    - name: napcat-web
+      port: 6099
+      targetPort: 6099

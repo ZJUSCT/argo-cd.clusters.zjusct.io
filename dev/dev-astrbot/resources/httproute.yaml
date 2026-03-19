@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: astrbot
+  labels:
+    app: astrbot-stack
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway
+  hostnames:
+    - astrbot-dev.clusters.zjusct.io
+  rules:
+    - backendRefs:
+        - name: astrbot
+          port: 6185
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: napcat
+  labels:
+    app: astrbot-stack
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway
+  hostnames:
+    - napcat-dev.clusters.zjusct.io
+  rules:
+    - backendRefs:
+        - name: napcat
+          port: 6099
