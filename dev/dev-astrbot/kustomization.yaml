@@ -7,5 +7,13 @@ resources:
   - resources/deployment.yaml
   - resources/service.yaml
   - resources/httproute.yaml
+helmCharts:
+  - name: kubernetes-mcp-server
+    repo: oci://ghcr.io/containers/charts
+    version: 0.1.0
+    includeCRDs: true
+    releaseName: kubernetes-mcp-server
+    namespace: dev-astrbot
+    valuesFile: values/kubernetes-mcp-server-0.1.0.yaml
 transformers:
   - ../../image-prefix.yaml
