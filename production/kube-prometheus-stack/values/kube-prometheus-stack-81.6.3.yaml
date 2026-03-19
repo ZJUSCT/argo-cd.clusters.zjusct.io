@@ -1799,6 +1799,124 @@ grafana:
                 severity: warning
               notification_settings:
                 receiver: DingTalk
+            - uid: ceph-cluster-capacity-warning
+              title: Ceph Cluster Capacity Usage Above 85%
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: prom
+                  model:
+                    editorMode: code
+                    expr: "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes"
+                    instant: true
+                    intervalMs: 1000
+                    legendFormat: __auto
+                    maxDataPoints: 43200
+                    range: false
+                    refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                        - evaluator:
+                            params:
+                                - 0.85
+                            type: gt
+                          operator:
+                            type: and
+                          query:
+                            params:
+                                - C
+                          reducer:
+                            params: []
+                            type: last
+                          type: query
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              noDataState: NoData
+              execErrState: Error
+              annotations:
+                description: 'Ceph cluster capacity usage is {{ $values.A.Value | humanizePercentage }}. Cluster: *{{ $labels.cluster }}*. Please consider expanding storage capacity or cleaning up unused data.'
+                summary: 'Ceph cluster capacity usage > 85% ({{ $values.A.Value | humanizePercentage }})'
+              labels:
+                severity: warning
+              notification_settings:
+                receiver: DingTalk
+            - uid: ceph-osd-nearfull-warning
+              title: Ceph OSD NearFull Alert
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: prom
+                  model:
+                    editorMode: code
+                    expr: "ceph_health_detail{name=\"OSD_NEARFULL\"} == 1"
+                    instant: true
+                    intervalMs: 1000
+                    legendFormat: __auto
+                    maxDataPoints: 43200
+                    range: false
+                    refId: A
+                - refId: B
+                  datasourceUid: __expr__
+                  model:
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    reducer: last
+                    refId: B
+                    settings:
+                        mode: dropNN
+                    type: reduce
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                        - evaluator:
+                            params:
+                                - 0
+                            type: gt
+                          operator:
+                            type: and
+                          query:
+                            params:
+                                - C
+                          reducer:
+                            params: []
+                            type: last
+                          type: query
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: B
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              noDataState: NoData
+              execErrState: Error
+              annotations:
+                description: 'One or more OSDs have reached the NEARFULL threshold (>90% usage). Run `ceph osd df` to identify affected OSDs. Affected OSDs: {{ $labels.name }}'
+                summary: 'Ceph OSD NearFull - one or more OSDs above 90% usage'
+              labels:
+                severity: warning
+              notification_settings:
+                receiver: DingTalk
 
     # policies.yaml:
     #   apiVersion: 1
