@@ -1727,8 +1727,8 @@ grafana:
               noDataState: NoData
               execErrState: Error
               annotations:
-                description: 'In namespace *{{ "{{" }} $labels.namespace {{ "}}" }}*, the Pod *{{ "{{" }} $labels.pod {{ "}}" }}* (belonging to {{ "{{" }} $labels.workload_type {{ "}}" }} *{{ "{{" }} $labels.workload {{ "}}" }}*) is using {{ "{{" }} $value | humanizePercentage {{ "}}" }} of its memory limit. This Pod is at high risk of being OOM Killed. Please check for memory leaks or increase the resource limits.'
-                summary: 'Memory usage > 90% for Pod {{ "{{" }} $labels.pod {{ "}}" }} ({{ "{{" }} $labels.workload {{ "}}" }})'
+                description: 'In namespace *{{ or $values.A.Labels.namespace "n/a" }}*, the Pod *{{ or $values.A.Labels.pod "n/a" }}* (belonging to {{ or $values.A.Labels.workload_type "n/a" }} *{{ or $values.A.Labels.workload "n/a" }}*) is using {{ $values.A.Value | humanizePercentage }} of its memory limit. This Pod is at high risk of being OOM Killed. Please check for memory leaks or increase the resource limits.'
+                summary: 'Memory usage > 90% for Pod {{ or $values.A.Labels.pod "n/a" }} ({{ or $values.A.Labels.workload "n/a" }})'
               labels:
                 severity: warning
               notification_settings:
