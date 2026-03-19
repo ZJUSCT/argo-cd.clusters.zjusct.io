@@ -20,12 +20,12 @@ helmCharts:
   valuesFile: values/opentelemetry-operator-0.105.1.yaml
   namespace: opentelemetry
   version: 0.105.1
-- name: opentelemetry-ebpf-instrumentation
-  repo: https://open-telemetry.github.io/opentelemetry-helm-charts
-  includeCRDs: true
-  releaseName: opentelemetry-ebpf-instrumentation
-  valuesFile: values/opentelemetry-ebpf-instrumentation-0.4.3.yaml
-  namespace: opentelemetry
-  version: 0.4.3
+# - name: opentelemetry-ebpf-instrumentation
+#   repo: https://open-telemetry.github.io/opentelemetry-helm-charts
+#   includeCRDs: true
+#   releaseName: opentelemetry-ebpf-instrumentation
+#   valuesFile: values/opentelemetry-ebpf-instrumentation-0.4.3.yaml
+#   namespace: opentelemetry
+#   version: 0.4.3
 transformers:
   - ../../image-prefix.yaml
