@@ -25,7 +25,7 @@ spec:
       # 初始化容器：首次生成随机 machine-id，后续复用
       initContainers:
         - name: init-machine-id
-          image: busybox:1.37.0
+          image: docker.io/library/busybox:1.37.0
           command:
             - /bin/sh
             - -c
@@ -44,7 +44,7 @@ spec:
 
       containers:
         - name: napcat
-          image: mlikiowa/napcat-docker:latest
+          image: docker.io/mlikiowa/napcat-docker:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: NAPCAT_UID
@@ -83,7 +83,7 @@ spec:
               readOnly: true
 
         - name: astrbot
-          image: soulter/astrbot:latest
+          image: docker.io/soulter/astrbot:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ

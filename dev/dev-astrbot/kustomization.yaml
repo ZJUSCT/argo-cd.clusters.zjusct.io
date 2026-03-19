@@ -7,3 +7,5 @@ resources:
   - resources/deployment.yaml
   - resources/service.yaml
   - resources/httproute.yaml
+transformers:
+  - ../../image-prefix.yaml
