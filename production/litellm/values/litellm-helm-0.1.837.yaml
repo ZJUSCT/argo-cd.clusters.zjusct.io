@@ -244,6 +244,8 @@ proxy_config:
         api_base: https://api.kimi.com/coding/v1
         api_key: os.environ/PLAN_KIMI_API_KEY
         custom_llm_provider: openai
+        extra_headers:
+          User-Agent: "claude-code/0.1.0"
 
     ####################################################################
     # 稀宇科技 - MiniMax - Max-极速版
