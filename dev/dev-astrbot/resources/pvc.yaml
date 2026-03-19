@@ -10,7 +10,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  # storageClassName: nfs-client # Uncomment and set your RWX storage class if needed
+  storageClassName: ceph-filesystem # Uncomment and set your RWX storage class if needed
 
 ---
 apiVersion: v1
