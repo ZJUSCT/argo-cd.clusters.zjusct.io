@@ -228,19 +228,37 @@ proxy_config:
         custom_llm_provider: anthropic
 
     ####################################################################
+    # 月之暗面 - Kimi - Allegretto
+    ####################################################################
+    # Anthropic API
+    - model_name: plan/kimi/kimi-for-coding/anthropic
+      litellm_params:
+        model: kimi-for-coding
+        api_base: https://api.kimi.com/coding/
+        api_key: os.environ/PLAN_KIMI_API_KEY
+        custom_llm_provider: anthropic
+    # OpenAI API
+    - model_name: plan/kimi/kimi-for-coding/openai
+      litellm_params:
+        model: kimi-for-coding
+        api_base: https://api.kimi.com/coding/v1
+        api_key: os.environ/PLAN_KIMI_API_KEY
+        custom_llm_provider: openai
+
+    ####################################################################
     # 稀宇科技 - MiniMax - Max-极速版
     ####################################################################
     # Anthropic API
-    - model_name: plan/minimax/MiniMax-M2.5-highspeed/anthropic
+    - model_name: plan/minimax/MiniMax-M2.7-highspeed/anthropic
       litellm_params:
-        model: MiniMax-M2.5-highspeed
+        model: MiniMax-M2.7-highspeed
         api_base: https://api.minimaxi.com/anthropic
         api_key: os.environ/PLAN_MINIMAX_API_KEY
         custom_llm_provider: anthropic
     # OpenAI API
-    - model_name: plan/minimax/MiniMax-M2.5-highspeed/openai
+    - model_name: plan/minimax/MiniMax-M2.7-highspeed/openai
       litellm_params:
-        model: MiniMax-M2.5-highspeed
+        model: MiniMax-M2.7-highspeed
         api_base: https://api.minimaxi.com/v1
         api_key: os.environ/PLAN_MINIMAX_API_KEY
         custom_llm_provider: openai
@@ -362,31 +380,31 @@ proxy_config:
     #     api_base: https://openrouter.ai/api/v1
     #     api_key:
     # 硅基流动 SiliconFlow
-    - model_name: api/siliconflow/GLM-5
-      litellm_params:
-        model: Pro/zai-org/GLM-5
-        api_base: https://api.siliconflow.cn
-        api_key: os.environ/API_SILICONFLOW_API_KEY
-        custom_llm_provider: openai
+    # - model_name: api/siliconflow/GLM-5
+    #   litellm_params:
+    #     model: Pro/zai-org/GLM-5
+    #     api_base: https://api.siliconflow.cn
+    #     api_key: os.environ/API_SILICONFLOW_API_KEY
+    #     custom_llm_provider: openai
     # Duckcoding
-    - model_name: api/duckcoding/claude-sonnet-4-6
-      litellm_params:
-        model: claude-sonnet-4-6
-        api_base: https://jp.duckcoding.com
-        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: api/duckcoding/gpt-5.3-codex
-      litellm_params:
-        model: gpt-5.3-codex
-        api_base: https://jp.duckcoding.com/v1
-        api_key: os.environ/API_DUCKCODING_CODEX_API_KEY
-        custom_llm_provider: openai
-    - model_name: api/duckcoding/gemini-3.1-pro
-      litellm_params:
-        model: gemini-3.1-pro-preview
-        api_base: https://jp.duckcoding.com/v1
-        api_key: os.environ/API_DUCKCODING_GEMINI_API_KEY
-        custom_llm_provider: openai
+    # - model_name: api/duckcoding/claude-sonnet-4-6
+    #   litellm_params:
+    #     model: claude-sonnet-4-6
+    #     api_base: https://jp.duckcoding.com
+    #     api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
+    #     custom_llm_provider: anthropic
+    # - model_name: api/duckcoding/gpt-5.3-codex
+    #   litellm_params:
+    #     model: gpt-5.3-codex
+    #     api_base: https://jp.duckcoding.com/v1
+    #     api_key: os.environ/API_DUCKCODING_CODEX_API_KEY
+    #     custom_llm_provider: openai
+    # - model_name: api/duckcoding/gemini-3.1-pro
+    #   litellm_params:
+    #     model: gemini-3.1-pro-preview
+    #     api_base: https://jp.duckcoding.com/v1
+    #     api_key: os.environ/API_DUCKCODING_GEMINI_API_KEY
+    #     custom_llm_provider: openai
     # - model_name: api/duckcoding/grok-4.1
     #   litellm_params:
     #     model: grok-4.1
