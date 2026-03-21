@@ -128,104 +128,20 @@ proxy_config:
     ####################################################################
     # 字节跳动 - 火山方舟 - Pro
     ####################################################################
-    # OpenAI API
-    - model_name: plan/volcengine/ark-code-latest/openai
-      litellm_params:
-        model: ark-code-latest
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    - model_name: plan/volcengine/doubao-seed-2.0-code/openai
-      litellm_params:
-        model: doubao-seed-2.0-code
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    - model_name: plan/volcengine/doubao-seed-2.0-pro/openai
-      litellm_params:
-        model: doubao-seed-2.0-pro
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    - model_name: plan/volcengine/doubao-seed-2.0-lite/openai
-      litellm_params:
-        model: doubao-seed-2.0-lite
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    - model_name: plan/volcengine/doubao-seed-code/openai
-      litellm_params:
-        model: doubao-seed-code
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    - model_name: plan/volcengine/glm-4.7/openai
-      litellm_params:
-        model: glm-4.7
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    - model_name: plan/volcengine/minimax-m2.5/openai
-      litellm_params:
-        model: minimax-m2.5
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    - model_name: plan/volcengine/kimi-k2.5/openai
-      litellm_params:
-        model: kimi-k2.5
-        api_base: https://ark.cn-beijing.volces.com/api/coding/v3
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: openai
-    # Anthropic API
-    - model_name: plan/volcengine/ark-code-latest/anthropic
-      litellm_params:
-        model: ark-code-latest
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/volcengine/doubao-seed-2.0-code/anthropic
-      litellm_params:
-        model: doubao-seed-2.0-code
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/volcengine/doubao-seed-2.0-pro/anthropic
-      litellm_params:
-        model: doubao-seed-2.0-code
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/volcengine/doubao-seed-2.0-lite/anthropic
-      litellm_params:
-        model: doubao-seed-2.0-code
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/volcengine/doubao-seed-code/anthropic
-      litellm_params:
-        model: doubao-seed-code
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/volcengine/glm-4.7/anthropic
-      litellm_params:
-        model: glm-4.7
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/volcengine/minimax-m2.5/anthropic
-      litellm_params:
-        model: minimax-m2.5
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/volcengine/kimi-k2.5/anthropic
-      litellm_params:
-        model: kimi-k2.5
-        api_base: https://ark.cn-beijing.volces.com/api/coding
-        api_key: os.environ/PLAN_VOLCENGINE_API_KEY
-        custom_llm_provider: anthropic
+    # # OpenAI API
+    # - model_name: plan/volcengine/ark-code-latest/openai
+    #   litellm_params:
+    #     model: ark-code-latest
+    #     api_base: https://ark.cn-beijing.volces.com/api/coding/v3
+    #     api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+    #     custom_llm_provider: openai
+    # # Anthropic API
+    # - model_name: plan/volcengine/ark-code-latest/anthropic
+    #   litellm_params:
+    #     model: ark-code-latest
+    #     api_base: https://ark.cn-beijing.volces.com/api/coding
+    #     api_key: os.environ/PLAN_VOLCENGINE_API_KEY
+    #     custom_llm_provider: anthropic
 
     ####################################################################
     # 月之暗面 - Kimi - Allegretto
