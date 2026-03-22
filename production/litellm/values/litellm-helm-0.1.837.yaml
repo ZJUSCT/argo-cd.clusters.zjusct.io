@@ -124,6 +124,23 @@ proxyConfigMap:
 proxy_config:
   litellm_settings:
     callbacks: ["otel"]
+
+  mcp_servers:
+    # HTTP
+    zhipu_web_search:
+      url: "https://open.bigmodel.cn/api/mcp-broker/proxy/web-search/mcp"
+      transport: "http"
+      auth_type: "api_key"
+      auth_value: "os.environ/PLAN_ZHIPU_API_KEY"
+
+    # stdio 视觉理解
+    zhipu_vision:
+      transport: "stdio"
+      command: "npx"
+      args: ["-y", "@z_ai/mcp-server"]
+      env:
+        ZHIPU_API_KEY: "os.environ/PLAN_ZHIPU_API_KEY"
+
   model_list:
     ####################################################################
     # 字节跳动 - 火山方舟 - Pro
