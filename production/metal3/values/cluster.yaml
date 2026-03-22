@@ -68,7 +68,7 @@ nodes:
       enabled: false
 
   - name: m700
-    mac: "9C:C2:C4:55:E3:92"
+    mac: "80:61:5f:10:88:99"
     bmc:
       address: redfish://172.25.3.70
 
