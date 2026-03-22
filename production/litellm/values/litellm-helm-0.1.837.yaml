@@ -137,9 +137,10 @@ proxy_config:
     zhipu_vision:
       transport: "stdio"
       command: "npx"
-      args: ["-y", "@z_ai/mcp-server"]
+      args: ["-y", "@z_ai/mcp-server@latest"]
       env:
-        ZHIPU_API_KEY: "os.environ/PLAN_ZHIPU_API_KEY"
+        Z_AI_API_KEY: "os.environ/PLAN_ZHIPU_API_KEY"
+        Z_AI_MODE: "ZHIPU"
 
   model_list:
     ####################################################################
