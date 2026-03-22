@@ -318,6 +318,8 @@ proxy_config:
     #     custom_llm_provider: openai
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
+    store_model_in_db: true
+    supported_db_objects: ["mcp"]
 
 resources:
   {}
