@@ -128,9 +128,9 @@ proxy_config:
   mcp_servers:
     # HTTP
     zhipu_web_search:
-      url: "https://open.bigmodel.cn/api/mcp-broker/proxy/web-search/mcp"
+      url: "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
       transport: "http"
-      auth_type: "api_key"
+      auth_type: "bearer_token"
       auth_value: "os.environ/PLAN_ZHIPU_API_KEY"
 
     # stdio 视觉理解
