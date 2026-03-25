@@ -162,6 +162,36 @@ proxy_config:
     #     custom_llm_provider: anthropic
 
     ####################################################################
+    # OpenCode Go
+    ####################################################################
+    # OpenAI API
+    - model_name: plan/opencode-go/glm-5/openai
+      litellm_params:
+        model: opencode-go/glm-5
+        api_base: https://opencode.ai/zen/go/v1
+        api_key: os.environ/PLAN_OPENCODE_API_KEY
+        custom_llm_provider: openai
+    - model_name: plan/opencode-go/kimi-k2.5/openai
+      litellm_params:
+        model: opencode-go/kimi-k2.5
+        api_base: https://opencode.ai/zen/go/v1
+        api_key: os.environ/PLAN_OPENCODE_API_KEY
+        custom_llm_provider: openai
+    # Anthropic API
+    - model_name: plan/opencode-go/minimax-m2.7/anthropic
+      litellm_params:
+        model: opencode-go/minimax-m2.7
+        api_base: https://opencode.ai/zen/go/v1
+        api_key: os.environ/PLAN_OPENCODE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: plan/opencode-go/minimax-m2.5/anthropic
+      litellm_params:
+        model: opencode-go/minimax-m2.5
+        api_base: https://opencode.ai/zen/go/v1
+        api_key: os.environ/PLAN_OPENCODE_API_KEY
+        custom_llm_provider: anthropic
+
+    ####################################################################
     # 月之暗面 - Kimi - Allegretto
     ####################################################################
     # Anthropic API
