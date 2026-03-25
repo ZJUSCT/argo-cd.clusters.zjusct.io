@@ -181,13 +181,13 @@ proxy_config:
     - model_name: plan/opencode-go/minimax-m2.7/anthropic
       litellm_params:
         model: minimax-m2.7
-        api_base: https://opencode.ai/zen/go/
+        api_base: https://opencode.ai/zen/go
         api_key: os.environ/PLAN_OPENCODE_API_KEY
         custom_llm_provider: anthropic
     - model_name: plan/opencode-go/minimax-m2.5/anthropic
       litellm_params:
         model: minimax-m2.5
-        api_base: https://opencode.ai/zen/go/
+        api_base: https://opencode.ai/zen/go
         api_key: os.environ/PLAN_OPENCODE_API_KEY
         custom_llm_provider: anthropic
 
