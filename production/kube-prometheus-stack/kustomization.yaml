@@ -4,6 +4,7 @@ namespace: kube-prometheus-stack
 resources:
 - resources/namespace.yaml
 - resources/sealedsecret-grafana.yaml
+- resources/sealedsecret-alertmanager-config.yaml
 - resources/obc-loki.yaml
 - resources/obc-tempo.yaml
 - resources/obc-mimir-ruler.yaml

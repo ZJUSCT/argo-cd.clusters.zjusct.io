@@ -966,7 +966,10 @@ alertmanager:
     ## If true then the user will be responsible to provide a secret with alertmanager configuration
     ## So when true the config part will be ignored (including templateFiles) and the one in the secret will be used
     ##
-    useExistingSecret: false
+    # The Alertmanager config contains a secret webhook URL, so provide it via
+    # a dedicated SealedSecret instead of templating an env placeholder into
+    # alertmanager.yaml.
+    useExistingSecret: true
 
     ## Secrets is a list of Secrets in the same namespace as the Alertmanager object, which shall be mounted into the
     ## Alertmanager Pods. The Secrets are mounted into /etc/alertmanager/secrets/.
@@ -982,15 +985,10 @@ alertmanager:
     ##
     configMaps: []
 
-    ## EnvFrom to load DINGTALK_WEBHOOK_URL from grafana-secrets
-    envFrom:
-      - secretRef:
-          name: grafana-secrets
-
     ## ConfigSecret is the name of a Kubernetes Secret in the same namespace as the Alertmanager object, which contains configuration for
     ## this Alertmanager instance. Defaults to 'alertmanager-' The secret is mounted into /etc/alertmanager/config.
     ##
-    # configSecret:
+    configSecret: alertmanager-kube-prometheus-stack-alertmanager-config
 
     ## WebTLSConfig defines the TLS parameters for HTTPS
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#alertmanagerwebspec
@@ -4431,7 +4429,19 @@ prometheus:
     ## List of scrape classes to expose to scraping objects such as
     ## PodMonitors, ServiceMonitors, Probes and ScrapeConfigs.
     ##
-    scrapeClasses: []
+    scrapeClasses:
+      - name: default-sample-fixes
+        default: true
+        metricRelabelings:
+          # rook-ceph-exporter currently emits duplicate cephfs client metrics
+          # with different values in a single scrape, which triggers
+          # PrometheusDuplicateTimestamps. Drop only that broken metric family.
+          - action: drop
+            sourceLabels:
+              - job
+              - __name__
+            separator: ;
+            regex: rook-ceph-exporter;ceph_mds_client_metrics_cephfs_.*
     # - name: istio-mtls
     #   default: false
     #   tlsConfig:
@@ -4807,6 +4817,13 @@ prometheus:
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#remotewritespec
     remoteWrite:
       - url: http://mimir-gateway.kube-prometheus-stack.svc:80/api/v1/push
+        # OpenTelemetry resource attr `host.ip` is converted to the Prometheus
+        # label `host_ip`, which can exceed Mimir's 2048-byte label value limit.
+        # Drop it only on the outbound remote-write path so local Prometheus
+        # storage and alerting stay unchanged.
+        writeRelabelConfigs:
+          - action: labeldrop
+            regex: host_ip
     ## additionalRemoteWrite is appended to remoteWrite
     additionalRemoteWrite: []
 
