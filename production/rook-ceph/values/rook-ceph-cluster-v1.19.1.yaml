@@ -41,10 +41,6 @@ configOverride: |
   mon_osd_prime_pg_temp = false
   mon_osdmap_full_prune_enabled = false
 
-  [mds]
-  # Reduce journal trim pressure; current Squid build has hit trim-thread asserts.
-  mds_log_max_segments = 1024
-
 # configOverride: |
 #   [global]
 #   mon_allow_pool_delete = true
