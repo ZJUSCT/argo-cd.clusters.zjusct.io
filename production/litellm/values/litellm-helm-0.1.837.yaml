@@ -233,6 +233,12 @@ proxy_config:
     # 智谱华章 - GLM - Max
     ####################################################################
     # Anthropic API
+    - model_name: plan/zhipu/GLM-5.1/anthropic
+      litellm_params:
+        model: GLM-5.1
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY
+        custom_llm_provider: anthropic
     - model_name: plan/zhipu/GLM-5/anthropic
       litellm_params:
         model: GLM-5
@@ -258,6 +264,12 @@ proxy_config:
         api_key: os.environ/PLAN_ZHIPU_API_KEY
         custom_llm_provider: anthropic
     # OpenAI API
+    - model_name: plan/zhipu/GLM-5.1/openai
+      litellm_params:
+        model: GLM-5.1
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY
+        custom_llm_provider: openai
     - model_name: plan/zhipu/GLM-5/openai
       litellm_params:
         model: GLM-5
