@@ -551,7 +551,53 @@ alertmanager:
   ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
   ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
   ##
-  stringConfig: ""
+  stringConfig: |
+    global:
+      resolve_timeout: 5m
+    templates:
+      - '/etc/alertmanager/config/*.tmpl'
+    route:
+      group_by: ['namespace']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'null'
+      routes:
+        - receiver: 'null'
+          matchers:
+            - alertname = "Watchdog"
+        - receiver: 'DingTalk'
+          matchers:
+            - severity = critical
+    receivers:
+      - name: 'null'
+      - name: 'DingTalk'
+        webhook_configs:
+          - url: '${DINGTALK_WEBHOOK_URL}'
+            send_resolved: true
+    inhibit_rules:
+      - equal:
+          - 'namespace'
+          - 'alertname'
+        source_matchers:
+          - 'severity = critical'
+        target_matchers:
+          - 'severity =~ warning|info'
+      - equal:
+          - 'namespace'
+          - 'alertname'
+        source_matchers:
+          - 'severity = warning'
+        target_matchers:
+          - 'severity = info'
+      - source_matchers:
+          - 'alertname = InfoInhibitor'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+      - target_matchers:
+          - 'alertname = InfoInhibitor'
 
   ## Pass the Alertmanager configuration directives through Helm's templating
   ## engine. If the Alertmanager configuration contains Alertmanager templates,
@@ -561,7 +607,7 @@ alertmanager:
   ##      https://prometheus.io/docs/alerting/configuration/#tmpl_string
   ##      https://prometheus.io/docs/alerting/notifications/
   ##      https://prometheus.io/docs/alerting/notification_examples/
-  tplConfig: false
+  tplConfig: true
 
   ## Alertmanager template files to format alerts
   ## By default, templateFiles are placed in /etc/alertmanager/config/ and if
@@ -935,6 +981,11 @@ alertmanager:
     ## The ConfigMaps are mounted into /etc/alertmanager/configmaps/.
     ##
     configMaps: []
+
+    ## EnvFrom to load DINGTALK_WEBHOOK_URL from grafana-secrets
+    envFrom:
+      - secretRef:
+          name: grafana-secrets
 
     ## ConfigSecret is the name of a Kubernetes Secret in the same namespace as the Alertmanager object, which contains configuration for
     ## this Alertmanager instance. Defaults to 'alertmanager-' The secret is mounted into /etc/alertmanager/config.
@@ -1862,7 +1913,7 @@ grafana:
                   datasourceUid: prom
                   model:
                     editorMode: code
-                    expr: "ceph_health_detail{name=\"OSD_NEARFULL\"} == 1"
+                    expr: "ceph_health_detail{name=\"OSD_NEARFULL\"}"
                     instant: true
                     intervalMs: 1000
                     legendFormat: __auto
@@ -1911,7 +1962,7 @@ grafana:
               noDataState: NoData
               execErrState: Error
               annotations:
-                description: 'One or more OSDs have reached the NEARFULL threshold (>90% usage). Run `ceph osd df` to identify affected OSDs. Affected OSDs: {{ "{{" }} $labels.name {{ "}}" }}'
+                description: 'One or more OSDs have reached the NEARFULL threshold (>90% usage). Run `ceph health detail` and `ceph osd df` to identify affected OSDs.'
                 summary: 'Ceph OSD NearFull - one or more OSDs above 90% usage'
               labels:
                 severity: warning
