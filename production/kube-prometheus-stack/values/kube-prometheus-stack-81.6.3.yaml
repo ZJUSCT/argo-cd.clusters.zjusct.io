@@ -656,8 +656,11 @@ alertmanager:
       - alertmanager.clusters.zjusct.io
       - alertmanager.s.zjusct.io
       # - my-filter.example.com
-      parentRefs: []
-      # - name: acme-gw
+      parentRefs:
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          name: envoy-gateway
+          namespace: envoy-gateway
 
       # -- create http route for redirect (https://gateway-api.sigs.k8s.io/guides/http-redirect-rewrite/#http-to-https-redirects)
       ## Take care that you only enable this on the http listener of the gateway to avoid an infinite redirect.
