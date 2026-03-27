@@ -537,10 +537,10 @@ alertmanager:
       group_interval: 5m
       repeat_interval: 12h
       receiver: 'null'
-      routes:
-      - receiver: 'DingTalk'
-        matchers:
-          - severity = critical
+      # routes:
+      # - receiver: 'DingTalk'
+      #   matchers:
+      #     - severity = critical
     receivers:
     - name: 'null'
     - name: 'DingTalk'
