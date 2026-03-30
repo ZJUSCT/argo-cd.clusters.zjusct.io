@@ -1,16 +1,17 @@
 {
-  "name": "Argo CD Clusters Dev",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": "."
-  },
-  "features": {
-    "harbor.clusters.zjusct.io/ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-  },
+  "name": "ZJUSCT K8S Dev Container",
+  "dockerComposeFile": "compose.yml",
+  "service": "devcontainer",
+  "mounts": [
+    {
+      "type": "bind",
+      "source": "/dev/kvm",
+      "target": "/dev/kvm"
+    }
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-azuretools.vscode-docker",
         "redhat.vscode-yaml",
         "editorconfig.editorconfig"
       ]

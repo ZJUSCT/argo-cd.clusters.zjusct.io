@@ -1,0 +1,13 @@
+# https://docs.docker.com/reference/compose-file/
+services:
+  devcontainer:
+    build:
+      context: .
+      args:
+        DEBIAN_VERSION: trixie
+        K8S_VERSION: v1.35
+    volumes:
+      - ..:/workspace
+      - /dev/kvm:/dev/kvm
+    working_dir: /workspace
+    network_mode: host
