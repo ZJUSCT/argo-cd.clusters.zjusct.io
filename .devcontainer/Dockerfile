@@ -7,6 +7,7 @@ ARG MIRROR=mirrors.zju.edu.cn
 ARG K8S_VERSION
 ARG KUBESEAL_VERSION
 
+ENV DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
 cat <<EOT > /etc/apt/sources.list.d/debian.sources
 Types: deb
@@ -56,7 +57,8 @@ apt-get install -y --no-install-recommends \
     kubectl \
     helm \
     python3-pip \
-    python3-full
+    python3-full \
+    tmux
 EOF
 
 RUN <<EOF
