@@ -2,6 +2,10 @@
 ARG DEBIAN_VERSION=trixie
 FROM harbor.clusters.zjusct.io/mcr.microsoft.com/devcontainers/base:${DEBIAN_VERSION}
 
+# Pre-create .claude directory with correct ownership so Docker
+# doesn't create it as root when bind-mounting settings.json
+RUN mkdir -p /home/vscode/.claude && chown vscode:vscode /home/vscode/.claude
+
 ARG DEBIAN_VERSION=${DEBIAN_VERSION}
 ARG MIRROR=mirrors.zju.edu.cn
 ARG K8S_VERSION
