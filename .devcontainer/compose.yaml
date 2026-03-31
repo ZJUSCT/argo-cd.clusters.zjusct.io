@@ -6,8 +6,31 @@ services:
       args:
         DEBIAN_VERSION: trixie
         K8S_VERSION: v1.35
+        KUBESEAL_VERSION: 0.36.1
+        MIRROR: mirrors.zju.edu.cn
     volumes:
       - ..:/workspace
       - /dev/kvm:/dev/kvm
+      # K8S
+      - type: bind
+        source: ${HOME}/.kube/config
+        target: /home/vscode/.kube/config
+        read_only: true
+      # AI agents
+      - type: bind
+        source: ${HOME}/.config/opencode/opencode.json
+        target: /home/vscode/.config/opencode/opencode.json
+        read_only: true
+      - type: bind
+        source: ${HOME}/.claude/settings.json
+        target: /home/vscode/.claude/settings.json
+        read_only: true
+      # Git
+      - type: bind
+        source: ${HOME}/.gitconfig
+        target: /home/vscode/.gitconfig
+        read_only: true
     working_dir: /workspace
     network_mode: host
+    entrypoint: ["sleep", "infinity"]
+    init: true

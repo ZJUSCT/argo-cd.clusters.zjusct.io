@@ -1,14 +1,8 @@
 {
   "name": "ZJUSCT K8S Dev Container",
-  "dockerComposeFile": "compose.yml",
+  "dockerComposeFile": "compose.yaml",
   "service": "devcontainer",
-  "mounts": [
-    {
-      "type": "bind",
-      "source": "/dev/kvm",
-      "target": "/dev/kvm"
-    }
-  ],
+  "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {
       "extensions": [
