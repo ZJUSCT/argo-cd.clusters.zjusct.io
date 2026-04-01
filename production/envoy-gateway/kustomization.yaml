@@ -6,6 +6,7 @@ resources:
 - resources/envoy-gateway.yaml
 - resources/envoy-proxy-service.yaml
 - resources/envoyproxy.yaml
+- resources/clienttrafficpolicy-allow-underscores.yaml
 helmCharts:
 - name: gateway-helm
   repo: oci://docker.io/envoyproxy/

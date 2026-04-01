@@ -100,6 +100,7 @@ packages:
   - bear
   - bison
   - btop
+  - bubblewrap
   - build-essential
   - cargo
   - clang
