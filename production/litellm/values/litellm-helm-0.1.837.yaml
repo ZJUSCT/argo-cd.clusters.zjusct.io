@@ -158,13 +158,13 @@ proxy_config:
         model: glm-5
         api_base: https://opencode.ai/zen/go/v1
         api_key: os.environ/PLAN_OPENCODE_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/opencode-go/kimi-k2.5/openai
       litellm_params:
         model: kimi-k2.5
         api_base: https://opencode.ai/zen/go/v1
         api_key: os.environ/PLAN_OPENCODE_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     # Anthropic API
     - model_name: plan/opencode-go/minimax-m2.7/anthropic
       litellm_params:
@@ -195,7 +195,7 @@ proxy_config:
         model: kimi-for-coding
         api_base: https://api.kimi.com/coding/v1
         api_key: os.environ/PLAN_KIMI_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
         extra_headers:
           User-Agent: "claude-code/0.1.0"
 
@@ -215,7 +215,7 @@ proxy_config:
         model: MiniMax-M2.7-highspeed
         api_base: https://api.minimaxi.com/v1
         api_key: os.environ/PLAN_MINIMAX_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
 
     ####################################################################
     # 智谱华章 - GLM - Max
@@ -225,43 +225,43 @@ proxy_config:
         model: glm-4.5
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/zhipu/glm-4.5-air/openai
       litellm_params:
         model: glm-4.5-air
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/zhipu/glm-4.6/openai
       litellm_params:
         model: glm-4.6
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/zhipu/glm-4.7/openai
       litellm_params:
         model: glm-4.7
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/zhipu/glm-5/openai
       litellm_params:
         model: glm-5
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/zhipu/glm-5-turbo/openai
       litellm_params:
         model: glm-5-turbo
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/zhipu/glm-5.1/openai
       litellm_params:
         model: glm-5.1
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: openai
+        custom_llm_provider: hosted_vllm
     - model_name: plan/zhipu/glm-4.5/anthropic
       litellm_params:
         model: glm-4.5
