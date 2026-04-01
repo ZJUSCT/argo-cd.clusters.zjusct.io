@@ -166,13 +166,6 @@ apt-get update -y
 # EOF
 
 ########################################################################
-# OpenTelemetry Collector Contrib
-# https://github.com/open-telemetry/opentelemetry-collector-releases
-########################################################################
-
-install_pkg_from_github "open-telemetry/opentelemetry-collector-releases" "otelcol-contrib_*_linux_amd64.deb"
-
-########################################################################
 # Containers
 ########################################################################
 
@@ -196,39 +189,6 @@ npm install --global \
     @anthropic-ai/claude-code \
     @openai/codex \
     @google/gemini-cli
-
-########################################################################
-# K8S
-########################################################################
-
-# https://argo-cd.readthedocs.io/en/stable/cli_installation/
-install_bin_from_github "argoproj/argo-cd" "argocd-linux-amd64" "argocd"
-
-# https://docs.cilium.io/en/stable/observability/hubble/setup
-install_tarball_from_github "cilium/cilium-cli" "cilium-linux-amd64.tar.gz"
-install_tarball_from_github "cilium/hubble" "hubble-linux-amd64.tar.gz"
-
-# https://github.com/bitnami-labs/sealed-secrets
-install_tarball_from_github "bitnami-labs/sealed-secrets" 'kubeseal-*-linux-amd64.tar.gz'
-
-# https://github.com/kubernetes-sigs/kustomize
-install_tarball_from_github "kubernetes-sigs/kustomize" 'kustomize_*_linux_amd64.tar.gz'
-
-# https://kubevirt.io/
-install_bin_from_github "kubevirt/kubevirt" "virtctl-v*-linux-amd64" "virtctl"
-
-# https://helm.sh/docs/intro/install/
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
-
-########################################################################
-# Misc
-########################################################################
-
-# https://github.com/taodd/cephtrace
-for _bin in radostrace kfstrace osdtrace; do
-    install_bin_from_github "taodd/cephtrace" "$_bin"
-done
-unset _bin
 
 ########################################################################
 # Python

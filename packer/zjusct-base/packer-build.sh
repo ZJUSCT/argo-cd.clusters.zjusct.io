@@ -8,9 +8,9 @@ export PACKER_LOG_PATH="packer.log"
 # -on-error=abort will leave the output files for debugging
 packer build \
     -on-error=abort \
-    -only="cloud-init.qemu.ubuntu" .
-if [ -f output-cloud-init/cloud-init.qcow2 ]; then
+    .
+if [ -f output/zjusct-base.qcow2 ]; then
     echo "Output info:"
-    qemu-img info output-cloud-init/cloud-init.qcow2
-    sha256sum output-cloud-init/cloud-init.qcow2
+    qemu-img info output/zjusct-base.qcow2
+    sha256sum output/zjusct-base.qcow2
 fi

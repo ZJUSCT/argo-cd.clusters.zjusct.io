@@ -1,3 +1,4 @@
+# Dockerfile for packer runner
 FROM harbor.clusters.zjusct.io/docker.io/hashicorp/packer:latest
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.zju.edu.cn/g' /etc/apk/repositories

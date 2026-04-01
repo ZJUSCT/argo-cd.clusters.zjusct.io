@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+set -xeou pipefail
+
+########################################################################
+# Helper functions
+########################################################################
+
+# Mimics `gh release download` without requiring authentication.
+# Usage: gh_release_download --repo OWNER/REPO --pattern GLOB [--dir DIR]
+#
+# Searches all releases rather than /latest so repos that ship multiple
+# products on different branches are handled correctly.
+gh_release_download() {
+    if ! command -v jq >/dev/null; then
+        echo "gh_release_download: jq is required but not installed" >&2
+        return 1
+    fi
+    local repo="" pattern="" dir="."
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        --repo | -R)
+            repo="$2"
+            shift 2
+            ;;
+        --pattern | -p)
+            pattern="$2"
+            shift 2
+            ;;
+        --dir | -D)
+            dir="$2"
+            shift 2
+            ;;
+        *)
+            echo "gh_release_download: unknown option: $1" >&2
+            return 1
+            ;;
+        esac
+    done
+
+    [ -z "$repo" ] && {
+        echo "gh_release_download: --repo required" >&2
+        return 1
+    }
+    [ -z "$pattern" ] && {
+        echo "gh_release_download: --pattern required" >&2
+        return 1
+    }
+
+    mkdir -p "$dir"
+
+    local retries=20
+    while [ "$retries" -gt 0 ]; do
+        local found_name="" found_url=""
+        while IFS=$'\t' read -r name url; do
+            # shellcheck disable=SC2254
+            case "$name" in
+            $pattern)
+                found_name="$name"
+                found_url="$url"
+                break
+                ;;
+            esac
+        done < <(curl -sSf "https://api.github.com/repos/$repo/releases" |
+            jq -r '.[].assets[] | [.name, .browser_download_url] | @tsv')
+
+        if [ -n "$found_url" ]; then
+            if curl -fSL -o "$dir/$found_name" "$found_url"; then
+                echo "Downloaded: $dir/$found_name"
+                return 0
+            fi
+            echo "Download failed, retrying..." >&2
+        fi
+
+        retries=$((retries - 1))
+        sleep 1
+    done
+
+    echo "gh_release_download: no asset matching '$pattern' in $repo" >&2
+    return 1
+}
+
+# install_pkg_from_github OWNER/REPO GLOB_PATTERN
+# Example: install_pkg_from_github wagoodman/dive "dive_*_linux_amd64.deb"
+install_pkg_from_github() {
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    gh_release_download --repo "$1" --pattern "$2" --dir "$tmpdir"
+    dpkg -i "$tmpdir"/*.deb || apt-get --fix-broken --fix-missing install -y
+    rm -rf "$tmpdir"
+}
+
+# install_bin_from_github OWNER/REPO GLOB_PATTERN [DEST_NAME]
+# Downloads a single binary asset and installs it to /usr/local/bin.
+# If DEST_NAME is omitted the downloaded filename is used as-is.
+install_bin_from_github() {
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    gh_release_download --repo "$1" --pattern "$2" --dir "$tmpdir"
+    if [ -n "${3:-}" ]; then
+        install -m 755 "$tmpdir"/* "/usr/local/bin/$3"
+    else
+        install -m 755 "$tmpdir"/* /usr/local/bin/
+    fi
+    rm -rf "$tmpdir"
+}
+
+# install_tarball_from_github OWNER/REPO TARBALL_PATTERN [FILE_PATTERN]
+# Downloads a .tar.gz asset, extracts it, and installs files to /usr/local/bin.
+# - By default, only executable files are installed.
+# - If FILE_PATTERN is provided, only files matching that pattern are installed.
+install_tarball_from_github() {
+    local repo="$1"
+    local pattern="$2"
+    local file_pattern="${3:-}"
+
+    local tmpdir extract_dir
+    tmpdir=$(mktemp -d)
+    extract_dir="$tmpdir/extract"
+    mkdir -p "$extract_dir"
+
+    gh_release_download --repo "$repo" --pattern "$pattern" --dir "$tmpdir"
+
+    # Extract to subdirectory
+    tar xzvf "$tmpdir"/*.tar.gz -C "$extract_dir"
+
+    # Install files based on pattern
+    if [ -n "$file_pattern" ]; then
+        # Install files matching the specified pattern
+        find "$extract_dir" -name "$file_pattern" -type f -exec install -m 755 {} /usr/local/bin/ \;
+    else
+        # Default: only install executable files
+        find "$extract_dir" -type f -executable -exec install -m 755 {} /usr/local/bin/ \;
+    fi
+
+    rm -rf "$tmpdir"
+}
+
+########################################################################
+# APT Update
+# we should update index before installing any package, otherwise we may get "Unable to locate package"
+########################################################################
+
+apt-get update -y
+
+########################################################################
+# OpenTelemetry Collector Contrib
+# https://github.com/open-telemetry/opentelemetry-collector-releases
+########################################################################
+
+install_pkg_from_github "open-telemetry/opentelemetry-collector-releases" "otelcol-contrib_*_linux_amd64.deb"
+
+########################################################################
+# K8S
+########################################################################
+
+# https://argo-cd.readthedocs.io/en/stable/cli_installation/
+install_bin_from_github "argoproj/argo-cd" "argocd-linux-amd64" "argocd"
+
+# https://docs.cilium.io/en/stable/observability/hubble/setup
+install_tarball_from_github "cilium/cilium-cli" "cilium-linux-amd64.tar.gz"
+install_tarball_from_github "cilium/hubble" "hubble-linux-amd64.tar.gz"
+
+# https://github.com/bitnami-labs/sealed-secrets
+install_tarball_from_github "bitnami-labs/sealed-secrets" 'kubeseal-*-linux-amd64.tar.gz'
+
+# https://github.com/kubernetes-sigs/kustomize
+install_tarball_from_github "kubernetes-sigs/kustomize" 'kustomize_*_linux_amd64.tar.gz'
+
+# https://kubevirt.io/
+install_bin_from_github "kubevirt/kubevirt" "virtctl-v*-linux-amd64" "virtctl"
+
+# https://helm.sh/docs/intro/install/
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
+
+########################################################################
+# Misc
+########################################################################
+
+# https://github.com/taodd/cephtrace
+for _bin in radostrace kfstrace osdtrace; do
+    install_bin_from_github "taodd/cephtrace" "$_bin"
+done
+unset _bin

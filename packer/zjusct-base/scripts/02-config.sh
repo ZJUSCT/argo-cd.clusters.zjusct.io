@@ -22,10 +22,7 @@ install -D -m 0644 -o root -g root /tmp/rootfs/etc/motd /etc/motd
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/modprobe.d/nvidia-perf.conf /etc/modprobe.d/nvidia-perf.conf
 
 # systemd overrides
-install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/docker.socket.d/override.conf /etc/systemd/system/docker.socket.d/override.conf
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/mount-local.service /etc/systemd/system/mount-local.service
-install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/otelcol-contrib.service.d/override.conf /etc/systemd/system/otelcol-contrib.service.d/override.conf
-install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/sssd.service.d/override.conf /etc/systemd/systemd/otelcol-contrib.service.d/override.conf
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/resolved.conf.d/disable-llmnr.conf /etc/systemd/resolved.conf.d/disable-llmnr.conf
 
 # sudoers (must be 0440)
@@ -47,9 +44,6 @@ install -D -m 0600 -o root -g root /tmp/rootfs/etc/netplan/99-zjusct-network-man
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/uv/uv.toml /etc/uv/uv.toml
 install -D -m 0644 -o root -g root /tmp/rootfs/opt/conda/.condarc /opt/conda/.condarc
 
-# otelcol-contrib
-install -D -m 0640 -o root -g root /tmp/rootfs/etc/otelcol-contrib/config.yaml /etc/otelcol-contrib/config.yaml
-
 # mount local disks
 install -D -m 0755 -o root -g root /tmp/rootfs/usr/local/bin/mount-local.sh /usr/local/bin/mount-local.sh
 systemctl enable mount-local
@@ -58,29 +52,6 @@ systemctl enable mount-local
 # NFS over RDMA
 ########################################################################
 sed -E -i 's/^#[[:space:]]*rdma=n$/rdma=y/' "/etc/nfs.conf"
-
-########################################################################
-# Systemd
-########################################################################
-
-# Disable systemd socket activation for SSSD responders
-# FreeIPA client already configures nss/pam/ssh/sudo in sssd.conf services line
-# Socket activation conflicts with this configuration
-systemctl disable --now \
-    kubelet \
-    sssd-nss.socket \
-    sssd-pam.socket \
-    sssd-pam-priv.socket \
-    sssd-ssh.socket \
-    sssd-sudo.socket \
-    sssd-autofs.socket \
-    sssd-pac.socket 2>/dev/null || true
-
-########################################################################
-# Domain Control
-########################################################################
-
-groupdel docker # use FreeIPA group
 
 ########################################################################
 # GRUB - Set default kernel

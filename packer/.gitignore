@@ -7,7 +7,7 @@ crash.log
 # Cloud-init ISO (if generated)
 *.iso
 *.img
-SHA256SUMS
+SHA*SUMS
 
 # Packer logs
-packer.log
+*.log

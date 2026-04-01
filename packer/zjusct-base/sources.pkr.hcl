@@ -35,8 +35,6 @@ source "qemu" "ubuntu" {
   ssh_password = "ubuntu"
   ssh_timeout  = "20m"
 
-  iso_checksum = "none"
-
   # Shutdown
   shutdown_command = "shutdown -P now"
 

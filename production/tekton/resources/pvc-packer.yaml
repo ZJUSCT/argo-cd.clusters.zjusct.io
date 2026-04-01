@@ -1,0 +1,14 @@
+# Shared PersistentVolumeClaim for all packer pipeline runs.
+# Uses openebs-hostpath for best disk I/O performance during VM builds.
+# Reused across PipelineRuns so zjusct-full can read zjusct-base output directly.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: packer-data
+spec:
+  storageClassName: openebs-hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi

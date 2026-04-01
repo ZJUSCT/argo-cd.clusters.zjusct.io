@@ -29,18 +29,6 @@ bootcmd:
   - sed -i -e 's/deb.debian.org/mirrors.zju.edu.cn/g' /etc/apt/mirrors/debian.list /etc/apt/mirrors/debian-security.list
   # TODO: nvidia repo has problem with squid cache proxy
   - echo 'Acquire::http::Proxy::developer.download.nvidia.com "DIRECT";' > /etc/apt/apt.conf.d/99noproxy
-  # TODO: Hold Kernel Version to 6.12.41 for DOCA
-  - |
-    cat >/etc/apt/preferences.d/99-mask-kernel-meta <<'EOF'
-    Package: linux-image-amd64
-    Pin-Priority: -1
-
-    Package: linux-headers-amd64
-    Pin-Priority: -1
-    EOF
-  - apt-get update
-  - apt-get install -y linux-headers-6.12.41+deb13-amd64 linux-image-6.12.41+deb13-amd64
-  - apt-mark hold linux-image-amd64 linux-headers-amd64 linux-image-6.12.41+deb13-amd64 linux-headers-6.12.41+deb13-amd64
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
 ca_certs:
   trusted:
@@ -82,10 +70,6 @@ apt:
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 # https://mirrors.zju.edu.cn/docker-ce/linux/debian/gpg
       keyserver: hkps://keyserver.ubuntu.com/
       source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
-    kubernetes:
-      keyid: DE15B14486CD377B9E876E1A234654DA9A296436 # https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key
-      keyserver: hkps://keyserver.ubuntu.com/
-      source: deb [signed-by=$KEY_FILE] https://mirrors.tuna.tsinghua.edu.cn/kubernetes/core:/stable:/v1.35/deb/ /
     nvidia:
       keyid: 02182E60104FCDC26EAE1B8597A5D4CB8793F200 # https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/8793F200.pub
       keyserver: hkps://keyserver.ubuntu.com/
@@ -109,7 +93,6 @@ packages:
   - aria2
   - attr
   - autoconf
-  - autofs
   - automake
   - bash-completion
   - bat
@@ -119,7 +102,6 @@ packages:
   - btop
   - build-essential
   - cargo
-  - ceph-common
   - clang
   - clangd
   - clang-format
@@ -139,7 +121,6 @@ packages:
   - file
   - fish
   - fq
-  - freeipa-client
   - fzf
   - gawk
   - gdu
@@ -157,8 +138,6 @@ packages:
   - iperf3
   - ipmitool
   - jq
-  - ldap-utils
-  - libsss-sudo
   - libvirt-clients
   - libvirt-daemon-system
   - linux-cpupower
@@ -202,8 +181,7 @@ packages:
   - snmp
   - squashfs-tools
   - sshfs
-  - sssd-ldap
-  - sssd-tools
+  - starship
   - stress
   - sudo
   - systemd-container
@@ -231,18 +209,16 @@ packages:
   - containerd.io
   - docker-buildx-plugin
   - docker-compose-plugin
-  # k8s
-  - kubectl
-  - kubelet
-  - kubeadm
   # nvidia https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html
   - nvidia-open
   # nvidia-container
   - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
   # doca https://developer.nvidia.com/doca-downloads
-  - doca-all # For BuildField Devices
+  # TODO: temporarily disabled - kernel-mft-dkms Recommends linux-headers-amd64,
+  # which causes DKMS double-build conflict during cloud-init
+  # - doca-all
   # TODO: temporary CUDA
-  - cuda-13-1
+  - cuda-toolkit
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 # package_update: true
 # package_upgrade: true

@@ -39,6 +39,6 @@ services:
         bind:
           create_host_path: false
     working_dir: /workspace
-    network_mode: host
+    privileged: true # kvm
     entrypoint: ["sleep", "infinity"]
     init: true
