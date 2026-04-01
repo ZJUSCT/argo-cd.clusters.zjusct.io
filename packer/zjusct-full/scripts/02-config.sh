@@ -13,6 +13,11 @@ set -xeou pipefail
 # check if source files exist
 tree /tmp/rootfs
 
+# MOTD
+rm -f /etc/update-motd.d/*
+install -D -m 0755 -o root -g root /tmp/rootfs/etc/update-motd.d/00-nice-motd /etc/update-motd.d/00-nice-motd
+install -D -m 0644 -o root -g root /tmp/rootfs/etc/motd /etc/motd
+
 # systemd overrides
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/docker.socket.d/override.conf /etc/systemd/system/docker.socket.d/override.conf
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/sssd.service.d/override.conf /etc/systemd/system/sssd.service.d/override.conf
@@ -20,6 +25,20 @@ install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/otelcol-contri
 
 # otelcol-contrib
 install -D -m 0640 -o root -g root /tmp/rootfs/etc/otelcol-contrib/config.yaml /etc/otelcol-contrib/config.yaml
+
+# mount local disks
+install -D -m 0755 -o root -g root /tmp/rootfs/usr/local/bin/mount-local.sh /usr/local/bin/mount-local.sh
+install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/mount-local.service /etc/systemd/system/mount-local.service
+systemctl enable mount-local
+
+# audit
+install -D -m 0640 -o root -g adm /tmp/rootfs/etc/audit/rules.d/zjusct.rules /etc/audit/rules.d/zjusct.rules
+
+# docker
+install -D -m 0644 -o root -g root /tmp/rootfs/etc/docker/daemon.json /etc/docker/daemon.json
+
+# sudoers (must be 0440)
+install -D -m 0440 -o root -g root /tmp/rootfs/etc/sudoers.d/audit /etc/sudoers.d/audit
 
 ########################################################################
 # Systemd
@@ -42,4 +61,5 @@ systemctl disable --now \
 # Domain Control
 ########################################################################
 
-groupdel docker # use FreeIPA group
+# use FreeIPA group
+groupdel docker

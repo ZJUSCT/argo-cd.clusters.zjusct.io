@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -xeou pipefail
 
+export http_proxy=http://172.28.0.4:3128
+export https_proxy=http://172.28.0.4:3128
+
 ########################################################################
 # Helper functions
 ########################################################################
@@ -244,15 +247,3 @@ if [ -n "$CONDA_SH" ]; then
     mkdir -p /etc/fish/conf.d
     ln -s $CONDA_PATH/etc/fish/conf.d/conda.fish /etc/fish/conf.d/z00_conda.fish
 fi
-
-########################################################################
-# lmod
-# https://lmod.readthedocs.io/en/latest/030_installing.html
-########################################################################
-
-# bash, zsh
-# lmod package already placed lmod.sh under profile.d, so no need here
-# ln -s /usr/share/lmod/lmod/init/profile /etc/profile.d/z00_lmod.sh
-
-# fish
-ln -s /usr/share/lmod/lmod/init/profile.fish /etc/fish/conf.d/z00_lmod.fish

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+########################################################################
+# GRUB - Set default kernel
+########################################################################
+
+# Method: GRUB_DEFAULT="saved" + grub-set-default
+# - GRUB_DEFAULT="saved" tells GRUB to use the value saved in grubenv
+# - grub-set-default writes the selected entry to /boot/grub/grubenv
+# This approach is more reliable than using menu index (1>2) because:
+#   - It survives kernel updates that change menu order
+#   - It uses the exact menu entry title as identifier
+
+sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT="saved"/' /etc/default/grub
+update-grub
+grub-set-default "Advanced options for Debian GNU/Linux>Debian GNU/Linux, with Linux 6.12.41+deb13-amd64"

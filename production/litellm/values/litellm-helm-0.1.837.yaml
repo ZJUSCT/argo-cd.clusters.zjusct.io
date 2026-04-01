@@ -127,8 +127,14 @@ proxy_config:
 
   mcp_servers:
     # HTTP
-    zhipu_web_search:
+    zhipu_websearch:
       url: "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
+      transport: "http"
+      auth_type: "bearer_token"
+      auth_value: "os.environ/PLAN_ZHIPU_API_KEY"
+
+    zhipu_zred:
+      url: "https://open.bigmodel.cn/api/mcp/zread/mcp"
       transport: "http"
       auth_type: "bearer_token"
       auth_value: "os.environ/PLAN_ZHIPU_API_KEY"
@@ -303,7 +309,6 @@ proxy_config:
     master_key: os.environ/PROXY_MASTER_KEY
     store_model_in_db: true
     store_prompts_in_spend_logs: true
-    supported_db_objects: ["mcp"]
 
 resources:
   {}
