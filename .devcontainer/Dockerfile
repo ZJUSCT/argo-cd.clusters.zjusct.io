@@ -72,11 +72,19 @@ ln -sf /usr/share/OVMF/OVMF_VARS_4M.fd /usr/share/OVMF/OVMF_VARS.fd
 EOF
 
 RUN <<EOF
+# https://argo-cd.readthedocs.io/en/stable/cli_installation/
 curl -sSL "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64" -o /usr/local/bin/argocd
 chmod +x /usr/local/bin/argocd
 
+# https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/
+cd /usr/local/bin
 curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
 
+# https://github.com/minio/mc
+wget https://dl.min.io/client/mc/release/linux-amd64/mc
+chmod +x mc
+
+# https://github.com/bitnami-labs/sealed-secrets
 curl -sSL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" | tar xz -C /usr/local/bin/
 chmod +x /usr/local/bin/kubeseal
 
