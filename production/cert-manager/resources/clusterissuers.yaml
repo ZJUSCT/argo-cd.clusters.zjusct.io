@@ -40,13 +40,45 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: clusters-zjusct-io-cert
+  name: zjusct-io-cert
   namespace: cert-manager
 spec:
-  secretName: clusters-zjusct-io-cert
+  secretName: zjusct-io-cert
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - "clusters.zjusct.io"
-  - "*.clusters.zjusct.io"
+  - "zjusct.io"
+  - "*.zjusct.io"
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "openng"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "openng"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: clusters-zju-edu-cn-cert
+  namespace: cert-manager
+spec:
+  secretName: clusters-zju-edu-cn-cert
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - "clusters.zju.edu.cn"
+  solvers:
+    - http01:
+        gatewayHTTPRoute:
+          parentRefs:
+            - name: envoy-gateway
+              namespace: envoy-gateway
+              kind: Gateway
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "openng"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "openng"
