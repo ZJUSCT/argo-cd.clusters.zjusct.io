@@ -320,7 +320,7 @@ approveSignerNames:
 #    - --controllers=*,-certificaterequests-approver
 extraArgs:
 - "--dns01-recursive-nameservers-only"
-- "--dns01-recursive-nameservers=10.10.0.21:53,223.6.6.6:53"
+- "--dns01-recursive-nameservers=1.1.1.1:53"
 
 # Additional environment variables to pass to cert-manager controller binary.
 # For example:
