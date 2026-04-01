@@ -48,8 +48,10 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - "zjusct.io"
-  - "*.zjusct.io"
+  - "clusters.zjusct.io"
+  - "*.clusters.zjusct.io"
+  - "s.zjusct.io"
+  - "*.s.zjusct.io"
   secretTemplate:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"

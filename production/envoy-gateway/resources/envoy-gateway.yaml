@@ -30,10 +30,22 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https
+    - name: https-clusters-zjusct-io
       protocol: HTTPS
       port: 443
       hostname: "*.clusters.zjusct.io"
+      tls:
+        certificateRefs:
+        - kind: Secret
+          name: zjusct-io-cert
+          namespace: cert-manager
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-s-zjusct-io
+      protocol: HTTPS
+      port: 443
+      hostname: "*.s.zjusct.io"
       tls:
         certificateRefs:
         - kind: Secret
