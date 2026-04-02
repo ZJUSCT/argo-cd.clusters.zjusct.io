@@ -19,6 +19,8 @@ spec:
             key: api-token
 ---
 # cloudflare DNS-01 validate, letsencrypt certificate
+# DNS-01 solver is scoped to zjusct.io domains via dnsZones selector;
+# HTTP-01 solver acts as fallback for non-Cloudflare domains.
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -36,6 +38,9 @@ spec:
           apiTokenSecretRef:
             name: cloudflare-api-token-secret
             key: api-token
+      selector:
+        dnsZones:
+        - zjusct.io
     - http01:
         gatewayHTTPRoute:
           parentRefs:
