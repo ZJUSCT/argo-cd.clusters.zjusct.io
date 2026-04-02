@@ -36,6 +36,12 @@ spec:
           apiTokenSecretRef:
             name: cloudflare-api-token-secret
             key: api-token
+    - http01:
+        gatewayHTTPRoute:
+          parentRefs:
+            - name: envoy-gateway
+              namespace: envoy-gateway
+              kind: Gateway
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -89,13 +95,6 @@ spec:
     kind: ClusterIssuer
   dnsNames:
   - "clusters.zju.edu.cn"
-  solvers:
-    - http01:
-        gatewayHTTPRoute:
-          parentRefs:
-            - name: envoy-gateway
-              namespace: envoy-gateway
-              kind: Gateway
   secretTemplate:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
