@@ -54,6 +54,18 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-clusters-zju-edu-cn
+      protocol: HTTPS
+      port: 443
+      hostname: "clusters.zju.edu.cn"
+      tls:
+        certificateRefs:
+        - kind: Secret
+          name: clusters-zju-edu-cn-cert
+          namespace: cert-manager
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: tls-passthrough
       protocol: TLS
       port: 444
