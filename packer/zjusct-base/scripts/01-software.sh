@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -xeou pipefail
 
-export http_proxy=http://172.28.0.4:3128
-export https_proxy=http://172.28.0.4:3128
-
 ########################################################################
 # Helper functions
 ########################################################################
@@ -203,6 +200,20 @@ pip config --global \
 
 pip install --break-system-packages \
     uv poetry
+
+########################################################################
+# zellij: tmux alternative
+# https://github.com/zellij-org/zellij/releases
+########################################################################
+
+case "$(uname -m)" in
+x86_64)
+    install_tarball_from_github "zellij-org/zellij" "zellij-x86_64-unknown-linux-musl.tar.gz"
+    ;;
+aarch64 | arm64)
+    install_tarball_from_github "zellij-org/zellij" "zellij-aarch64-unknown-linux-musl.tar.gz"
+    ;;
+esac
 
 ########################################################################
 # conda

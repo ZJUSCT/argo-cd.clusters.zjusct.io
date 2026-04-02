@@ -27,8 +27,6 @@ bootcmd:
   - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
   - ['sed', '-i', 's/^Components: main$/Components: main contrib non-free non-free-firmware/', '/etc/apt/sources.list.d/debian.sources']
   - sed -i -e 's/deb.debian.org/mirrors.zju.edu.cn/g' /etc/apt/mirrors/debian.list /etc/apt/mirrors/debian-security.list
-  # TODO: nvidia repo has problem with squid cache proxy
-  - echo 'Acquire::http::Proxy::developer.download.nvidia.com "DIRECT";' > /etc/apt/apt.conf.d/99noproxy
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
 ca_certs:
   trusted:
@@ -69,7 +67,8 @@ apt:
     docker:
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 # https://mirrors.zju.edu.cn/docker-ce/linux/debian/gpg
       keyserver: hkps://keyserver.ubuntu.com/
-      source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
+      # source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
+      source: deb [signed-by=$KEY_FILE] https://mirrors.aliyun.com/docker-ce/linux/debian $RELEASE stable
     nvidia:
       keyid: 02182E60104FCDC26EAE1B8597A5D4CB8793F200 # https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/8793F200.pub
       keyserver: hkps://keyserver.ubuntu.com/
@@ -81,8 +80,7 @@ apt:
     doca:
       keyid: CAE649B3B3929F8470D4D33BA024F6F0E6D6A281 # https://linux.mellanox.com/public/repo/doca/GPG-KEY-Mellanox.pub
       keyserver: hkps://keyserver.ubuntu.com/
-      # TODO: DOCA HTTPS has some issues, so use HTTP temporarily
-      source: deb [signed-by=$KEY_FILE] http://linux.mellanox.com/public/repo/doca/latest/debian13/x86_64/ ./
+      source: deb [signed-by=$KEY_FILE] https://linux.mellanox.com/public/repo/doca/latest/debian13/x86_64/ ./
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 packages:
   - 7zip
@@ -102,7 +100,6 @@ packages:
   - btop
   - bubblewrap
   - build-essential
-  - cargo
   - clang
   - clangd
   - clang-format
@@ -177,7 +174,7 @@ packages:
   - ripgrep
   - rpm2cpio
   - rsync
-  - rustc
+  - rustup
   - smartmontools
   - snmp
   - squashfs-tools
@@ -221,8 +218,8 @@ packages:
   # TODO: temporary CUDA
   - cuda-toolkit
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
-# package_update: true
-# package_upgrade: true
+package_update: true
+package_upgrade: true
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-locale
 # locale: en_US.UTF-8
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-timezone

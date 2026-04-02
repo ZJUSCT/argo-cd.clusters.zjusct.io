@@ -17,7 +17,6 @@ source "qemu" "ubuntu" {
   # VM Configuration
   cpus        = 8
   memory      = 16384
-  disk_size   = "45G"
   format      = "qcow2"
   accelerator = "kvm"
   headless    = true

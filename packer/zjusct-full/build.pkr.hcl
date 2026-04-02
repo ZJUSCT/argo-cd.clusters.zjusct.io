@@ -1,6 +1,7 @@
 build {
   name = "zjusct-full"
   source "source.qemu.ubuntu" {
+    disk_size = "45G"
     iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/debian/zjusct-base.qcow2"
 
     # Download verification (comment out to skip, set "none" to disable)

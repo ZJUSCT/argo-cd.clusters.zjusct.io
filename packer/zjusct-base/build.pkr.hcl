@@ -1,6 +1,8 @@
 build {
   name = "zjusct-base"
   source "source.qemu.ubuntu" {
+    disk_size = "30G"
+
     #iso_url = "https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
     iso_url = "debian-13-generic-amd64.qcow2"
     #iso_checksum = "file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS"
@@ -41,6 +43,7 @@ build {
     scripts = [
       "scripts/01-software.sh",
       "scripts/02-config.sh",
+      "scripts/10-doca.sh",
       "scripts/99-clean.sh"
     ]
   }

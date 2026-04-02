@@ -7,7 +7,9 @@
     "vscode": {
       "extensions": [
         "redhat.vscode-yaml",
-        "editorconfig.editorconfig"
+        "editorconfig.editorconfig",
+        "iliazeus.vscode-ansi",
+        "foxundermoon.shell-format"
       ]
     }
   }

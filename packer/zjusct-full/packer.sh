@@ -7,10 +7,17 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+rm -rf output
+
 export PACKER_LOG=1
 export PACKER_LOG_PATH="packer.log"
 
-rm -rf output
+echo "Initializing Packer plugins..."
+packer init .
+
+echo "Validating configuration..."
+packer validate .
+cloud-init schema -c user-data
 
 packer build \
     -on-error=abort \
@@ -18,8 +25,8 @@ packer build \
 #    -debug -on-error=ask \
 # -on-error=abort will leave the output files for debugging
 
-if [ -f output/zjusct-base.qcow2 ]; then
+if [ -f output/zjusct-full.qcow2 ]; then
     echo "Output info:"
-    qemu-img info output/zjusct-base.qcow2
-    sha256sum output/zjusct-base.qcow2
+    qemu-img info output/zjusct-full.qcow2
+    sha256sum output/zjusct-full.qcow2
 fi
