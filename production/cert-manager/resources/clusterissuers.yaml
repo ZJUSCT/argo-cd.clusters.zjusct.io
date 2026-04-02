@@ -40,16 +40,34 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: zjusct-io-cert
+  name: clusters-zjusct-io-cert
   namespace: cert-manager
 spec:
-  secretName: zjusct-io-cert
+  secretName: clusters-zjusct-io-cert
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
   - "clusters.zjusct.io"
   - "*.clusters.zjusct.io"
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "openng"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "openng"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: s-zjusct-io-cert
+  namespace: cert-manager
+spec:
+  secretName: s-zjusct-io-cert
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
   - "s.zjusct.io"
   - "*.s.zjusct.io"
   secretTemplate:

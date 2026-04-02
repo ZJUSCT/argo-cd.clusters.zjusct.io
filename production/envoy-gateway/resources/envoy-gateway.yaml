@@ -37,7 +37,7 @@ spec:
       tls:
         certificateRefs:
         - kind: Secret
-          name: zjusct-io-cert
+          name: clusters-zjusct-io-cert
           namespace: cert-manager
       allowedRoutes:
         namespaces:
@@ -49,7 +49,7 @@ spec:
       tls:
         certificateRefs:
         - kind: Secret
-          name: zjusct-io-cert
+          name: s-zjusct-io-cert
           namespace: cert-manager
       allowedRoutes:
         namespaces:
