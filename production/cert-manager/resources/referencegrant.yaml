@@ -1,5 +1,5 @@
-# Allow Gateway in envoy-gateway namespace to reference secrets in cert-manager namespace
-# This enables cross-namespace secret references without needing to copy secrets
+# Allow Gateway in envoy-gateway namespace to reference secrets and services in cert-manager namespace
+# This enables cross-namespace secret references and ACME HTTP-01 solver routing
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
@@ -13,3 +13,5 @@ spec:
   to:
   - group: ""
     kind: Secret
+  - group: ""
+    kind: Service
