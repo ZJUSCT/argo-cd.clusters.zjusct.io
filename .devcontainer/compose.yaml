@@ -8,37 +8,25 @@ services:
         K8S_VERSION: v1.35
         KUBESEAL_VERSION: 0.36.1
         MIRROR: mirrors.zju.edu.cn
+    image: harbor.clusters.zjusct.io/library/devcontainer-k8s:latest
     volumes:
       - ..:/workspace
       - /dev/kvm:/dev/kvm
-      # K8S
-      - type: bind
-        source: ${HOME}/.kube/config
-        target: /home/vscode/.kube/config
-        read_only: true
-        bind:
-          create_host_path: false
-      # AI agents
-      - type: bind
-        source: ${HOME}/.config/opencode/opencode.json
-        target: /home/vscode/.config/opencode/opencode.json
-        read_only: true
-        bind:
-          create_host_path: false
-      - type: bind
-        source: ${HOME}/.claude/settings.json
-        target: /home/vscode/.claude/settings.json
-        read_only: true
-        bind:
-          create_host_path: false
-      # Git
-      - type: bind
-        source: ${HOME}/.gitconfig
-        target: /home/vscode/.gitconfig
-        read_only: true
-        bind:
-          create_host_path: false
+      # 宿主机家目录挂载到 /home/host，通过 post_start 拷贝配置文件
+      - ${HOME}:/home/host:ro
+      # 持久化 agent 会话等数据
+      - home:/home/vscode
     working_dir: /workspace
     privileged: true # kvm
     entrypoint: ["sleep", "infinity"]
     init: true
+    post_start:
+      - command: |
+          mkdir -p /home/vscode/.kube /home/vscode/.config/opencode /home/vscode/.claude
+          [ -f /home/host/.kube/config ]        && cp /home/host/.kube/config /home/vscode/.kube/config
+          [ -f /home/host/.config/opencode/opencode.json ] && cp /home/host/.config/opencode/opencode.json /home/vscode/.config/opencode/opencode.json
+          [ -f /home/host/.claude/settings.json ] && cp /home/host/.claude/settings.json /home/vscode/.claude/settings.json
+          [ -f /home/host/.claude.json ]         && cp /home/host/.claude.json /home/vscode/.claude.json
+          [ -f /home/host/.gitconfig ]           && cp /home/host/.gitconfig /home/vscode/.gitconfig
+volumes:
+  home:
