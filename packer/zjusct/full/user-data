@@ -27,6 +27,8 @@ disable_root: false
 # https://docs.cloud-init.io/en/latest/reference/modules.html#bootcmd
 bootcmd:
   - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
+  - ['sed', '-i', 's/^Components: main$/Components: main contrib non-free non-free-firmware/', '/etc/apt/sources.list.d/debian.sources']
+  - sed -i -e 's/deb.debian.org/mirrors.zju.edu.cn/g' /etc/apt/mirrors/debian.list /etc/apt/mirrors/debian-security.list
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
 ca_certs:
   trusted:
@@ -55,6 +57,12 @@ ca_certs:
 apt:
   http_proxy: http://172.28.0.4:3128
   https_proxy: http://172.28.0.4:3128
+  primary:
+    - arches: [default]
+      uri: https://mirrors.zju.edu.cn/debian/
+  security:
+    - arches: [default]
+      uri: https://mirrors.zju.edu.cn/debian-security/
   sources:
     kubernetes:
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436 # https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key

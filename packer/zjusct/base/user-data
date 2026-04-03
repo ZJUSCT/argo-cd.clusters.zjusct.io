@@ -55,7 +55,6 @@ ca_certs:
 apt:
   http_proxy: http://172.28.0.4:3128
   https_proxy: http://172.28.0.4:3128
-  # primary and security do not support enable components, so use sources_list
   primary:
     - arches: [default]
       uri: https://mirrors.zju.edu.cn/debian/
@@ -67,8 +66,7 @@ apt:
     docker:
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 # https://mirrors.zju.edu.cn/docker-ce/linux/debian/gpg
       keyserver: hkps://keyserver.ubuntu.com/
-      # source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
-      source: deb [signed-by=$KEY_FILE] https://mirrors.aliyun.com/docker-ce/linux/debian $RELEASE stable
+      source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
     nvidia:
       keyid: 02182E60104FCDC26EAE1B8597A5D4CB8793F200 # https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/8793F200.pub
       keyserver: hkps://keyserver.ubuntu.com/
@@ -209,14 +207,12 @@ packages:
   - docker-compose-plugin
   # nvidia https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html
   - nvidia-open
+  - cuda-toolkit
   # nvidia-container
   - nvidia-container-toolkit # this package exist in cuda repo ubuntu but not in debian, so debian need to add nvidia-container repo
   # doca https://developer.nvidia.com/doca-downloads
-  # TODO: temporarily disabled - kernel-mft-dkms Recommends linux-headers-amd64,
-  # which causes DKMS double-build conflict during cloud-init
+  # TODO: temporary fix in 10-doca.sh
   # - doca-all
-  # TODO: temporary CUDA
-  - cuda-toolkit
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 package_update: true
 package_upgrade: true
