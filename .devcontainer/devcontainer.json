@@ -1,8 +1,32 @@
+// https://containers.dev/implementors/json_reference/
 {
   "name": "ZJUSCT K8S Dev Container",
-  "dockerComposeFile": "compose.yaml",
-  "service": "devcontainer",
+  "image": "harbor.clusters.zjusct.io/library/devcontainer-k8s:latest",
   "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "privileged": true,
+  "init": true,
+  "containerEnv": {
+    "HTTP_PROXY": "http://172.28.0.4:3128",
+    "HTTPS_PROXY": "http://172.28.0.4:3128"
+  },
+  "mounts": [
+    "source=/dev/kvm,target=/dev/kvm,type=bind",
+    "source=${localEnv:HOME},target=/home/host,type=bind,readonly",
+    {
+      "source": "home",
+      "target": "/home/vscode",
+      "type": "volume"
+    }
+  ],
+  "postStartCommand": [
+    "/usr/local/share/devcontainer/post-start.sh"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": [

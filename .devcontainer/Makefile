@@ -1,7 +1,9 @@
+IMAGE := harbor.clusters.zjusct.io/library/devcontainer-k8s
+
 build:
-	docker compose build
+	docker build -t $(IMAGE) .
 
 push: build
-	docker compose push
+	docker push $(IMAGE)
 
 .PHONY: build push

@@ -2,24 +2,29 @@
 ARG DEBIAN_VERSION=trixie
 FROM harbor.clusters.zjusct.io/mcr.microsoft.com/devcontainers/base:${DEBIAN_VERSION}
 
-ARG DEBIAN_VERSION=${DEBIAN_VERSION}
+COPY squid.crt /usr/local/share/ca-certificates/squid.crt
+RUN update-ca-certificates
+
 ARG MIRROR=mirrors.zju.edu.cn
-ARG K8S_VERSION
-ARG KUBESEAL_VERSION
+ARG K8S_VERSION=v1.35
+ARG KUBESEAL_VERSION=0.36.1
+ARG HTTP_PROXY=http://172.28.0.4:3128
+ARG HTTPS_PROXY=http://172.28.0.4:3128
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
 set -xe
+. /etc/os-release
 cat <<EOT > /etc/apt/sources.list.d/debian.sources
 Types: deb
 URIs: https://${MIRROR}/debian/
-Suites: ${DEBIAN_VERSION} ${DEBIAN_VERSION}-updates ${DEBIAN_VERSION}-backports
+Suites: ${VERSION_CODENAME} ${VERSION_CODENAME}-updates ${VERSION_CODENAME}-backports
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 Types: deb
 URIs: https://${MIRROR}/debian-security/
-Suites: ${DEBIAN_VERSION}-security
+Suites: ${VERSION_CODENAME}-security
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOT
@@ -37,7 +42,7 @@ chmod 644 /etc/apt/sources.list.d/kubernetes.list
 curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 chmod 644 /usr/share/keyrings/hashicorp-archive-keyring.gpg
 cat <<EOT | tee /etc/apt/sources.list.d/hashicorp.list
-deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${DEBIAN_VERSION} main
+deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${VERSION_CODENAME} main
 EOT
 # >>>
 
@@ -62,6 +67,7 @@ apt-get install -y --no-install-recommends \
     python3-pip \
     python3 \
     tmux \
+    vim \
     btop \
     pre-commit \
     qemu-system-x86 \
@@ -69,6 +75,7 @@ apt-get install -y --no-install-recommends \
     ovmf \
     cloud-init \
     cloud-image-utils
+apt-get autoremove -y
 
 # Packer expects OVMF_CODE.fd / OVMF_VARS.fd, Debian ships OVMF_CODE_4M.fd / OVMF_VARS_4M.fd
 ln -sf /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd
@@ -103,3 +110,7 @@ npm install -g \
 pip config --global set global.index-url https://${MIRROR}/pypi/web/simple
 EOF
 
+COPY post-start.sh /usr/local/share/devcontainer/post-start.sh
+RUN chmod a+rx /usr/local/share/devcontainer/post-start.sh
+
+RUN apt-get distclean -y
