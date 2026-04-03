@@ -149,42 +149,42 @@ persistence:
       # Specify the "storageClass" used to provision the volume. Or the default
       # StorageClass will be used (the default).
       # Set it to "-" to disable dynamic provisioning
-      storageClass: ""
+      storageClass: ceph-filesystem
       subPath: ""
-      accessMode: ReadWriteOnce
-      size: 500Gi
+      accessMode: ReadWriteMany
+      size: 100Gi
       annotations: {}
     jobservice:
       jobLog:
         existingClaim: ""
-        storageClass: ""
+        storageClass: ceph-filesystem
         subPath: ""
-        accessMode: ReadWriteOnce
+        accessMode: ReadWriteMany
         size: 1Gi
         annotations: {}
     # If external database is used, the following settings for database will
     # be ignored
     database:
       existingClaim: ""
-      storageClass: ""
+      storageClass: ceph-filesystem
       subPath: ""
-      accessMode: ReadWriteOnce
+      accessMode: ReadWriteMany
       size: 1Gi
       annotations: {}
     # If external Redis is used, the following settings for Redis will
     # be ignored
     redis:
       existingClaim: ""
-      storageClass: ""
+      storageClass: ceph-filesystem
       subPath: ""
-      accessMode: ReadWriteOnce
+      accessMode: ReadWriteMany
       size: 1Gi
       annotations: {}
     trivy:
       existingClaim: ""
-      storageClass: ""
+      storageClass: ceph-filesystem
       subPath: ""
-      accessMode: ReadWriteOnce
+      accessMode: ReadWriteMany
       size: 5Gi
       annotations: {}
   # Define which storage backend is used for registry to store
@@ -286,7 +286,7 @@ persistence:
 # The initial password of Harbor admin. Change it from portal after launching Harbor
 # or give an existing secret for it
 # key in secret is given via (default to HARBOR_ADMIN_PASSWORD)
-existingSecretAdminPassword: ""
+existingSecretAdminPassword: "harbor-admin-password"
 existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 harborAdminPassword: "Harbor12345"
 
@@ -368,7 +368,7 @@ imagePullSecrets:
 # The update strategy for deployments with persistent volumes(jobservice, registry): "RollingUpdate" or "Recreate"
 # Set it as "Recreate" when "RWM" for volumes isn't supported
 updateStrategy:
-  type: Recreate
+  type: RollingUpdate
 
 # debug, info, warning, error or fatal
 logLevel: info
@@ -631,7 +631,7 @@ core:
   secret: ""
   # Fill in the name of a kubernetes secret if you want to use your own
   # If using existingSecret, the key must be secret
-  existingSecret: "harbor-core-sealed-secret"
+  existingSecret: ""
   # Fill the name of a kubernetes secret if you want to use your own
   # TLS certificate and private key for token encryption/decryption.
   # The secret must contain keys named:
@@ -719,7 +719,7 @@ jobservice:
   # Must be a string of 16 chars.
   secret: ""
   # Use an existing secret resource
-  existingSecret: "harbor-jobservice-sealed-secret"
+  existingSecret: ""
   # Key within the existing secret for the job service secret
   existingSecretKey: JOBSERVICE_SECRET
 
@@ -777,7 +777,7 @@ registry:
   # Must be a string of 16 chars.
   secret: ""
   # Use an existing secret resource
-  existingSecret: "harbor-registry-sealed-secret"
+  existingSecret: ""
   # Key within the existing secret for the registry service secret
   existingSecretKey: REGISTRY_HTTP_SECRET
   # If true, the registry returns relative URLs in Location headers. The client is responsible for resolving the correct URL.
