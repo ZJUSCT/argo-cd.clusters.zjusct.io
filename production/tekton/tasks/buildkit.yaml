@@ -51,6 +51,16 @@ spec:
   - name: dockerconfig
     description: Docker config secret for authentication
     optional: true
+  # Harbor Example:
+  # {
+  #   "auths": {
+  #     "harbor.clusters.zjusct.io": {
+  #       "username": "<name>",
+  #       "password": "<password>",
+  #       "auth": "echo -n '<username>:<password>' | base64"
+  #     }
+  #   }
+  # }
 
   steps:
   - name: build-and-push

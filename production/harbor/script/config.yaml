@@ -1,0 +1,171 @@
+# Harbor declarative configuration
+# Applied by configure_harbor.py via Harbor REST API (v2.0)
+
+# --- System Settings (PUT /api/v2.0/configurations) ---
+# Only listed keys will be updated; omitted keys are left untouched.
+system:
+  auth_mode: db_auth
+  self_registration: false
+  project_creation_restriction: adminonly
+  # read_only: false
+  # robot_token_duration: 30          # days, -1 = never expires
+  # robot_name_prefix: "robot$"
+  # scan_all_policy:
+  #   type: daily
+  #   parameter:
+  #     daily_time: 0                 # seconds offset from UTC midnight
+
+# --- Registry Endpoints (POST /api/v2.0/registries) ---
+# type: docker-hub, github-ghcr, docker-registry, harbor, quay,
+#       aws-ecr, azure-acr, ali-acr, google-gcr, gitlab, etc.
+# For docker-hub and github-ghcr, url is embedded and should be omitted.
+registries:
+  - name: hub.docker.com
+    type: docker-hub
+    url: https://hub.docker.com
+    insecure: false
+    # credential:
+    #   type: basic
+    #   access_key: ""
+    #   access_secret: ""
+
+  - name: ghcr.io
+    type: github-ghcr
+    url: https://ghcr.io
+    insecure: false
+
+  - name: quay.io
+    type: docker-registry
+    url: https://quay.io
+    insecure: false
+
+  - name: nvcr.io
+    type: docker-registry
+    url: https://nvcr.io
+    insecure: false
+
+  - name: registry.k8s.io
+    type: docker-registry
+    url: https://registry.k8s.io
+    insecure: false
+
+  - name: registry.gitlab.com
+    type: docker-registry
+    url: https://registry.gitlab.com
+    insecure: false
+
+  - name: ecr-public.aws.com
+    type: docker-registry
+    url: https://ecr-public.aws.com
+    insecure: false
+
+  - name: mcr.microsoft.com
+    type: docker-registry
+    url: https://mcr.microsoft.com
+    insecure: false
+
+# --- Projects (POST /api/v2.0/projects) ---
+# For proxy cache projects, set registry to the name of a registry endpoint above.
+# Regular projects omit the registry field.
+projects:
+  - name: hub.docker.com
+    public: true
+    registry: hub.docker.com
+  - name: docker.io
+    public: true
+    registry: hub.docker.com
+  - name: registry-1.docker.io
+    public: true
+    registry: hub.docker.com
+  - name: ghcr.io
+    public: true
+    registry: ghcr.io
+  - name: quay.io
+    public: true
+    registry: quay.io
+  - name: nvcr.io
+    public: true
+    registry: nvcr.io
+  - name: registry.k8s.io
+    public: true
+    registry: registry.k8s.io
+  - name: registry.gitlab.com
+    public: true
+    registry: registry.gitlab.com
+  - name: ecr-public.aws.com
+    public: true
+    registry: ecr-public.aws.com
+  - name: public.ecr.aws
+    public: true
+    registry: ecr-public.aws.com
+  - name: mcr.microsoft.com
+    public: true
+    registry: mcr.microsoft.com
+
+  - name: library
+    public: true
+    # Regular project for buildkit to push/pull images
+
+  # - name: my-app
+  #   public: false
+  #   storage_limit: 10737418240    # 10Gi
+
+# --- Robot Accounts (POST /api/v2.0/robots) ---
+# level: system or project
+# duration: days (-1 = never expires)
+# permissions[].access.resource: repository, artifact, tag, artifact-label, scan, etc.
+# permissions[].access.action: *, pull, push, create, read, update, delete, list, operate
+robot_accounts:
+  # Harbor project-level robots are scoped to exactly ONE project each.
+  # One robot entry per project is required.
+  - name: buildkit
+    level: project
+    project: library
+    duration: -1
+    description: Robot for buildkit push/pull on library project
+    permissions:
+      - kind: project
+        namespace: library
+        access:
+          - resource: repository
+            action: pull
+          - resource: repository
+            action: push
+          - resource: artifact
+            action: delete
+          - resource: tag
+            action: create
+
+  # - name: ci-bot
+  #   level: project
+  #   project: my-app
+  #   duration: 90
+  #   permissions:
+  #     - kind: project
+  #       namespace: my-app
+  #       access:
+  #         - resource: repository
+  #           action: pull
+  #         - resource: repository
+  #           action: push
+
+# --- Replication Policies (POST /api/v2.0/replication/policies) ---
+# src_registry / dest_registry: name of a registry endpoint above, or "local" for self
+# trigger.type: manual, event_based, scheduled
+# filters[].type: name, tag, label, resource
+# filters[].decoration: matches, excludes
+replication:
+  # - name: mirror-nginx
+  #   description: Replicate nginx images from Docker Hub
+  #   src_registry: hub.docker.com
+  #   dest_registry: local
+  #   dest_namespace: library
+  #   trigger:
+  #     type: scheduled
+  #     settings:
+  #       cron: "0 0 * * *"       # daily at midnight
+  #   override: true
+  #   filters:
+  #     - type: name
+  #       value: "library/nginx"
+  #       decoration: matches

@@ -3,3 +3,4 @@ tmp/
 **/tmp.yaml
 .DS_Store
 .venv/
+**/.env

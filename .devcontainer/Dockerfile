@@ -64,6 +64,8 @@ apt-get install -y --no-install-recommends \
     packer \
     kubectl \
     helm \
+    python3-yaml \
+    python3-dotenv \
     python3-pip \
     python3 \
     tmux \
