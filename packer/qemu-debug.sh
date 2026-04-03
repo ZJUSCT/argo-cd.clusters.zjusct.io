@@ -9,7 +9,7 @@ cp "$SOURCE_IMAGE" "$TARGET_IMAGE"
 
 # qemu-img resize -f qcow2 "$TARGET_IMAGE" 30G
 cp /usr/share/OVMF/OVMF_VARS.fd /tmp/efivars.fd
-cloud-localds /tmp/seeds-cloudimg.iso user-data meta-data
+cloud-localds /tmp/seeds-cloudimg.iso debug/user-data debug/meta-data
 
 /usr/bin/qemu-system-x86_64 \
     -nographic \
