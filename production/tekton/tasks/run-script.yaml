@@ -19,6 +19,10 @@ spec:
     - name: SCRIPT
       description: Path to the script to run, relative to the workspace root
       type: string
+    - name: SCRIPT_ARGS
+      description: Optional arguments to pass to the script
+      type: string
+      default: ""
   workspaces:
     - name: source
       description: Workspace containing the source code and scripts
@@ -33,4 +37,5 @@ spec:
         set -e
         SCRIPT_PATH="$(workspaces.source.path)/$(params.SCRIPT)"
         cd "$(dirname "${SCRIPT_PATH}")"
-        bash "${SCRIPT_PATH}"
+        # SCRIPT_ARGS intentionally unquoted for word splitting
+        bash "${SCRIPT_PATH}" $(params.SCRIPT_ARGS)

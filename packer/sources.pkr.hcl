@@ -15,7 +15,7 @@ source "qemu" "ubuntu" {
   efi_boot   = true
 
   # VM Configuration
-  cpus        = 8
+  cpus        = 32
   memory      = 16384
   format      = "qcow2"
   accelerator = "kvm"
@@ -32,10 +32,11 @@ source "qemu" "ubuntu" {
   # SSH Configuration
   ssh_username = "root"
   ssh_password = "ubuntu"
-  ssh_timeout  = "20m"
+  ssh_timeout  = "1m"
 
   # Shutdown
-  shutdown_command = "shutdown -P now"
+  # shutdown_command = "shutdown -P now" # sometimes timeout waiting
+  shutdown_command = "poweroff"
 
   qemuargs = [
     ["-cpu", "host"]

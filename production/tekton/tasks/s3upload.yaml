@@ -3,7 +3,7 @@ kind: Task
 metadata:
   name: s3upload
   labels:
-    app.kubernetes.io/version: "0.2"
+    app.kubernetes.io/version: "0.3"
   annotations:
     tekton.dev/pipelines.minVersion: "0.17.0"
     tekton.dev/categories: Storage
@@ -11,12 +11,10 @@ metadata:
     tekton.dev/platforms: "linux/amd64"
 spec:
   description: >-
-    Upload a build artifact to Rook Ceph RGW object storage using MinIO Client
-    (mc). The uploaded file is renamed with a git commit hash suffix, and a
-    SHA256SUMS file is generated alongside it for ironic baremetal deployment
-    verification. Credentials and endpoint are loaded from the
-    ObjectBucketClaim-generated Secret and ConfigMap named "packer-images"
-    in the tekton namespace.
+    Upload a file to S3-compatible object storage using MinIO Client (mc).
+    Bucket configuration and credentials are read from workspaces:
+    - bucket-config: ConfigMap with BUCKET_HOST, BUCKET_PORT, BUCKET_NAME
+    - credentials: Secret with AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
   params:
     - name: MC_IMAGE
       description: MinIO Client container image
@@ -24,69 +22,51 @@ spec:
       default: "minio/mc:latest"
     - name: FILENAME
       description: >-
-        Exact path (relative to the workspace root) to the file to upload
-        (e.g. images/cloud-init.qcow2). The task will check existence
-        and upload that file directly; no searching is performed.
+        Path relative to the source workspace of the file to upload.
       type: string
     - name: S3_PREFIX
       description: >-
         Destination prefix inside the bucket, with trailing slash
-        (e.g. debian/). Leave empty to place files at bucket root.
+        (e.g. debian/). Leave empty for bucket root.
       type: string
       default: ""
-    - name: COMMIT_HASH
-      description: Git commit hash to use as version suffix for the uploaded file
-      type: string
   workspaces:
     - name: source
-      description: Workspace containing the build artifact to upload
+      description: Workspace containing the file to upload
+    - name: bucket-config
+      description: >-
+        ConfigMap workspace containing: BUCKET_HOST, BUCKET_PORT, BUCKET_NAME
+    - name: credentials
+      description: >-
+        Secret workspace containing: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
   steps:
     - name: upload
       image: $(params.MC_IMAGE)
       workingDir: $(workspaces.source.path)
-      envFrom:
-        - configMapRef:
-            name: packer-images
-        - secretRef:
-            name: packer-images
       script: |
         #!/bin/sh
         set -xeu
 
         SRC="$(params.FILENAME)"
         if [ ! -f "${SRC}" ]; then
-          echo "ERROR: No file named '${SRC}' found under $(workspaces.source.path)"
+          echo "ERROR: File not found: ${SRC}"
           exit 1
         fi
         echo "Found: ${SRC}"
         ls -lh "${SRC}"
 
-        SRC_DIR="$(dirname "${SRC}")"
-        SRC_BASE="$(basename "${SRC}")"
+        BUCKET_NAME="$(cat "$(workspaces.bucket-config.path)/BUCKET_NAME")"
+        BUCKET_HOST="$(cat "$(workspaces.bucket-config.path)/BUCKET_HOST")"
+        BUCKET_PORT="$(cat "$(workspaces.bucket-config.path)/BUCKET_PORT")"
 
-        # Strip extension, append short commit hash, re-add extension
-        SHORT_HASH="${COMMIT_HASH:0:8}"
-        EXT="${SRC_BASE##*.}"
-        NAME="${SRC_BASE%.*}"
-        NEW_NAME="${NAME}-${SHORT_HASH}.${EXT}"
-        NEW_PATH="${SRC_DIR}/${NEW_NAME}"
+        AWS_ACCESS_KEY_ID="$(cat "$(workspaces.credentials.path)/AWS_ACCESS_KEY_ID")"
+        AWS_SECRET_ACCESS_KEY="$(cat "$(workspaces.credentials.path)/AWS_SECRET_ACCESS_KEY")"
 
-        mv "${SRC}" "${NEW_PATH}"
-        echo "Renamed: ${SRC_BASE} -> ${NEW_NAME}"
+        mc alias set ceph "http://${BUCKET_HOST}:${BUCKET_PORT}" \
+          "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
 
-        # Generate SHA256SUMS (format: <hash>  <filename>)
-        cd "${SRC_DIR}"
-        sha256sum "${NEW_NAME}" > "SHA256SUMS-${NAME}"
-        echo "SHA256SUMS-${NAME}:"
-        cat "SHA256SUMS-${NAME}"
+        DST="ceph/${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
+        mc cp "${SRC}" "${DST}"
+        echo "Uploaded: s3://${BUCKET_NAME}/$(params.S3_PREFIX)$(basename "${SRC}")"
 
-        mc alias set ceph "http://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
-
-        S3_DST="$(params.S3_PREFIX)"
-        mc cp "${NEW_PATH}" "ceph/${BUCKET_NAME}/${S3_DST}${NEW_NAME}"
-        echo "Uploaded: s3://${BUCKET_NAME}/${S3_DST}${NEW_NAME}"
-
-        mc cp "${SRC_DIR}/SHA256SUMS-${NAME}" "ceph/${BUCKET_NAME}/${S3_DST}SHA256SUMS-${NAME}"
-        echo "Uploaded: s3://${BUCKET_NAME}/${S3_DST}SHA256SUMS-${NAME}"
-
-        mc ls "ceph/${BUCKET_NAME}/${S3_DST}" | tail -n 20
+        mc ls "ceph/${BUCKET_NAME}/$(params.S3_PREFIX)" | tail -n 20

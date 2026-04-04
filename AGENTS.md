@@ -96,6 +96,8 @@ feat(agent): update helm chart for nginx ingress
     kubectl kustomize --enable-helm --load-restrictor=LoadRestrictionsNone
     ```
 
+    对于非 kubectl 管理的资源（极少，例如 Tekton Pipeline Run），使用 `kubectl apply/create --dry-run=client` 来验证配置合法性。
+
 - 应用变更：
 
     由 Argo CD 管理的资源应当通过 GitOps 流程部署，否则可能导致 Argo CD 同步出现问题。

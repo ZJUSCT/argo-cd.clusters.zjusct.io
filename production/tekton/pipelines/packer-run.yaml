@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: packer-zjusct-full-
+  generateName: packer-
   namespace: tekton
 spec:
   pipelineRef:
@@ -12,11 +12,9 @@ spec:
     - name: git-revision
       value: "master"
     - name: build-script
-      value: "packer/zjusct-full/packer-build.sh"
+      value: "packer/pipeline.sh"
     - name: build-image
       value: "harbor.clusters.zjusct.io/library/packer:latest"
-    - name: build-output
-      value: "packer/zjusct-full/output/zjusct-full.qcow2"
     - name: upload-image
       value: "harbor.clusters.zjusct.io/docker.io/minio/mc:latest"
     - name: upload-s3-prefix
@@ -29,3 +27,9 @@ spec:
     - name: shared-data
       persistentVolumeClaim:
         claimName: packer-data
+    - name: bucket-config
+      configMap:
+        name: packer-images
+    - name: credentials
+      secret:
+        secretName: packer-images
