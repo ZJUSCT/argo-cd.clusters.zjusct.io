@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: buildkit-packer-run-
+  generateName: buildkit-mihomo-run-
   namespace: tekton
 spec:
   pipelineRef:
@@ -12,15 +12,15 @@ spec:
         fsGroup: 65532
   params:
     - name: git-url
-      value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+      value: "https://github.com/ZJUSCT/mihomo.git"
     - name: git-revision
-      value: "master"
+      value: "zjusct"
     - name: image-reference
-      value: "harbor.clusters.zjusct.io/library/openclaw:latest"
+      value: "harbor.clusters.zjusct.io/library/mihomo:latest"
     - name: dockerfile-path
-      value: "Dockerfile"
+      value: "Dockerfile.zjusct"
     - name: context-dir
-      value: "dev/dev-openclaw/image"
+      value: "."
   workspaces:
     - name: shared-data
       volumeClaimTemplate:
