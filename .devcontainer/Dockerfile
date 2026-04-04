@@ -2,19 +2,21 @@
 ARG DEBIAN_VERSION=trixie
 FROM harbor.clusters.zjusct.io/mcr.microsoft.com/devcontainers/base:${DEBIAN_VERSION}
 
-COPY squid.crt /usr/local/share/ca-certificates/squid.crt
-RUN update-ca-certificates
-
 ARG MIRROR=mirrors.zju.edu.cn
 ARG K8S_VERSION=v1.35
 ARG KUBESEAL_VERSION=0.36.1
-ARG HTTP_PROXY=http://172.28.0.4:3128
-ARG HTTPS_PROXY=http://172.28.0.4:3128
-
+ARG PROXY_URL=http://172.28.0.4:3128
 ENV DEBIAN_FRONTEND=noninteractive
+
+COPY squid.crt /usr/local/share/ca-certificates/squid.crt
+COPY proxy.sh /etc/profile.d/proxy.sh
+RUN update-ca-certificates
+
 RUN <<EOF
 set -xe
 . /etc/os-release
+. /etc/profile.d/proxy.sh
+
 cat <<EOT > /etc/apt/sources.list.d/debian.sources
 Types: deb
 URIs: https://${MIRROR}/debian/
@@ -64,6 +66,7 @@ apt-get install -y --no-install-recommends \
     packer \
     kubectl \
     helm \
+    fish \
     python3-yaml \
     python3-dotenv \
     python3-pip \
@@ -78,6 +81,7 @@ apt-get install -y --no-install-recommends \
     cloud-init \
     cloud-image-utils
 apt-get autoremove -y
+apt-get distclean
 
 # Packer expects OVMF_CODE.fd / OVMF_VARS.fd, Debian ships OVMF_CODE_4M.fd / OVMF_VARS_4M.fd
 ln -sf /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd
@@ -86,6 +90,9 @@ EOF
 
 RUN <<EOF
 set -xe
+. /etc/os-release
+. /etc/profile.d/proxy.sh
+
 # https://argo-cd.readthedocs.io/en/stable/cli_installation/
 curl -sSL "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64" -o /usr/local/bin/argocd
 chmod +x /usr/local/bin/argocd
@@ -114,5 +121,3 @@ EOF
 
 COPY post-start.sh /usr/local/share/devcontainer/post-start.sh
 RUN chmod a+rx /usr/local/share/devcontainer/post-start.sh
-
-RUN apt-get distclean -y
