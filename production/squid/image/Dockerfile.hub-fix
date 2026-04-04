@@ -1,12 +1,3 @@
-# FROM harbor.clusters.zjusct.io/docker.io/ubuntu/squid
-#
-# RUN <<EOF
-# sed -i 's/[a-z]*.ubuntu.com/mirrors.zju.edu.cn/' /etc/apt/sources.list.d/ubuntu.sources
-# apt-get update
-# apt-get install -y squid-openssl squid-common squid-purge squidclient
-# apt-get clean
-# EOF
-
 FROM harbor.clusters.zjusct.io/docker.io/ubuntu/squid AS builder
 
 RUN <<EOF
@@ -33,11 +24,11 @@ apt-get update
 apt-get source squid-openssl
 cd squid-6.* # TODO: this is unstable
 mk-build-deps --install --remove --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes'
-curl -o /tmp/content-length-fix.patch https://github.com/ZJUSCT/squid/commit/a9b06626dceadbfcb0a8ce17433a018e6f5940b7.patch
+curl -o /tmp/content-length-fix.patch https://github.com/yadij/squid/commit/10941052c85397c52d6bc15a9a8f6fee2cec3e0b.patch
 export QUILT_PATCHES=debian/patches
 quilt import /tmp/content-length-fix.patch
 quilt push
-dch --local +zjusct "Apply Content-Length preservation fix for 304 responses"
+dch --local +zjusct "HTTP/1.1: improve handling of malformed 304 responses"
 export DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck nodoc noautodbgsym"
 dpkg-buildpackage -us -uc -b -j$(nproc)
 apt-get distclean

@@ -1,0 +1,124 @@
+# Build Squid from source
+# Usage: docker build --build-arg SQUID_REPO=https://github.com/squid-cache/squid.git ...
+
+FROM debian:trixie AS builder
+
+ARG SQUID_REPO=https://github.com/squid-cache/squid.git
+ARG SQUID_BRANCH=master
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN <<EOF
+set -xe
+sed -i 's/[a-z]*.debian.org/mirrors.zju.edu.cn/' /etc/apt/sources.list.d/debian.sources
+apt-get update
+apt-get install -y --no-install-recommends \
+    build-essential \
+    autoconf automake libtool pkg-config \
+    libssl-dev \
+    libcap-dev \
+    libexpat1-dev \
+    libxml2-dev \
+    libltdl-dev \
+    ca-certificates \
+    git
+apt-get distclean
+EOF
+
+RUN <<EOF
+set -xe
+git clone --depth 1 --branch "$SQUID_BRANCH" "$SQUID_REPO" /build/squid
+EOF
+
+WORKDIR /build/squid
+
+RUN <<EOF
+set -xe
+./bootstrap.sh
+EOF
+
+RUN <<EOF
+set -xe
+./configure \
+    --prefix=/usr \
+    --datadir=/usr/share/squid \
+    --sysconfdir=/etc/squid \
+    --libexecdir=/usr/lib/squid \
+    --localstatedir=/var \
+    --with-logdir=/var/log/squid \
+    --with-pidfile=/run/squid.pid \
+    --with-swapdir=/var/spool/squid \
+    --with-default-user=proxy \
+    --with-openssl \
+    --enable-ssl-crtd \
+    --enable-inline \
+    --enable-async-io=8 \
+    --enable-storeio=ufs,aufs,diskd,rock \
+    --enable-removal-policies=lru,heap \
+    --enable-delay-pools \
+    --enable-cache-digests \
+    --enable-icap-client \
+    --enable-follow-x-forwarded-for \
+    --enable-icmp \
+    --enable-build-info="built from source" \
+    --with-large-files \
+    --with-filedescriptors=65536 \
+    --disable-arch-native
+EOF
+
+RUN <<EOF
+set -xe
+make -j$(nproc)
+make install DESTDIR=/install
+rm -rf /install/var/run
+EOF
+
+
+FROM debian:trixie
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN <<EOF
+set -xe
+sed -i 's/[a-z]*.debian.org/mirrors.zju.edu.cn/' /etc/apt/sources.list.d/debian.sources
+apt-get update
+apt-get install -y --no-install-recommends \
+    libssl3t64 \
+    libcap2 \
+    libexpat1 \
+    libxml2 \
+    libltdl7 \
+    libatomic1 \
+    ca-certificates
+apt-get distclean
+EOF
+
+COPY --from=builder /install/ /
+
+# Create proxy user/group matching Ubuntu's squid package (uid=13)
+RUN <<EOF
+set -xe
+groupadd -g 13 proxy 2>/dev/null || true
+useradd -u 13 -g 13 -M -d /var/spool/squid -s /usr/sbin/nologin proxy 2>/dev/null || true
+EOF
+
+RUN <<EOF
+set -xe
+mkdir -p /var/log/squid /var/spool/squid /var/lib/squid /cache
+chown -R proxy:proxy /var/log/squid /var/spool/squid /var/lib/squid /cache
+EOF
+
+# Replicate entrypoint from ubuntu/squid image
+RUN cat > /usr/local/bin/entrypoint.sh <<'ENTRY'
+#!/bin/bash
+tail -F /var/log/squid/access.log 2>/dev/null &
+tail -F /var/log/squid/error.log 2>/dev/null &
+tail -F /var/log/squid/store.log 2>/dev/null &
+tail -F /var/log/squid/cache.log 2>/dev/null &
+/usr/sbin/squid -Nz
+/usr/sbin/squid "$@"
+ENTRY
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+EXPOSE 3128
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["-NYCd", "1"]

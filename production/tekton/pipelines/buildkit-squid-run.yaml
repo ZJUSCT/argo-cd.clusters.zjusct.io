@@ -18,7 +18,7 @@ spec:
     - name: image-reference
       value: "harbor.clusters.zjusct.io/library/squid:latest"
     - name: dockerfile-path
-      value: "Dockerfile"
+      value: "Dockerfile.hub-fix"
     - name: context-dir
       value: "production/squid/image"
   workspaces:
