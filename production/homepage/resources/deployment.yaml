@@ -38,7 +38,7 @@ spec:
               type: RuntimeDefault
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "homepage.clusters.zjusct.io,homepage.s.zjusct.io"
+              value: "clusters.zjusct.io,s.zjusct.io,clusters.zju.edu.cn"
           ports:
             - name: http
               containerPort: 3000
