@@ -22,6 +22,9 @@ spec:
       automountServiceAccountToken: true
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: homepage
           image: ghcr.io/gethomepage/homepage:v1.12.3
@@ -37,8 +40,16 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "clusters.zjusct.io,s.zjusct.io,clusters.zju.edu.cn"
+              value: "$(MY_POD_IP):3000,clusters.zjusct.io,s.zjusct.io,clusters.zju.edu.cn"
           ports:
             - name: http
               containerPort: 3000
@@ -49,7 +60,15 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
           volumeMounts:
+            - mountPath: /app/config
+              name: config
             - mountPath: /app/config/custom.js
               name: homepage-config
               subPath: custom.js
@@ -80,5 +99,7 @@ spec:
         - name: homepage-config
           configMap:
             name: homepage
+        - name: config
+          emptyDir: {}
         - name: logs
           emptyDir: {}
