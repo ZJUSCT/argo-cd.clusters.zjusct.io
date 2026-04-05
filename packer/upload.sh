@@ -18,7 +18,7 @@ fi
 
 SRC_BASE="$(basename "${SRC}")"
 
-mc alias set ceph "http://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
+mc alias set ceph "https://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
 
 mc cp "${SRC}" "ceph/${BUCKET_NAME}/${S3_PREFIX}${SRC_BASE}"
 echo "Uploaded: s3://${BUCKET_NAME}/${S3_PREFIX}${SRC_BASE}"
