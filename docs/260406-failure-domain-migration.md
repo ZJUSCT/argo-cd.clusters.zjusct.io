@@ -178,5 +178,13 @@ After all PGs reach `active+clean`:
 - [ ] Revert mClock profile: `ceph config set osd osd_mclock_profile balanced`
 - [ ] Clean up redundant `osd_snap_trim_sleep`: `ceph config rm osd osd_snap_trim_sleep`
 - [ ] Remove orphaned CRUSH rules: `ceph osd crush rule rm <old-rule>`
-- [ ] Restore `osd.11` reweight to 1.0 once data has drained: `ceph osd reweight osd.11 1.0`
-- [ ] Verify cluster health is `HEALTH_OK`
+- [ ] Reset all manual OSD reweights to 1.0 (workarounds from failureDomain: host era):
+  ```
+  ceph osd reweight osd.11 1.0
+  ceph osd reweight osd.1 1.0
+  ceph osd reweight osd.22 1.0
+  ceph osd reweight osd.18 1.0
+  ```
+  With `failureDomain: osd`, the balancer distributes across all OSDs regardless of host, so manual reweights are no longer needed. Note: `ceph osd reweight` only affects PG placement, not the `ceph df` capacity calculation (`PGMap::get_rule_avail` in `src/mon/PGMap.cc` uses raw CRUSH item weights, ignoring reweight).
+- [ ] Let the upmap balancer redistribute PGs evenly after reweight reset
+- [ ] Verify cluster health is `HEALTH_OK` and pool MAX AVAIL has increased
