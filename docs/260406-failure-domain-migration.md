@@ -171,11 +171,102 @@ This was set in Phase 1 but was redundant -- mClock forces all sleep options to 
 
 Controls the scheduling priority of recovery/backfill I/O relative to client I/O. Not modified -- the mClock profile is the correct mechanism to control recovery vs client IOPS balance.
 
+## Recovery progress estimation
+
+### Baseline measurements (2026-04-06)
+
+| Metric | Value |
+|--------|-------|
+| Total misplaced objects | ~29.2M across 4 pools |
+| Total data to move | ~9.9 TiB |
+| Recovery rate | 41 MiB/s (balanced) / ~60 MiB/s (high_recovery_ops) |
+| Estimated completion | ~3.0 days (balanced) / ~2.1 days (high_recovery_ops) |
+
+### Per-pool breakdown
+
+| Pool | Misplaced objects | Est. data to move | Notes |
+|------|-------------------|-------------------|-------|
+| pool 6 (`cephfs-cephfs-hdd-data`) | 17,916,213 | ~6.6 TiB | Largest, bottlenecked by HDD throughput |
+| pool 8 (`cephfs-cephfs-nvme-data`) | 11,156,554 | ~2.9 TiB | NVMe tier, should complete faster |
+| `ceph-blockpool` | 93,942 | ~352 GiB | RBD block pool, small |
+| `ceph-objectstore` data | ~18,000 | ~46 GiB | RGW, negligible |
+
+### Methodology
+
+- Data volume = sum(misplaced_objects * avg_object_size) per pool
+- Recovery rate measured via `ceph status` recovery throughput field
+- Time estimate = total_data / recovery_rate
+
+### Periodic check commands
+
+```bash
+# Overall progress
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph status
+
+# Per-pool misplaced objects (compare against baseline above)
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph osd pool stats | grep -E "pool|misplaced"
+
+# Non-clean PGs
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph pg dump pgs_brief | grep -v "active+clean" | wc -l
+```
+
+## Pool MAX AVAIL progressive increase
+
+### Key insight
+
+Pool MAX AVAIL increases **in real-time** as PGs drain from the bottleneck OSD (osd.11), NOT only after migration completes. `ceph df` recalculates MAX AVAIL on every update cycle using `PGMap::get_rule_avail()`.
+
+### How it works
+
+`get_rule_avail()` computes: `MIN(effective_avail / crush_weight)` across all OSDs in the CRUSH rule. The pool with the smallest ratio determines MAX AVAIL. As osd.11 drains, its effective_avail increases, eventually being replaced by the next bottleneck (osd.22).
+
+### Current bottleneck analysis (cephfs-cephfs-hdd-data)
+
+| OSD | Host | Usage | Available | Crush weight | eff_avail/weight |
+|-----|------|-------|-----------|-------------|-----------------|
+| **osd.11** | m601 | 94.43% | 107 GiB | 122434 | **885** (bottleneck) |
+| osd.22 | m600 | 79.90% | 384 GiB | 122434 | 3137 |
+| osd.10 | m601 | 44.57% | 1060 GiB | 122434 | 8659 |
+| osd.8 | m601 | 36.32% | 1212 GiB | 122434 | 9902 |
+
+Current MAX AVAIL = 885 * (sum of all crush weights in rule) / replicas ~ 186 GiB.
+
+### Simulation: osd.11 draining
+
+Each pool-6 PG that migrates off osd.11 frees approximately 81 GiB of space. As osd.11's effective_avail grows, MAX AVAIL increases step-wise:
+
+| PGs drained from osd.11 | osd.11 avail | osd.11 eff/weight | New bottleneck | Pool MAX AVAIL |
+|------------------------|-------------|-------------------|----------------|----------------|
+| 0 (now) | 107 GiB | 885 | osd.11 | **186 GiB** |
+| 1 | 188 GiB | 1535 | osd.11 | ~323 GiB |
+| 2 | 269 GiB | 2186 | osd.11 | ~460 GiB |
+| 3 | 350 GiB | 2836 | osd.11 | ~597 GiB |
+| 4 | 431 GiB | 3486 | osd.22 (3137) | **~4.8 TiB** |
+
+After ~4 pool-6 PGs complete, osd.22 replaces osd.11 as the bottleneck and MAX AVAIL jumps to ~4.8 TiB. Further increases require osd.22 to also drain, which happens once the reweight reset to 1.0 is applied post-migration.
+
+### Expected timeline
+
+- **0-8 hours**: First 1-2 pool-6 PGs complete, MAX AVAIL gradually increases to ~300-460 GiB
+- **8-16 hours**: ~4 pool-6 PGs complete, MAX AVAIL jumps to ~4.8 TiB (osd.22 becomes bottleneck)
+- **After reweight reset (post-migration)**: Full capacity unlocked as OSD reweights no longer distort placement
+
+### Monitoring MAX AVAIL
+
+```bash
+# Check pool MAX AVAIL trend
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph df | grep -A1 "cephfs-cephfs-hdd-data"
+
+# Check osd.11 available space
+kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph osd df osd.11 | tail -1
+```
+
 ## Post-migration cleanup
 
 After all PGs reach `active+clean`:
 
-- [ ] Revert mClock profile: `ceph config set osd osd_mclock_profile balanced`
+- [ ] Revert mClock profile: remove `osd_mclock_profile = high_recovery_ops` from Helm values (or set back to `balanced`)
+- [ ] Revert recovery override: remove `osd_mclock_override_recovery_settings` and `osd_max_backfills` from Helm values
 - [ ] Clean up redundant `osd_snap_trim_sleep`: `ceph config rm osd osd_snap_trim_sleep`
 - [ ] Remove orphaned CRUSH rules: `ceph osd crush rule rm <old-rule>`
 - [ ] Reset all manual OSD reweights to 1.0 (workarounds from failureDomain: host era):

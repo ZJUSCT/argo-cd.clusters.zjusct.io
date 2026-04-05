@@ -26,6 +26,9 @@ configOverride: |
   # mClock QoS profile -- prioritize recovery during migration
   # https://docs.ceph.com/en/squid/rados/configuration/mclock-config-ref/
   osd_mclock_profile = high_recovery_ops
+  # Allow overriding recovery/backfill limits controlled by mClock
+  osd_mclock_override_recovery_settings = true
+  osd_max_backfills = 3
 
   # OSD 队列和线程优化（解决队列瓶颈）
   osd_op_num_shards_hdd = 8
