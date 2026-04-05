@@ -683,7 +683,8 @@ cephBlockPools:
   - name: ceph-blockpool
     # see https://github.com/rook/rook/blob/master/Documentation/CRDs/Block-Storage/ceph-block-pool-crd.md#spec for available configuration
     spec:
-      failureDomain: host
+      failureDomain: osd
+      enableCrushUpdates: true
       replicated:
         size: 2
       parameters:
@@ -755,7 +756,7 @@ cephFileSystems:
     spec:
       preserveFilesystemOnDelete: true
       metadataPool:
-        failureDomain: host
+        failureDomain: osd
         enableCrushUpdates: true
         deviceClass: nvme
         replicated:
@@ -764,7 +765,8 @@ cephFileSystems:
           pg_autoscale_mode: "on"
           pg_num_min: "16"
       dataPools:
-        - failureDomain: host
+        - failureDomain: osd
+          enableCrushUpdates: true
           replicated:
             size: 2
           name: data0
@@ -772,7 +774,7 @@ cephFileSystems:
             pg_autoscale_mode: "on"
             pg_num_min: "32"
         - name: cephfs-hdd-data
-          failureDomain: host
+          failureDomain: osd
           enableCrushUpdates: true
           deviceClass: hdd
           replicated:
@@ -781,7 +783,7 @@ cephFileSystems:
             pg_autoscale_mode: "on"
             pg_num_min: "32"
         - name: cephfs-nvme-data
-          failureDomain: host
+          failureDomain: osd
           deviceClass: nvme
           enableCrushUpdates: true
           replicated:
@@ -790,7 +792,7 @@ cephFileSystems:
             pg_autoscale_mode: "on"
             pg_num_min: "128"
         - name: cephfs-ssd-data
-          failureDomain: host
+          failureDomain: osd
           deviceClass: ssd
           enableCrushUpdates: true
           replicated:
@@ -799,7 +801,7 @@ cephFileSystems:
             pg_autoscale_mode: "on"
             pg_num_min: "32"
         - name: cephfs-home
-          failureDomain: host
+          failureDomain: osd
           deviceClass: nvme
           enableCrushUpdates: true
           replicated:
@@ -876,7 +878,7 @@ cephObjectStores:
     # see https://github.com/rook/rook/blob/master/Documentation/CRDs/Object-Storage/ceph-object-store-crd.md#object-store-settings for available configuration
     spec:
       metadataPool:
-        failureDomain: host
+        failureDomain: osd
         enableCrushUpdates: true
         deviceClass: hdd
         replicated:
@@ -885,7 +887,7 @@ cephObjectStores:
           pg_autoscale_mode: "on"
           pg_num_min: "8"
       dataPool:
-        failureDomain: host
+        failureDomain: osd
         enableCrushUpdates: true
         deviceClass: hdd
         replicated:
