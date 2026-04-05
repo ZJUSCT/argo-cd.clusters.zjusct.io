@@ -33,6 +33,18 @@ spec:
     - name: https-clusters-zjusct-io
       protocol: HTTPS
       port: 443
+      hostname: clusters.zjusct.io
+      tls:
+        certificateRefs:
+        - kind: Secret
+          name: clusters-zjusct-io-cert
+          namespace: cert-manager
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-wildcard-clusters-zjusct-io
+      protocol: HTTPS
+      port: 443
       hostname: "*.clusters.zjusct.io"
       tls:
         certificateRefs:
@@ -43,6 +55,18 @@ spec:
         namespaces:
           from: All
     - name: https-s-zjusct-io
+      protocol: HTTPS
+      port: 443
+      hostname: s.zjusct.io
+      tls:
+        certificateRefs:
+        - kind: Secret
+          name: s-zjusct-io-cert
+          namespace: cert-manager
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-wildcard-s-zjusct-io
       protocol: HTTPS
       port: 443
       hostname: "*.s.zjusct.io"
