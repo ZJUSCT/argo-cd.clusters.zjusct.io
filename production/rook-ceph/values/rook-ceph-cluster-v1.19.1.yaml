@@ -23,6 +23,10 @@ configOverride: |
   mds_session_blocklist_on_evict = false
 
   [osd]
+  # mClock QoS profile -- prioritize recovery during migration
+  # https://docs.ceph.com/en/squid/rados/configuration/mclock-config-ref/
+  osd_mclock_profile = high_recovery_ops
+
   # OSD 队列和线程优化（解决队列瓶颈）
   osd_op_num_shards_hdd = 8
   osd_op_num_shards_ssd = 16

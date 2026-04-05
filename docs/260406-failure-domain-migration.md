@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-06
 **Cluster:** rook-ceph (Ceph Squid 19.2.3, Rook v1.19.1)
-**Status:** Pending (values edited, awaiting ArgoCD sync)
+**Status:** In progress (ArgoCD synced, migration running)
 
 ## Problem
 
@@ -80,15 +80,25 @@ When Rook detects a failure domain change on a pool with `enableCrushUpdates: tr
 3. Ceph remaps all PGs to conform to the new placement (`chooseleaf_firstn 2 type osd`)
 4. PGs transition through `active+remapped+backfilling` states
 
-## Pre-apply checklist
+## Migration timeline
 
-Before pushing, ensure:
+- **Phase 1 (2026-04-06):** Emergency fixes for osd.11 near-full
+  - `osd.11 reweight` reduced to 0.30
+  - `osd_snap_trim_sleep` set to 0 (redundant -- already forced to 0 by mClock, see below)
+  - See [260406-cephfs-osd-near-full.md](260406-cephfs-osd-near-full.md) for details
 
-- [ ] osd.11 reweight migration from earlier (Phase 1) has stabilized
-- [ ] Cluster recovery from the ~11h-ago disruption is complete (no misplaced objects)
-- [ ] No OSDs in backfillfull/nearfull state
+- **Phase 2 (2026-04-06):** Failure domain migration applied via ArgoCD
+  - All 9 pools changed from `failureDomain: host` to `failureDomain: osd`
+  - Rook created new CRUSH rules and applied them to each pool
+  - Ceph began remapping ~573 PGs (backfill in progress)
 
-## Post-apply monitoring
+- **PG 6.4 repair (2026-04-06):**
+  - Pre-existing inconsistent PG on pool `cephfs-cephfs-hdd-data` (acting [22, 16])
+  - 1 scrub error found during deep scrub at 21:35 UTC (before migration)
+  - `ceph pg repair 6.4` executed -- repair confirmed, snap trim queue cleared (300 snapshots freed)
+  - Post-repair deep scrub running to verify consistency
+
+## Migration monitoring
 
 ```bash
 # Watch PG states during migration
@@ -101,26 +111,72 @@ kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph osd pool stats
 kubectl -n rook-ceph exec deploy/rook-ceph-tools -- ceph pg dump pgs_brief | grep -v "active+clean" | head -20
 ```
 
-## OSD tuning options (reference)
+## OSD tuning applied during migration
 
-### `osd_max_backfills`
+### mClock QoS scheduler (important discovery)
 
-Controls how many PGs each OSD can backfill simultaneously. Default is 1.
+This cluster uses the mClock scheduler (default in Ceph Squid). mClock controls IOPS allocation across three client types:
 
-When the CRUSH rule changes, Ceph must remap and backfill PGs to their new OSD locations. With 1178 PGs and only 1 backfill slot per OSD (29 OSDs = 29 concurrent backfills), the migration could be slow. Increasing to 2 doubles throughput but also doubles the I/O load on each OSD.
+| Client Type | Request Types |
+|-------------|---------------|
+| Client | External client I/O |
+| Background recovery | Internal recovery requests |
+| Background best-effort | Backfill, scrub, snap trim, PG deletion |
 
-Recommendation: set to `2` during migration, revert to `1` after:
+The active mClock profile determines the IOPS reservation, weight, and limit for each client type. **Individual config options like `osd_max_backfills` and `osd_snap_trim_sleep` are silently overridden by mClock** -- `ceph config set` reports success but the value is reverted to the profile default within seconds. This was discovered via warning logs on osd.13.
+
+**Impact on earlier tuning attempts:**
+- `osd_max_backfills` changes to 2 and 3 never took effect -- mClock held them at the profile default of 1. The observed throughput variations (43 vs 128 MiB/s) were caused by other factors, not by this setting.
+- `osd_snap_trim_sleep` set to 0 in Phase 1 was redundant -- mClock already disables all sleep options (`osd_snap_trim_sleep`, `osd_recovery_sleep`, `osd_scrub_sleep`, etc.) when any profile is active.
+
+### Current profile: `balanced` (default)
+
+| Client Type | Reservation | Weight | Limit |
+|-------------|-------------|--------|-------|
+| Client | 50% | 1 | MAX |
+| Background recovery | 50% | 1 | MAX |
+| Background best-effort | MIN | 1 | 90% |
+
+### Recommended: switch to `high_recovery_ops` profile
+
+To prioritize the migration, switch the mClock profile:
+
+```bash
+ceph config set osd osd_mclock_profile high_recovery_ops
 ```
-ceph config set osd osd_max_backfills 2
+
+This allocates 70% IOPS reservation to background recovery at the expense of client I/O (30%):
+
+| Client Type | Reservation | Weight | Limit |
+|-------------|-------------|--------|-------|
+| Client | 30% | 1 | MAX |
+| Background recovery | 70% | 2 | MAX |
+| Background best-effort | MIN | 1 | MAX |
+
+Revert after migration completes:
+
+```bash
+ceph config set osd osd_mclock_profile balanced
 ```
 
-### `osd_recovery_op_priority`
+### `osd_max_backfills` = 1 (mClock default, leave as-is)
 
-Controls the priority of recovery/backfill I/O operations relative to client I/O. Default is 63 (on a scale where client ops are typically priority 63, scrub is lower). Setting it to a lower number (e.g., 1) makes recovery ops yield to client I/O, reducing client-visible latency impact during migration. Setting it higher makes recovery finish faster but may cause client I/O latency spikes.
+Controls how many PGs each OSD can backfill simultaneously. Locked by mClock to the profile default of 1. Modifying it requires `osd_mclock_override_recovery_settings=true`, which is not recommended as the built-in profiles are optimized based on this value. Leave at default.
 
-Recommendation: leave at default (63) if you want faster migration. Set to `1` if you need to protect client I/O latency:
-```
-ceph config set osd osd_recovery_op_priority 1
-```
+### `osd_snap_trim_sleep` = 0 (already mClock default)
 
-These are optional tuning knobs, not required for the migration itself. Apply them via `kubectl exec` into the rook-ceph-tools pod if desired.
+This was set in Phase 1 but was redundant -- mClock forces all sleep options to 0. No action needed; no revert required.
+
+### `osd_recovery_op_priority` = 63 (default, unchanged)
+
+Controls the scheduling priority of recovery/backfill I/O relative to client I/O. Not modified -- the mClock profile is the correct mechanism to control recovery vs client IOPS balance.
+
+## Post-migration cleanup
+
+After all PGs reach `active+clean`:
+
+- [ ] Revert mClock profile: `ceph config set osd osd_mclock_profile balanced`
+- [ ] Clean up redundant `osd_snap_trim_sleep`: `ceph config rm osd osd_snap_trim_sleep`
+- [ ] Remove orphaned CRUSH rules: `ceph osd crush rule rm <old-rule>`
+- [ ] Restore `osd.11` reweight to 1.0 once data has drained: `ceph osd reweight osd.11 1.0`
+- [ ] Verify cluster health is `HEALTH_OK`
