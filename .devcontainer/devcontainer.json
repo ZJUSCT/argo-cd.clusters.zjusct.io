@@ -2,9 +2,9 @@
 {
   "name": "ZJUSCT K8S Dev Container",
   "image": "harbor.clusters.zjusct.io/library/devcontainer-k8s:latest",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  // "build": {
+  //   "dockerfile": "Dockerfile"
+  // },
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "privileged": true,
