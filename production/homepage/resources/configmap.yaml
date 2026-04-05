@@ -5,101 +5,221 @@ metadata:
   namespace: homepage
   labels:
     app.kubernetes.io/name: homepage
+# configuration guide
+# document: https://gethomepage.dev/configs/
+# icons: https://gethomepage.dev/configs/services/#icons
 data:
   kubernetes.yaml: |
     mode: cluster
-  settings.yaml: ""
-  # settings.yaml: |
-  #   providers:
-  #     longhorn:
-  #       url: https://harbor.clusters.zjusct.io
+  settings.yaml: |
+    title: ZJUSCT Cluster
+    description: 浙江大学超算队集群导航页
+    favicon: https://avatars.githubusercontent.com/ZJUSCT
   custom.css: ""
   custom.js: ""
   bookmarks.yaml: |
     - ZJUSCT:
-        - HomePage:
-            abbr: HP
-            href: https://www.zjusct.io
+        - Document:
+            - href: https://www.zjusct.io
+              icon: mdi-library
         - GitHub:
-            abbr: GH
-            href: https://github.com/zjusct
+            - href: https://github.com/zjusct
+              icon: github
+    - Hosted Servers:
+        - t-jsl-ausa:
+            - href: https://t-jsl-ausa-bmc.s.zjusct.io
+              icon: mdi-server
+        - t-hsb-inspurm6:
+            - href: https://t-hsb-inspurm6-bmc.s.zjusct.io
+              icon: mdi-server
+        - t-hsb-inspurm7:
+            - href: https://t-hsb-inspurm7-bmc.s.zjusct.io
+              icon: mdi-server
+        - t-wzk-siton700:
+            - href: https://t-wzk-siton700-bmc.s.zjusct.io
+              icon: mdi-server
+        - t-wzk-siton701:
+            - href: https://t-wzk-siton701-bmc.s.zjusct.io
+              icon: mdi-server
+        - t-cjh-supermicro:
+            - href: https://t-cjh-supermicro-bmc.s.zjusct.io
+              icon: mdi-server
+        - t-cjh-inspurm6:
+            - href: https://t-cjh-inspurm6-bmc.s.zjusct.io
+              icon: mdi-server
+    - Servers:
+        - storage:
+            - href: https://storage-bmc.s.zjusct.io
+              icon: mdi-server
+        - m600:
+            - href: https://m600-bmc.s.zjusct.io
+              icon: mdi-server
+        - m601:
+            - href: https://m601-bmc.s.zjusct.io
+              icon: mdi-server
+        - m602:
+            - href: https://m602-bmc.s.zjusct.io
+              icon: mdi-server
+        - m603:
+            - href: https://m603-bmc.s.zjusct.io
+              icon: mdi-server
+        - m604:
+            - href: https://m604-bmc.s.zjusct.io
+              icon: mdi-server
+        - m700:
+            - href: https://m700-bmc.s.zjusct.io
+              icon: mdi-server
+        - m701:
+            - href: https://m701-bmc.s.zjusct.io
+              icon: mdi-server
+        - a700:
+            - href: https://a700-bmc.s.zjusct.io
+              icon: mdi-server
+        - m800:
+            - href: https://m800-bmc.s.zjusct.io
+              icon: mdi-server
+        - root:
+            - href: https://root-bmc.s.zjusct.io
+              icon: mdi-server
+    - Mirror:
+        - zjumirror-storage-1:
+            - href: https://zjumirror-storage-1-bmc.s.zjusct.io
+              icon: mdi-server
+        - zjumirror-storage-2:
+            - href: https://zjumirror-storage-2-bmc.s.zjusct.io
+              icon: mdi-server
+        - zjumirror-storage-3:
+            - href: https://zjumirror-storage-3-bmc.s.zjusct.io
+              icon: mdi-server
+        - zjumirror-front-1:
+            - href: https://zjumirror-front-1-bmc.s.zjusct.io
+              icon: mdi-server
+        - zjumirror-front-2:
+            - href: https://zjumirror-front-2-bmc.s.zjusct.io
+              icon: mdi-server
+    - Infrastructure:
+        - ib40:
+            - href: https://ib40.s.zjusct.io
+              icon: mdi-switch
+        - pdu1:
+            - href: https://pdu1.s.zjusct.io
+              icon: mdi-power-plug-battery
+        - pdu2:
+            - href: https://pdu2.s.zjusct.io
+              icon: mdi-power-plug-battery
+        - pdu3:
+            - href: https://pdu3.s.zjusct.io
+              icon: mdi-power-plug-battery
+        - rt:
+            - href: https://rt.s.zjusct.io
+              icon: mdi-router
+        - swc0:
+            - href: https://swc0.s.zjusct.io
+              icon: mdi-switch
+        - swc1:
+            - href: https://swc1.s.zjusct.io
+              icon: mdi-switch
+        - swc2:
+            - href: https://swc2.s.zjusct.io
+              icon: mdi-switch
+        - swc3:
+            - href: https://swc3.s.zjusct.io
+              icon: mdi-switch
+        - swc512:
+            - href: https://swc512.s.zjusct.io
+              icon: mdi-switch
   services.yaml: |
-    - Cluster Management:
-        - Argo CD:
-            href: https://argo-cd.clusters.zjusct.io
-            description: GitOps continuous deployment
-            icon: argocd
-        - Headlamp:
-            href: https://headlamp.clusters.zjusct.io
-            description: Kubernetes dashboard
-            icon: kubernetes
-        - Tekton:
-            href: https://tekton.clusters.zjusct.io
-            description: Kubernetes-native CI/CD
-            icon: tekton
+    - General:
+        - FreeIPA:
+            href: https://ipa-01.clusters.zjusct.io
+            description: Identity and Authentication
+            icon: freeipa
+        - VaultWarden:
+            href: http://key.s.zjusct.io
+            description: Self-hosted password manager
+            icon: vaultwarden
+        - OverLeaf:
+            href: http://latex.s.zjusct.io
+            description: Collaborative LaTeX editor
+            icon: overleaf
+        - LiteLLM:
+            href: https://litellm.s.zjusct.io/ui
+            description: LLM proxy gateway
+            icon: open-router
     - CI/CD:
+        - Argo CD:
+            href: https://argo-cd.s.zjusct.io
+            description: GitOps continuous deployment
+            icon: argo-cd
         - Jenkins:
-            href: https://jenkins.clusters.zjusct.io
+            href: https://jenkins.s.zjusct.io
             description: Continuous integration
             icon: jenkins
+        - Tekton:
+            href: https://tekton.s.zjusct.io
+            description: Kubernetes-native CI/CD
+            icon: si-tekton
     - Storage:
         - Harbor:
-            href: https://harbor.clusters.zjusct.io
+            href: https://harbor.s.zjusct.io
             description: Container image registry
             icon: harbor
         - Rook-Ceph:
-            href: https://ceph.clusters.zjusct.io
+            href: https://ceph.s.zjusct.io
             description: Distributed storage dashboard
             icon: ceph
         - Dragonfly:
-            href: https://dragonfly.clusters.zjusct.io
+            href: https://dragonfly.s.zjusct.io
             description: P2P file distribution
-            icon: dragonfly
+            icon: https://landscape.cncf.io/logos/60b07adb6812ca92688c7a1c33b13001022b0dd73cd3b8e64a415e4f003cde16.svg
     - Monitoring:
+        - Headlamp:
+            href: https://headlamp.s.zjusct.io
+            description: Kubernetes dashboard
+            icon: kubernetes
         - Grafana:
-            href: https://grafana.clusters.zjusct.io
+            href: https://grafana.s.zjusct.io
             description: Metrics visualization
             icon: grafana
         - Prometheus:
-            href: https://prometheus.clusters.zjusct.io
+            href: https://prometheus.s.zjusct.io
             description: Metrics collection
             icon: prometheus
         - Alertmanager:
-            href: https://alertmanager.clusters.zjusct.io
+            href: https://alertmanager.s.zjusct.io
             description: Alert management
-            icon: prometheus
+            icon: alertmanager
         - Hubble:
-            href: https://hubble.clusters.zjusct.io
+            href: https://hubble.s.zjusct.io
             description: Cilium network observability
             icon: cilium
-    - Other:
-        - LiteLLM:
-            href: https://litellm.clusters.zjusct.io
-            description: LLM proxy gateway
-            icon: opensource
         - OpenTelemetry:
-            href: https://otel-http.clusters.zjusct.io
+            href: https://otel-http.s.zjusct.io
             description: Observability collector
-            icon: opentelemetry
+            icon: si-opentelemetry
   widgets.yaml: |
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
     - kubernetes:
         cluster:
           show: true
           cpu: true
           memory: true
-          showLabel: true
-          label: "cluster"
+          showLabel: false
         nodes:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-    - resources:
-        backend: resources
-        expanded: true
-        cpu: true
-        memory: true
-    - search:
-        provider: duckduckgo
-        target: _blank
+          show: false
+    - openmeteo:
+        label: Hangzhou
+        latitude: 30.25
+        longitude: 120.17
+        timezone: Asia/Shanghai
+        units: metric
+        cache: 5
+        format:
+          maximumFractionDigits: 1
+    - greeting:
+        text_size: xl
+        text: ZJUSCT Cluster Homepage
   docker.yaml: ""
