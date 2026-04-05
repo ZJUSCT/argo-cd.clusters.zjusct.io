@@ -32,7 +32,7 @@ source "qemu" "ubuntu" {
   # SSH Configuration
   ssh_username = "root"
   ssh_password = "ubuntu"
-  ssh_timeout  = "1m"
+  ssh_timeout  = "5m"
 
   # Shutdown
   # shutdown_command = "shutdown -P now" # sometimes timeout waiting

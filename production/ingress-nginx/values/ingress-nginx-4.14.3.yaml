@@ -554,7 +554,7 @@ controller:
     # -- List of IP families (e.g. IPv4, IPv6) assigned to the external controller service. This field is usually assigned automatically based on cluster configuration and the `ipFamilyPolicy` field.
     # Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
     ipFamilies:
-    - IPv4
+      - IPv4
     # -- Enable the HTTP listener on both controller services or not.
     enableHttp: true
     # -- Enable the HTTPS listener on both controller services or not.
@@ -643,7 +643,7 @@ controller:
       # -- List of IP families (e.g. IPv4, IPv6) assigned to the internal controller service. This field is usually assigned automatically based on cluster configuration and the `ipFamilyPolicy` field.
       # Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack/#services
       ipFamilies:
-      - IPv4
+        - IPv4
       ports: {}
       # -- Port the internal HTTP listener is published with.
       # Defaults to the value of `controller.service.ports.http`.
@@ -805,7 +805,7 @@ controller:
           type: RuntimeDefault
         capabilities:
           drop:
-          - ALL
+            - ALL
         readOnlyRootFilesystem: true
       resources: {}
       # limits:
@@ -838,7 +838,7 @@ controller:
           type: RuntimeDefault
         capabilities:
           drop:
-          - ALL
+            - ALL
         readOnlyRootFilesystem: true
       resources: {}
       # -- Volume mounts for webhook patch containers
@@ -1021,7 +1021,7 @@ controller:
     preStop:
       exec:
         command:
-        - /wait-shutdown
+          - /wait-shutdown
   priorityClassName: ""
 # -- Rollback limit
 ##

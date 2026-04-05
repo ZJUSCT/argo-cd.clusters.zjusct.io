@@ -10,7 +10,7 @@ fi
 
 COMMIT_HASH="${1:-$(git rev-parse --short HEAD)}"
 
-rm -rf output output-base output-full
+rm -rf output-base output-full
 
 export PACKER_LOG=1
 export PACKER_LOG_PATH="zjusct-base.log"
