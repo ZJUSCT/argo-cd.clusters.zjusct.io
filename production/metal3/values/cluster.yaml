@@ -78,7 +78,7 @@ nodes:
       address: redfish://172.25.3.71
 
   - name: a700
-    mac: "9c:c2:c4:79:da:c2"
+    mac: "9C:C2:C4:55:E3:3E"
     bmc:
       address: redfish://172.25.3.72
 
