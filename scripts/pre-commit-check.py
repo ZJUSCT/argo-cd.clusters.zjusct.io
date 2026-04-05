@@ -3,29 +3,19 @@
 
 import sys
 import subprocess
-import re
-import json
-import urllib.request
-import urllib.error
-import time
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
-from urllib.parse import urlparse
 
-try:
-    import yaml
-except ImportError:
-    print("Error: PyYAML not installed. Install with: pip install pyyaml")
-    sys.exit(1)
+# Allow importing sibling module without package setup
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from version_utils import load_yaml
 
 
 class Checker:
     """Main checker class."""
 
-    def __init__(self, auto_fix: bool = False, update_versions: bool = False):
+    def __init__(self, auto_fix: bool = False):
         self.auto_fix = auto_fix
-        self.update_versions = update_versions
-        self.version_cache: Dict[Tuple[str, str], Optional[str]] = {}
         self.errors: List[str] = []
         self.warnings: List[str] = []
         self.fixes: List[str] = []
@@ -42,20 +32,10 @@ class Checker:
         except FileNotFoundError:
             return 1, "", f"Command not found: {cmd[0]}"
 
-    def load_yaml(self, file_path: Path) -> Optional[Dict]:
-        """Load and parse YAML file."""
-        try:
-            with open(file_path, 'r') as f:
-                return yaml.safe_load(f)
-        except FileNotFoundError:
-            return None
-        except yaml.YAMLError as e:
-            print(f"  Error parsing {file_path}: {e}")
-            return None
-
     def save_yaml(self, file_path: Path, data: Dict) -> bool:
         """Save data to YAML file."""
         try:
+            import yaml
             with open(file_path, 'w') as f:
                 yaml.dump(data, f, default_flow_style=False, sort_keys=False)
             return True
@@ -63,218 +43,9 @@ class Checker:
             print(f"  Error saving {file_path}: {e}")
             return False
 
-    def get_latest_version_http(self, chart_name: str, repo_url: str) -> Optional[str]:
-        """Get latest version from HTTP Helm repository."""
-        try:
-            # Ensure repo_url ends with /
-            if not repo_url.endswith('/'):
-                repo_url += '/'
-
-            index_url = repo_url + 'index.yaml'
-
-            # Create request with User-Agent (some servers require it)
-            req = urllib.request.Request(index_url)
-            req.add_header('User-Agent', 'helm-chart-validator/1.0')
-
-            with urllib.request.urlopen(req, timeout=10) as response:
-                index_data = yaml.safe_load(response.read())
-
-            entries = index_data.get('entries', {})
-            chart_entries = entries.get(chart_name, [])
-
-            if not chart_entries:
-                print(f"chart not found in index")
-                return None
-
-            # Get the first entry (should be the latest)
-            latest = chart_entries[0]
-            return latest.get('version')
-
-        except urllib.error.HTTPError as e:
-            print(f"HTTP {e.code} {e.reason}")
-            print(f"      URL: {index_url}")
-            print(f"      Headers: {dict(e.headers)}")
-            return None
-        except urllib.error.URLError as e:
-            print(f"connection failed: {e.reason}")
-            return None
-        except yaml.YAMLError as e:
-            print(f"YAML parse error: {e}")
-            return None
-        except KeyError as e:
-            print(f"missing key: {e}")
-            return None
-        except Exception as e:
-            print(f"unexpected error: {e}")
-            return None
-
-    def get_oci_auth_token(self, registry: str, repository: str, max_retries: int = 2) -> Tuple[Optional[str], Optional[str]]:
-        """Get authentication token for OCI registry with retries. Returns (token, error)."""
-        # Determine auth service and realm based on registry
-        if 'docker.io' in registry or registry == 'registry-1.docker.io':
-            auth_url = "https://auth.docker.io/token"
-            service = "registry.docker.io"
-            # Docker Hub uses 'library/' prefix for official images
-            if '/' not in repository:
-                repository = f"library/{repository}"
-        else:
-            # Generic OCI registry, try without auth first
-            return None, None
-
-        # Request token with pull scope
-        scope = f"repository:{repository}:pull"
-        token_url = f"{auth_url}?service={service}&scope={scope}"
-
-        last_error = None
-        for attempt in range(max_retries):
-            try:
-                req = urllib.request.Request(token_url)
-                req.add_header('User-Agent', 'helm-chart-validator/1.0')
-
-                with urllib.request.urlopen(req, timeout=20) as response:
-                    data = json.loads(response.read())
-                    token = data.get('token')
-                    if token:
-                        return token, None
-                    else:
-                        return None, "No token in response"
-
-            except urllib.error.URLError as e:
-                last_error = f"network error: {e.reason}"
-                if attempt < max_retries - 1:
-                    time.sleep(1)  # Brief wait before retry
-                    continue
-            except Exception as e:
-                last_error = f"auth error: {e}"
-                if attempt < max_retries - 1:
-                    time.sleep(1)
-                    continue
-
-        return None, last_error
-
-    def get_latest_version_oci(self, chart_name: str, repo_url: str) -> Optional[str]:
-        """Get latest version from OCI Helm repository."""
-        try:
-            # Parse OCI URL: oci://registry.example.com/charts
-            parsed = urlparse(repo_url)
-            if parsed.scheme != 'oci':
-                return None
-
-            # registry.example.com
-            registry = parsed.netloc
-            # /charts -> charts (remove leading and trailing slashes)
-            repository = parsed.path.strip('/')
-
-            # Construct the full image name
-            if repository:
-                image = f"{repository}/{chart_name}"
-            else:
-                image = chart_name
-
-            # Map common registries to their API endpoints
-            if registry == 'registry-1.docker.io' or 'docker.io' in registry:
-                api_registry = 'registry-1.docker.io'
-            else:
-                api_registry = registry
-
-            # For Docker Hub, add 'library/' prefix for official images
-            docker_image = image
-            if api_registry == 'registry-1.docker.io' and '/' not in image:
-                docker_image = f"library/{image}"
-
-            # Try to get auth token
-            token, auth_error = self.get_oci_auth_token(api_registry, docker_image)
-
-            # If auth failed for Docker Hub, we can't proceed (401 will happen)
-            if api_registry == 'registry-1.docker.io' and not token:
-                if auth_error:
-                    print(f"auth failed: {auth_error}")
-                else:
-                    print(f"auth failed: no token")
-                return None
-
-            # Construct tags URL
-            tags_url = f"https://{api_registry}/v2/{docker_image}/tags/list"
-
-            req = urllib.request.Request(tags_url)
-            req.add_header('Accept', 'application/json')
-            req.add_header('User-Agent', 'helm-chart-validator/1.0')
-
-            if token:
-                req.add_header('Authorization', f'Bearer {token}')
-
-            with urllib.request.urlopen(req, timeout=10) as response:
-                data = json.loads(response.read())
-
-            tags = data.get('tags', [])
-            if not tags:
-                print(f"no tags found")
-                return None
-
-            # Filter out non-version tags and sort semantically
-            version_tags = []
-            for tag in tags:
-                # Match semantic versions like 1.2.3, v1.2.3
-                if re.match(r'^v?\d+\.\d+\.\d+', tag):
-                    version_tags.append(tag)
-
-            if not version_tags:
-                print(f"no version tags found")
-                return None
-
-            # Sort versions (simple lexicographic sort for now)
-            # For proper semantic versioning, we'd need to parse and compare
-            version_tags.sort(reverse=True)
-            return version_tags[0]
-
-        except urllib.error.HTTPError as e:
-            print(f"HTTP {e.code} {e.reason}")
-            print(f"      URL: {tags_url if 'tags_url' in locals() else 'N/A'}")
-            if 'docker_image' in locals():
-                print(f"      Image: {docker_image}")
-            return None
-        except urllib.error.URLError as e:
-            print(f"connection failed: {e.reason}")
-            return None
-        except json.JSONDecodeError as e:
-            print(f"JSON parse error: {e}")
-            return None
-        except Exception as e:
-            print(f"unexpected error: {e}")
-            return None
-
-    def get_latest_version(self, chart_name: str, repo_url: str) -> Optional[str]:
-        """Get latest version of a Helm chart from repository."""
-        # Skip version fetching if update_versions is not enabled
-        if not self.update_versions:
-            return None
-
-        cache_key = (chart_name, repo_url)
-        if cache_key in self.version_cache:
-            return self.version_cache[cache_key]
-
-        print(f"    Fetching version for {chart_name}...", end=" ", flush=True)
-
-        version = None
-
-        # Detect repository type
-        if repo_url.startswith('oci://'):
-            version = self.get_latest_version_oci(chart_name, repo_url)
-        elif repo_url.startswith('http://') or repo_url.startswith('https://'):
-            version = self.get_latest_version_http(chart_name, repo_url)
-        else:
-            print("unknown protocol")
-
-        if version:
-            print(f"done ({version})")
-        else:
-            print("failed")
-
-        self.version_cache[cache_key] = version
-        return version
-
     def fix_helm_chart(self, chart: Dict, app_name: str, kustomization_file: Path, kustomization_data: Dict) -> bool:
         """Auto-fix helm chart configuration. Returns True if modified."""
+        import yaml
         modified = False
         name = chart.get("name", "unknown")
         repo = chart.get("repo")
@@ -303,19 +74,6 @@ class Checker:
             chart["includeCRDs"] = True
             self.fixes.append(f"  {app_name}: Chart '{name}' - set includeCRDs: true")
             modified = True
-
-        # Fix version if repo exists but version doesn't
-        if repo and not version:
-            latest = self.get_latest_version(name, repo)
-            if latest:
-                chart["version"] = latest
-                version = latest
-                self.fixes.append(f"  {app_name}: Chart '{name}' - added version: {latest}")
-                modified = True
-            else:
-                self.errors.append(
-                    f"  {app_name}: Chart '{name}' - failed to fetch version"
-                )
 
         # Fix valuesFile - must be values/<name>-<version>.yaml
         if version:
@@ -399,30 +157,6 @@ class Checker:
 
         return not has_error
 
-    def check_version_update(self, chart: Dict, app_name: str) -> None:
-        """Check if a newer version is available."""
-        # Skip version update check if not enabled
-        if not self.update_versions:
-            return
-
-        name = chart.get("name")
-        current_version = chart.get("version")
-        repo = chart.get("repo")
-
-        if not all([name, current_version, repo]):
-            return
-
-        latest = self.get_latest_version(name, repo)
-        if latest and latest != current_version:
-            # Normalize version comparison (remove v prefix)
-            latest_norm = latest.lstrip('v')
-            current_norm = current_version.lstrip('v')
-
-            if latest_norm != current_norm:
-                self.warnings.append(
-                    f"  {app_name}: Chart '{name}' update available: {current_version} -> {latest}"
-                )
-
     def check_kustomize_build(self, app_dir: Path, app_name: str) -> None:
         """Test if kustomize can successfully build the manifests."""
         code, _, stderr = self.run_command(
@@ -442,7 +176,7 @@ class Checker:
         print(f"\n{app_name}")
 
         # Load kustomization.yaml
-        kustomization_data = self.load_yaml(kustomization_file)
+        kustomization_data = load_yaml(kustomization_file)
         if not kustomization_data:
             self.errors.append(f"  {app_name}: Failed to load kustomization.yaml")
             return False
@@ -466,16 +200,8 @@ class Checker:
             if chart_modified:
                 modified = True
 
-            if not self.check_helm_chart_fields(chart, idx, app_name,
-                                                kustomization_file, kustomization_data):
-                continue
-
-            version = chart.get("version")
-            values_file_path = chart.get("valuesFile")
-
-            # Check for updates
-            if version:
-                self.check_version_update(chart, app_name)
+            self.check_helm_chart_fields(chart, idx, app_name,
+                                         kustomization_file, kustomization_data)
 
         # Save kustomization.yaml if modified
         if self.auto_fix and modified:
@@ -581,12 +307,7 @@ def main():
     parser.add_argument(
         "--fix",
         action="store_true",
-        help="Automatically fix issues (add missing fields, fetch versions)"
-    )
-    parser.add_argument(
-        "--update",
-        action="store_true",
-        help="Check for helm chart version updates (fetches latest versions from repositories)"
+        help="Automatically fix issues (add missing fields)"
     )
     parser.add_argument(
         "files",
@@ -596,7 +317,7 @@ def main():
     args = parser.parse_args()
 
     repo_root = get_git_root()
-    checker = Checker(auto_fix=args.fix, update_versions=args.update)
+    checker = Checker(auto_fix=args.fix)
     return checker.run_checks(repo_root, files=args.files)
 
 

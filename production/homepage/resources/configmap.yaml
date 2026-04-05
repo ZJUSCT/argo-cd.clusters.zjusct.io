@@ -139,7 +139,8 @@ data:
             description: Self-hosted password manager
             icon: vaultwarden
         - OverLeaf:
-            href: http://latex.s.zjusct.io
+            # href: http://latex.s.zjusct.io
+            href: http://latex.zjusct.io
             description: Collaborative LaTeX editor
             icon: overleaf
         - LiteLLM:
@@ -151,10 +152,10 @@ data:
             href: https://argo-cd.s.zjusct.io
             description: GitOps continuous deployment
             icon: argo-cd
-        - Jenkins:
-            href: https://jenkins.s.zjusct.io
-            description: Continuous integration
-            icon: jenkins
+        # - Jenkins:
+        #     href: https://jenkins.s.zjusct.io
+        #     description: Continuous integration
+        #     icon: jenkins
         - Tekton:
             href: https://tekton.s.zjusct.io
             description: Kubernetes-native CI/CD

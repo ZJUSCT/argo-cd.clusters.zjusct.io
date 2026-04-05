@@ -141,8 +141,19 @@ pre-commit 将对本节前述内容进行检查，步骤如下：
     valuesFile: values/<name>-<version>.yaml
     ```
 
-- 检查 Helm Chart 是否有新版本，若有则提示更新。
 - 本地构建 Kustomize 确保能成功渲染。
+
+### 版本检查
+
+运行 `scripts/check-versions.py` 可检查 Helm Chart 和容器镜像的可用更新：
+
+```bash
+python3 scripts/check-versions.py           # 检查全部
+python3 scripts/check-versions.py --helm    # 仅检查 Helm Chart
+python3 scripts/check-versions.py --images  # 仅检查容器镜像
+```
+
+该脚本仅做查询，不会修改任何文件。
 
 ## K8S 集群现状和部署指南
 
