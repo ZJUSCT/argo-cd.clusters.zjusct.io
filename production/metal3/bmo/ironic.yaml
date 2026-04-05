@@ -6,7 +6,7 @@ metadata:
   namespace: baremetal-operator-system
 spec:
   deployRamdisk:
-    disableDownloader: true
+    disableDownloader: false
   networking:
     dhcp:
       rangeBegin: "172.25.4.100"
