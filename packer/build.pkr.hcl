@@ -3,11 +3,16 @@ build {
   source "source.qemu.ubuntu" {
     disk_size = "30G"
 
-    iso_url      = "debian-13-generic-amd64.qcow2"
-    iso_checksum = "file:SHA512SUMS"
+    # # local
+    # iso_url      = "debian-13-generic-amd64.qcow2"
+    # iso_checksum = "file:SHA512SUMS"
+    # # remote
+    # iso_url = "https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
+    # iso_checksum = "file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS"
 
-    #iso_url = "https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
-    #iso_checksum = "file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS"
+    # pipeline
+    iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/upstream/debian-13-generic-amd64.qcow2"
+    iso_checksum = "file:http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/upstream/SHA512SUMS"
 
     # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
     cd_files = ["base/user-data", "base/meta-data"]
