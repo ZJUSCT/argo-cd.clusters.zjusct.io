@@ -150,6 +150,8 @@ apt-get update -y
 
 install_pkg_from_github "open-telemetry/opentelemetry-collector-releases" "otelcol-contrib_*_linux_amd64.deb"
 
+systemctl enable otelcol-contrib.service
+
 ########################################################################
 # K8S
 ########################################################################

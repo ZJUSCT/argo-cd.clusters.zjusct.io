@@ -23,7 +23,7 @@ for disk in /dev/sd[a-z] /dev/sd[a-z][a-z]; do
         setfacl -m g:zjusct:rwx "$mount_point"         # 当前权限
         setfacl -d -m g:zjusct:rwx "$mount_point"      # 默认 ACL
 
-        ((sata_count++))
+        sata_count=$((sata_count + 1))
     fi
 done
 
@@ -41,6 +41,6 @@ for disk in /dev/nvme*n1; do
         setfacl -m g:zjusct:rwx "$mount_point"         # 当前权限
         setfacl -d -m g:zjusct:rwx "$mount_point"      # 默认 ACL
 
-        ((nvme_count++))
+        nvme_count=$((nvme_count + 1))
     fi
 done

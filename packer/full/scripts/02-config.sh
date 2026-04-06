@@ -19,8 +19,6 @@ install -D -m 0755 -o root -g root /tmp/rootfs/etc/update-motd.d/00-nice-motd /e
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/motd /etc/motd
 
 # systemd overrides
-install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/docker.socket.d/override.conf /etc/systemd/system/docker.socket.d/override.conf
-install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/sssd.service.d/override.conf /etc/systemd/system/sssd.service.d/override.conf
 install -D -m 0644 -o root -g root /tmp/rootfs/etc/systemd/system/otelcol-contrib.service.d/override.conf /etc/systemd/system/otelcol-contrib.service.d/override.conf
 
 # otelcol-contrib
@@ -61,5 +59,7 @@ systemctl disable --now \
 # Domain Control
 ########################################################################
 
-# use FreeIPA group
-groupdel docker
+# Keep local docker group with same GID as FreeIPA group for boot-time fallback
+# SocketGroup=docker in docker.socket needs the group to exist before SSSD is online
+# SSSD provides group membership; local group provides the GID
+groupmod -g 1109200066 docker

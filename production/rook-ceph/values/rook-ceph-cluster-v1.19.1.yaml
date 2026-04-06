@@ -46,7 +46,6 @@ configOverride: |
 
   [mon]
   mon_osd_prime_pg_temp = false
-  mon_osdmap_full_prune_enabled = false
 
 # configOverride: |
 #   [global]
