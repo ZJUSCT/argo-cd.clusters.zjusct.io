@@ -38,17 +38,17 @@
 ```go
 func (c *Cluster) Start() error {
     // ... 现有代码 ...
-    
+
     // 1. 首先创建所有缺失的 MDS deployment（不检查 ok-to-stop）
     for i := 0; i < int(replicas); i++ {
         mdsDaemonName := k8sutil.IndexToName(i)
-        
+
         // 检查 deployment 是否存在
         deploymentExists, err := c.checkDeploymentExists(mdsDaemonName)
         if err != nil {
             return err
         }
-        
+
         if !deploymentExists {
             // 缺失的 deployment，直接创建，不检查 ok-to-stop
             _, err := c.createDeploymentWithoutUpgradeCheck(mdsDaemonName)
@@ -57,16 +57,16 @@ func (c *Cluster) Start() error {
             }
         }
     }
-    
+
     // 2. 然后更新现有的 MDS deployment（正常检查 ok-to-stop）
     for i := 0; i < int(replicas); i++ {
         mdsDaemonName := k8sutil.IndexToName(i)
-        
+
         deployment, err := c.startDeployment(...)
         // 这里会正常执行 ok-to-stop 检查
         ...
     }
-    
+
     return nil
 }
 ```
@@ -91,7 +91,7 @@ func (c *Cluster) Start() error {
    ```go
    type MetadataServerSpec struct {
        // ... 现有字段 ...
-       
+
        // ForceUpdate 表示强制更新 MDS，不检查 ok-to-stop
        // +optional
        ForceUpdate bool `json:"forceUpdate,omitempty"`
@@ -124,7 +124,7 @@ func (c *Cluster) Start() error {
    ```bash
    # 找到 MDS deployment
    kubectl get deployment -n rook-ceph -l app=rook-ceph-mds
-   
+
    # 编辑 deployment，移除 resource limits
    kubectl edit deployment -n rook-ceph <mds-deployment-name>
    ```

@@ -89,7 +89,7 @@ fi
 ```go
 func (c *Cluster) getOSDInfo(d *appsv1.Deployment) (OSDInfo, error) {
     // ... 现有代码 ...
-    
+
     // 添加设备路径验证
     if osd.BlockPath != "" && osd.ID != 0 {
         correctPath, err := c.verifyDevicePath(osd.ID, osd.BlockPath)
@@ -102,7 +102,7 @@ func (c *Cluster) getOSDInfo(d *appsv1.Deployment) (OSDInfo, error) {
             osd.BlockPath = correctPath
         }
     }
-    
+
     // ... 现有代码 ...
 }
 

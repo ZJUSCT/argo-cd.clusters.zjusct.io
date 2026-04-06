@@ -1,7 +1,7 @@
 # Rook Ceph OSD ID 识别错误问题分析报告
 
-**作者**: Qwen-Coder  
-**日期**: 2026-03-04  
+**作者**: Qwen-Coder
+**日期**: 2026-03-04
 **问题**: OSD ID 与设备绑定错误导致 OSD 13 无法启动
 
 ---
@@ -153,7 +153,7 @@ func (c *Cluster) getOSDInfo(d *appsv1.Deployment) (OSDInfo, error) {
         }
         // ...
     }
-    
+
     // 7.6 的 fallback 逻辑：如果非 PVC 且 BlockPath 为空，从 init container 读取
     if !isPVC && osd.BlockPath == "" {
         osd.BlockPath, err = getBlockPathFromActivateInitContainer(d)
@@ -257,9 +257,9 @@ if err != nil {
 // 【新增】验证 BlockPath 是否正确
 // 通过 ceph-volume raw list 验证设备上的 OSD ID 是否匹配
 if err := c.cluster.validateOSDDevice(osdInfo.ID, osdInfo.BlockPath); err != nil {
-    log.NamespacedWarning(c.cluster.clusterInfo.Namespace, logger, 
+    log.NamespacedWarning(c.cluster.clusterInfo.Namespace, logger,
         "OSD %d device path validation failed: %v. Re-fetching OSD info from ConfigMap.", osdInfo.ID, err)
-    
+
     // 从 ConfigMap 重新读取 OSD 信息
     refreshedOSDInfo, err := c.cluster.getOSDInfoFromConfigMap(osdInfo.NodeName)
     if err != nil {
@@ -281,14 +281,14 @@ c.osdDesiredState[osdID] = &osdInfo
 ```go
 func (c *Cluster) getOSDInfo(d *appsv1.Deployment) (OSDInfo, error) {
     // ... 现有代码 ...
-    
+
     for _, envVar := range container.Env {
         if envVar.Name == "ROOK_BLOCK_PATH" || envVar.Name == "ROOK_LV_PATH" {
             osd.BlockPath = envVar.Value
         }
         // ...
     }
-    
+
     // 【新增】验证 BlockPath 和 OSD UUID 的一致性
     // 执行 ceph-volume raw list <BlockPath> 检查返回的 osd_uuid 是否匹配
     if osd.BlockPath != "" && osd.UUID != "" {
@@ -299,12 +299,12 @@ func (c *Cluster) getOSDInfo(d *appsv1.Deployment) (OSDInfo, error) {
         } else if actualUUID != osd.UUID {
             log.NamespacedError(c.clusterInfo.Namespace, logger,
                 "OSD %d: UUID mismatch! BlockPath=%q has UUID=%s, expected %s. "+
-                "This may cause OSD activation failure.", 
+                "This may cause OSD activation failure.",
                 osd.ID, osd.BlockPath, actualUUID, osd.UUID)
             // 可以选择返回错误或记录告警
         }
     }
-    
+
     return osd, nil
 }
 ```

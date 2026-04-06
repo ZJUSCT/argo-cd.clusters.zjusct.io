@@ -119,6 +119,6 @@ sys.exit('no disk found with OSD ID $OSD_ID')
 
 ---
 
-**报告生成时间**：2026-03-04  
-**分析工具**：Doubao Seed 2.0 Code  
+**报告生成时间**：2026-03-04
+**分析工具**：Doubao Seed 2.0 Code
 **Co-authored-by**：Doubao Seed 2.0 Code <noreply@doubao.com>
