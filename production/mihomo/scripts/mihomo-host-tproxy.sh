@@ -53,7 +53,7 @@ require_cmd nft
 rule_present() {
     local mark_hex
     printf -v mark_hex '%x' "$MIHOMO_TPROXY_FWMARK"
-    ip -4 rule show | grep -Eq "fwmark 0x${mark_hex} .* lookup ${MIHOMO_TPROXY_TABLE}"
+    ip -4 rule show | grep -Eq "fwmark 0x${mark_hex}(/0x[0-9a-f]+)? lookup ${MIHOMO_TPROXY_TABLE}($| )"
 }
 
 apply_nft() {
@@ -72,12 +72,6 @@ table inet ${MIHOMO_NFT_TABLE} {
         type filter hook prerouting priority mangle; policy accept;
         ct direction reply counter return
         meta l4proto { tcp, udp } ip daddr @fake_ip_v4 meta mark set ${MIHOMO_TPROXY_FWMARK} tproxy ip to ${MIHOMO_TPROXY_VIP}:${MIHOMO_TPROXY_PORT} counter accept
-    }
-
-    chain output_tproxy {
-        type route hook output priority mangle; policy accept;
-        ct direction reply counter return
-        meta l4proto { tcp, udp } ip daddr @fake_ip_v4 meta mark set ${MIHOMO_TPROXY_FWMARK} counter accept
     }
 }
 EOF
