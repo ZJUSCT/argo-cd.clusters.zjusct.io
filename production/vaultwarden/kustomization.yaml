@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: vaultwarden
+resources:
+  - resources/namespace.yaml
+  - resources/httproute.yaml
+
+helmCharts:
+  - name: vaultwarden
+    repo: https://guerzon.github.io/vaultwarden
+    includeCRDs: true
+    releaseName: vaultwarden
+    version: 0.35.1
+    namespace: vaultwarden
+    valuesFile: values/vaultwarden-0.35.1.yaml
+
+transformers:
+  - ../../image-prefix.yaml
