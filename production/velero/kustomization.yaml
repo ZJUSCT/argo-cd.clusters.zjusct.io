@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: velero
+resources:
+  - resources/namespace.yaml
+
+helmCharts:
+  - name: velero
+    repo: https://vmware-tanzu.github.io/helm-charts
+    includeCRDs: true
+    releaseName: velero
+    version: 12.0.0
+    namespace: velero
+    valuesFile: values/velero-12.0.0.yaml
+images:
+  - name: velero/velero
+    newName: docker.io/velero/velero
+  - name: velero/velero-plugin-for-aws
+    newName: docker.io/velero/velero-plugin-for-aws
+transformers:
+  - ../../image-prefix.yaml
