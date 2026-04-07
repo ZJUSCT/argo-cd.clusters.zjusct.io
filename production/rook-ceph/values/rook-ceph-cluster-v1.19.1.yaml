@@ -19,8 +19,6 @@ configOverride: |
   osd_pool_default_size = 2
   osd_pool_default_min_size = 1
   auth_allow_insecure_global_id_reclaim = false
-  mds_session_blocklist_on_timeout = false
-  mds_session_blocklist_on_evict = false
 
   [osd]
   # mClock QoS profile -- prioritize recovery during migration
@@ -46,6 +44,17 @@ configOverride: |
 
   [mon]
   mon_osd_prime_pg_temp = false
+
+  [mds]
+  mds_session_blocklist_on_timeout = false
+  mds_session_blocklist_on_evict = false
+  # Purge queue: remove hard cap, raise per-PG and file limits
+  mds_max_purge_ops = 0
+  mds_max_purge_ops_per_pg = 64
+  mds_max_purge_files = 256
+  # Journal: fewer rotations under bursty workloads
+  mds_log_max_events = 131072
+  mds_log_max_segments = 2048
 
 # configOverride: |
 #   [global]
