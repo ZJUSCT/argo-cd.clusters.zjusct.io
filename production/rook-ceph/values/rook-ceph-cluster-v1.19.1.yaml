@@ -790,7 +790,7 @@ cephFileSystems:
             size: 2
           parameters:
             pg_autoscale_mode: "on"
-            pg_num_min: "32"
+            pg_num_min: "256"
         - name: cephfs-nvme-data
           failureDomain: osd
           deviceClass: nvme
