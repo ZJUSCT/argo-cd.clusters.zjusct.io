@@ -16,3 +16,11 @@ helmCharts:
 
 transformers:
   - ../../image-prefix.yaml
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: vaultwarden
+    patch: |-
+      - op: remove
+        path: /data/DOMAIN
