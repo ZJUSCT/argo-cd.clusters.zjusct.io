@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: overleaf
+
+resources:
+  - resources/namespace.yaml
+  - resources/httproute.yaml
+  - resources/configmap.yaml
+  - resources/overleaf-sealedsecret.yaml
+  - resources/overleaf-deployment.yaml
+
+helmCharts:
+  - name: mongodb
+    repo: https://charts.bitnami.com/bitnami
+    version: 13.18.5
+    releaseName: overleaf-mongodb
+    namespace: overleaf
+    valuesFile: values/mongodb-13.18.5.yaml
+  - name: redis
+    repo: https://charts.bitnami.com/bitnami
+    version: 25.3.7
+    releaseName: overleaf-redis
+    namespace: overleaf
+    valuesFile: values/redis-25.3.7.yaml
+
+transformers:
+  - ../../image-prefix.yaml

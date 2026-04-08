@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: overleaf
+  labels:
+    app.kubernetes.io/name: overleaf
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway
+  hostnames:
+    - latex.clusters.zjusct.io
+    - latex.s.zjusct.io
+  rules:
+    - backendRefs:
+        - name: overleaf
+          port: 80

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: overleaf
+data:
+  OVERLEAF_APP_NAME: "Overleaf Community Edition"
+  OVERLEAF_NAV_TITLE: "Overleaf @ ZJUSCT"
+  OVERLEAF_SITE_URL: "https://latex.clusters.zjusct.io"
+  OVERLEAF_IS_SERVER_PRO: "false"
+  OVERLEAF_MONGO_URL: "mongodb://overleaf-mongodb-0.overleaf-mongodb-headless.overleaf.svc.cluster.local:27017/sharelatex?replicaSet=overleaf"
+  OVERLEAF_REDIS_HOST: "overleaf-redis-master"
+  REDIS_HOST: "overleaf-redis-master"
+  OVERLEAF_REDIS_PORT: "6379"
+  REDIS_PORT: "6379"
+  OVERLEAF_BEHIND_PROXY: "true"
+  OVERLEAF_SECURE_COOKIE: "true"
+  OVERLEAF_TRUSTED_PROXY_IPS: "loopback,10.0.0.0/8"
+  OVERLEAF_EMAIL_FROM_ADDRESS: "mail@zjusct.io"
+  OVERLEAF_EMAIL_SMTP_HOST: "smtppro.zoho.com"
+  OVERLEAF_EMAIL_SMTP_PORT: "465"
+  OVERLEAF_EMAIL_SMTP_SECURE: "true"
+  OVERLEAF_EMAIL_SMTP_USER: "mail@zjusct.io"
+  GIT_BRIDGE_ENABLED: "false"
+  V1_HISTORY_URL: "http://localhost:3100/api"
+  ENABLED_LINKED_FILE_TYPES: "project_file,project_output_file"
+  ENABLE_CONVERSIONS: "true"
+  EMAIL_CONFIRMATION_DISABLED: "true"
+  LOG_LEVEL: "info"
+  NODE_ENV: "production"
+  # Required by community fork's settings.js even when sandboxed compiles are disabled
+  ALL_TEX_LIVE_DOCKER_IMAGES: "ghcr.io/mrhaoxx/sharelatex-base:2024.1"
+  ALL_TEX_LIVE_DOCKER_IMAGE_NAMES: "TeX Live 2024"
+  TEX_LIVE_DOCKER_IMAGE: "ghcr.io/mrhaoxx/sharelatex-base:2024.1"

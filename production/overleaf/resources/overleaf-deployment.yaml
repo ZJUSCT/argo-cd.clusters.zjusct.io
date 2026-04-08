@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overleaf
+  labels:
+    app.kubernetes.io/name: overleaf
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: overleaf
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: overleaf
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: overleaf
+          image: ghcr.io/mrhaoxx/sharelatex:main
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: overleaf
+            - secretRef:
+                name: overleaf-secret
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - |
+                    for i in $(seq 1 30); do
+                      [ -f /etc/nginx/sites-enabled/overleaf.conf ] && break
+                      sleep 1
+                    done
+                    if ! grep -q 'X-Forwarded-Proto' /etc/nginx/sites-enabled/overleaf.conf; then
+                      sed -i 's|proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;|proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\t\tproxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;|' /etc/nginx/sites-enabled/overleaf.conf
+                      sv restart nginx
+                    fi
+          volumeMounts:
+            - name: overleaf-data
+              mountPath: /var/lib/overleaf
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+      volumes:
+        - name: overleaf-data
+          persistentVolumeClaim:
+            claimName: overleaf-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: overleaf
+  labels:
+    app.kubernetes.io/name: overleaf
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app.kubernetes.io/name: overleaf
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: overleaf-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 10Gi
