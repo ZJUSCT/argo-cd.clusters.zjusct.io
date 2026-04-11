@@ -159,6 +159,12 @@ proxy_config:
         api_base: https://opencode.ai/zen/go/v1
         api_key: os.environ/PLAN_OPENCODE_API_KEY
         custom_llm_provider: hosted_vllm
+    - model_name: plan/opencode-go/glm-5.1/openai
+      litellm_params:
+        model: glm-5.1
+        api_base: https://opencode.ai/zen/go/v1
+        api_key: os.environ/PLAN_OPENCODE_API_KEY
+        custom_llm_provider: hosted_vllm
     - model_name: plan/opencode-go/kimi-k2.5/openai
       litellm_params:
         model: kimi-k2.5
