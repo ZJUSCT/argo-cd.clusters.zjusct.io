@@ -332,18 +332,24 @@ proxy_config:
         api_base: https://api.duckcoding.ai
         api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
         custom_llm_provider: anthropic
+        extra_headers:
+          User-Agent: "claude-code/0.1.0"
     - model_name: api/duckcoding/claude-sonnet-4-6
       litellm_params:
         model: claude-sonnet-4-6
         api_base: https://api.duckcoding.ai
         api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
         custom_llm_provider: anthropic
+        extra_headers:
+          User-Agent: "claude-code/0.1.0"
     - model_name: api/duckcoding/claude-haiku-4-5-20251001
       litellm_params:
         model: claude-haiku-4-5-20251001
         api_base: https://api.duckcoding.ai
         api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
         custom_llm_provider: anthropic
+        extra_headers:
+          User-Agent: "claude-code/0.1.0"
     - model_name: api/duckcoding/gpt-5.3-codex
       litellm_params:
         model: gpt-5.3-codex
