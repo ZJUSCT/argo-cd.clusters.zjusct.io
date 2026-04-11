@@ -369,6 +369,14 @@ proxy_config:
         api_key: os.environ/API_DUCKCODING_GEMINI_API_KEY
         custom_llm_provider: openai
 
+    ####################################################################
+    # Openrouter
+    ####################################################################
+    - model_name: api/openrouter/auto
+      litellm_params:
+        model: openrouter/openrouter/auto
+        api_key: os.environ/API_OPENROUTER_API_KEY
+
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
     store_model_in_db: true
