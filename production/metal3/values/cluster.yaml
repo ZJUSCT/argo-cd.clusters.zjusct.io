@@ -56,17 +56,10 @@ nodes:
       address: redfish://172.25.3.65
     bootMode: legacy
 
-  # Inspection-only nodes
   - name: atlas800
     mac: "B0:EC:DD:D1:97:F4"
     bmc:
       address: redfish://172.25.3.66
-    image:
-      enabled: false
-    rootDeviceHints:
-      enabled: false
-    userData:
-      enabled: false
 
   - name: m700
     mac: "9C:C2:C4:55:E3:92"
