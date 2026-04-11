@@ -69,31 +69,31 @@ spec:
   rootDeviceHints:
     {{- $rootDeviceConfig := .rootDeviceHints | default dict }}
     {{- $globalRootDevice := $.Values.default.rootDeviceHints }}
-    {{- with $rootDeviceConfig.deviceName | default $globalRootDevice.deviceName }}
+    {{- with (hasKey $rootDeviceConfig "deviceName" | ternary $rootDeviceConfig.deviceName $globalRootDevice.deviceName) }}
     deviceName: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.hctl | default $globalRootDevice.hctl }}
+    {{- with (hasKey $rootDeviceConfig "hctl" | ternary $rootDeviceConfig.hctl $globalRootDevice.hctl) }}
     hctl: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.model | default $globalRootDevice.model }}
+    {{- with (hasKey $rootDeviceConfig "model" | ternary $rootDeviceConfig.model $globalRootDevice.model) }}
     model: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.vendor | default $globalRootDevice.vendor }}
+    {{- with (hasKey $rootDeviceConfig "vendor" | ternary $rootDeviceConfig.vendor $globalRootDevice.vendor) }}
     vendor: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.serialNumber | default $globalRootDevice.serialNumber }}
+    {{- with (hasKey $rootDeviceConfig "serialNumber" | ternary $rootDeviceConfig.serialNumber $globalRootDevice.serialNumber) }}
     serialNumber: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.minSizeGigabytes | default $globalRootDevice.minSizeGigabytes }}
+    {{- with (hasKey $rootDeviceConfig "minSizeGigabytes" | ternary $rootDeviceConfig.minSizeGigabytes $globalRootDevice.minSizeGigabytes) }}
     minSizeGigabytes: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.wwn | default $globalRootDevice.wwn }}
+    {{- with (hasKey $rootDeviceConfig "wwn" | ternary $rootDeviceConfig.wwn $globalRootDevice.wwn) }}
     wwn: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.wwnWithExtension | default $globalRootDevice.wwnWithExtension }}
+    {{- with (hasKey $rootDeviceConfig "wwnWithExtension" | ternary $rootDeviceConfig.wwnWithExtension $globalRootDevice.wwnWithExtension) }}
     wwnWithExtension: {{ . }}
     {{- end }}
-    {{- with $rootDeviceConfig.wwnVendorExtension | default $globalRootDevice.wwnVendorExtension }}
+    {{- with (hasKey $rootDeviceConfig "wwnVendorExtension" | ternary $rootDeviceConfig.wwnVendorExtension $globalRootDevice.wwnVendorExtension) }}
     wwnVendorExtension: {{ . }}
     {{- end }}
     {{- if hasKey $rootDeviceConfig "rotational" }}
