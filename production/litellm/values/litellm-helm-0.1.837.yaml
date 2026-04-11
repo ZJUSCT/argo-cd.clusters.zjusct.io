@@ -323,6 +323,46 @@ proxy_config:
         api_key: os.environ/PLAN_ZHIPU_API_KEY
         custom_llm_provider: anthropic
 
+    ####################################################################
+    # Duckcoding
+    ####################################################################
+    - model_name: api/duckcoding/claude-opus-4-6
+      litellm_params:
+        model: claude-opus-4-6
+        api_base: https://api.duckcoding.ai
+        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: api/duckcoding/claude-sonnet-4-6
+      litellm_params:
+        model: claude-sonnet-4-6
+        api_base: https://api.duckcoding.ai
+        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: api/duckcoding/claude-haiku-4-5-20251001
+      litellm_params:
+        model: claude-haiku-4-5-20251001
+        api_base: https://api.duckcoding.ai
+        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
+        custom_llm_provider: anthropic
+    - model_name: api/duckcoding/gpt-5.3-codex
+      litellm_params:
+        model: gpt-5.3-codex
+        api_base: https://api.duckcoding.ai/v1
+        api_key: os.environ/API_DUCKCODING_CODEX_API_KEY
+        custom_llm_provider: openai
+    - model_name: api/duckcoding/gpt-5.4
+      litellm_params:
+        model: gpt-5.4
+        api_base: https://api.duckcoding.ai/v1
+        api_key: os.environ/API_DUCKCODING_CODEX_API_KEY
+        custom_llm_provider: openai
+    - model_name: api/duckcoding/gemini-3.1-pro
+      litellm_params:
+        model: gemini-3.1-pro-preview
+        api_base: https://api.duckcoding.ai/v1
+        api_key: os.environ/API_DUCKCODING_GEMINI_API_KEY
+        custom_llm_provider: openai
+
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
     store_model_in_db: true
