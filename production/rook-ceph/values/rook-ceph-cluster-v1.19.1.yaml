@@ -532,6 +532,12 @@ cephClusterSpec:
               metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part4
               databaseSizeMB: "51200"
 
+          - name: /dev/disk/by-id/ata-ST2000DM001-1CH164_Z1F3HVJV
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part3
+              databaseSizeMB: "51200"
+
           - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG108600VR960CGN
             config:
               deviceClass: ssd
