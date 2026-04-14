@@ -8,6 +8,9 @@ spec:
   - group: gateway.networking.k8s.io
     kind: HTTPRoute
     name: litellm
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: litellm-clusters-zju-edu-cn
   timeout:
     http:
       requestTimeout: 0s
