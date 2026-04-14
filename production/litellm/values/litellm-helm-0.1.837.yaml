@@ -324,6 +324,96 @@ proxy_config:
         custom_llm_provider: anthropic
 
     ####################################################################
+    # 智谱华章 - GLM - pro (Key 2)  presented by Rorineko
+    ####################################################################
+    # OpenAI API
+    - model_name: plan/zhipu/glm-4.5/openai
+      litellm_params:
+        model: glm-4.5
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: hosted_vllm
+    - model_name: plan/zhipu/glm-4.5-air/openai
+      litellm_params:
+        model: glm-4.5-air
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: hosted_vllm
+    - model_name: plan/zhipu/glm-4.6/openai
+      litellm_params:
+        model: glm-4.6
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: hosted_vllm
+    - model_name: plan/zhipu/glm-4.7/openai
+      litellm_params:
+        model: glm-4.7
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: hosted_vllm
+    - model_name: plan/zhipu/glm-5/openai
+      litellm_params:
+        model: glm-5
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: hosted_vllm
+    - model_name: plan/zhipu/glm-5-turbo/openai
+      litellm_params:
+        model: glm-5-turbo
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: hosted_vllm
+    - model_name: plan/zhipu/glm-5.1/openai
+      litellm_params:
+        model: glm-5.1
+        api_base: https://open.bigmodel.cn/api/coding/paas/v4
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: hosted_vllm
+    # Anthropic API
+    - model_name: plan/zhipu/glm-4.5/anthropic
+      litellm_params:
+        model: glm-4.5
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: anthropic
+    - model_name: plan/zhipu/glm-4.5-air/anthropic
+      litellm_params:
+        model: glm-4.5-air
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: anthropic
+    - model_name: plan/zhipu/glm-4.6/anthropic
+      litellm_params:
+        model: glm-4.6
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: anthropic
+    - model_name: plan/zhipu/glm-4.7/anthropic
+      litellm_params:
+        model: glm-4.7
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: anthropic
+    - model_name: plan/zhipu/glm-5/anthropic
+      litellm_params:
+        model: glm-5
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: anthropic
+    - model_name: plan/zhipu/glm-5-turbo/anthropic
+      litellm_params:
+        model: glm-5-turbo
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: anthropic
+    - model_name: plan/zhipu/glm-5.1/anthropic
+      litellm_params:
+        model: glm-5.1
+        api_base: https://open.bigmodel.cn/api/anthropic
+        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+        custom_llm_provider: anthropic
+
+    ####################################################################
     # Duckcoding
     ####################################################################
     - model_name: api/duckcoding/claude-opus-4-6
@@ -376,6 +466,28 @@ proxy_config:
       litellm_params:
         model: openrouter/openrouter/auto
         api_key: os.environ/API_OPENROUTER_API_KEY
+
+  router_settings:
+    # Options: simple-shuffle (random, default), latency-based-routing, usage-based-routing (perf impact), least-busy, cost-based-routing
+    routing_strategy: simple-shuffle
+
+    # Failure tolerance
+    allowed_fails: 3          # Max failures per minute before deployment enters cooldown
+    cooldown_time: 30         # Cooldown duration in seconds
+    disable_cooldowns: false  # Set true to disable cooldown mechanism
+
+    # Retries
+    num_retries: 2            # Retry count on failure (tries different deployments)
+    retry_after: 0            # Min seconds to wait before retrying
+
+    # Concurrency
+    default_max_parallel_requests: null  # Max concurrent requests per deployment, null for unlimited
+
+    # Pre-call checks
+    enable_pre_call_check: false  # Filter deployments by context window and region before calling
+
+    # Cache
+    cache_responses: false
 
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
