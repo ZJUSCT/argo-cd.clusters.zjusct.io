@@ -4,11 +4,9 @@ namespace: litellm
 resources:
 - resources/namespace.yaml
 - resources/httproute.yaml
-- resources/httproute-clusters-zju-edu-cn.yaml
 - resources/sealedsecret-masterkey.yaml
 - resources/sealedsecret-api-keys.yaml
 - resources/configmap-api-debug-env.yaml
-- resources/backendtrafficpolicy.yaml
 
 helmCharts:
 - name: litellm-helm
