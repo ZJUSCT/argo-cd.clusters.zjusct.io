@@ -1809,6 +1809,9 @@ mysql:
     service:
       # -- Mysql port.
       port: 3306
+    startupProbe:
+      enabled: true
+      failureThreshold: 60
 
 externalMysql:
   # -- Running GORM migration.
