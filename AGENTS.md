@@ -134,11 +134,10 @@ feat(agent): update helm chart for nginx ingress
     - 一次会话仅迁移一个命名空间下的服务，不要同时对多个服务进行升级，以免出现混乱。
 2. 进行配置文件迁移：
     - Helm Chart：
-        1. 生成旧版本上游默认值 `charts/<chart>-<version>/<chart>/values.yaml` 与当前仓库中的 `values/<chart>-<version>.yaml` 的 Diff 文件。这个 Diff 文件表示“我们相对上游做了哪些定制”，后续迁移必须以它为依据，而不是凭感觉修改。
+        1. 生成旧版本上游默认值 `charts/<chart>-<version>/<chart>/values.yaml` 与当前仓库中的 `values/<chart>-<version>.yaml` 的 Diff 文件。这个 Diff 文件表示“我们相对上游做了哪些定制”，后续迁移必须以它为依据。
         2. 修改 `kustomization.yaml` 中的 Chart 版本，执行 `kubectl kustomize --enable-helm --load-restrictor=LoadRestrictionsNone`，令 Kustomize 自动拉取新版本 Chart。然后将新版本 Chart 自带的默认值文件 `charts/<chart>-<new_version>/<chart>/values.yaml` 复制为 `values/<chart>-<new_version>.yaml`，作为迁移起点。
         3. 基于第 1 步得到的 Diff，逐项、手工地将旧定制迁移到新的 `values/<chart>-<new_version>.yaml` 中。核心目标是保持与新上游默认值之间的 Diff **尽可能小且清晰**，使后续审阅者能够一眼看出“哪些行是我们有意修改的”。
             - 禁止直接复制旧的 `values/<chart>-<version>.yaml` 覆盖新文件，这会把上游新增字段、注释、格式调整、默认值写法一并抹掉，导致 Diff 噪音很大。
-            - 禁止为了“结果等价”而保留旧文件中的格式细节；例如上游已改为 `podSecurityContext: {}`，就不要继续写成两行形式；上游新增了注释或默认字段，也应保留。
             - 每迁移一处配置，都应尽量在新文件中直接修改对应字段，而不是连带改动周围无关内容。
             - 迁移完成后，应再次比较 `charts/<chart>-<new_version>/<chart>/values.yaml` 与 `values/<chart>-<new_version>.yaml`，确认 Diff 只包含业务上确有必要的定制项，不包含无意义的格式漂移、注释缺失、空值写法差异等噪音。
             - 如果新版本 Value 文件发生结构变化，则按具体情况处理：字段仅移动位置时，在新位置重新施加同一项定制；字段被删除、重命名、语义改变或引入了新功能时，需要先分析影响，再向用户报告并沟通确认。
