@@ -1845,6 +1845,11 @@ mysql:
     service:
       # -- Mysql port.
       port: 3306
+    # TODO: Ceph RBD too slow caused MySQL startup probe failure
+    # fix Ceph and remove the following startup probe configuration
+    startupProbe:
+      enabled: true
+      failureThreshold: 60
 
 externalMysql:
   # -- Running GORM migration.
