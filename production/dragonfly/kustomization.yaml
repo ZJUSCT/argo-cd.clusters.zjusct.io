@@ -8,8 +8,8 @@ helmCharts:
   repo: https://dragonflyoss.github.io/helm-charts/
   includeCRDs: true
   releaseName: dragonfly
-  valuesFile: values/dragonfly-1.6.13.yaml
-  version: 1.6.13
+  valuesFile: values/dragonfly-1.6.20.yaml
+  version: 1.6.20
   namespace: dragonfly
 transformers:
   - ../../image-prefix.yaml
