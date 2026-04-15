@@ -139,8 +139,7 @@ data:
             description: Self-hosted password manager
             icon: vaultwarden
         - OverLeaf:
-            # href: http://latex.s.zjusct.io
-            href: http://latex.zjusct.io
+            href: http://latex.s.zjusct.io
             description: Collaborative LaTeX editor
             icon: overleaf
         - LiteLLM:
