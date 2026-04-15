@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from version_utils import (
     HARBOR_PREFIX,
     VersionCache,
+    get_latest_github_release_version,
     get_latest_helm_version_http,
     get_latest_helm_version_oci,
     get_latest_image_tag,
@@ -57,6 +58,15 @@ class ImageItem:
     registry: str
     repository: str
     current_tag: str
+    source_file: str
+
+
+@dataclass
+class GitHubReleaseItem:
+    """A raw resource pinned to a GitHub release."""
+    app_name: str
+    owner_repo: str      # e.g. "tektoncd/operator"
+    current_tag: str     # e.g. "v0.79.0"
     source_file: str
 
 
@@ -145,6 +155,43 @@ def scan_helm_charts(repo_root: Path) -> List[HelmItem]:
                 repo=repo,
                 current_version=version,
                 is_oci=is_oci,
+            ))
+    return items
+
+
+# ---------------------------------------------------------------------------
+# GitHub release resource scanner
+# ---------------------------------------------------------------------------
+
+_GITHUB_RELEASE_RE = re.compile(
+    r"https://github\.com/([^/\s]+/[^/\s]+)/releases/download/([^/\s]+)/[^/\s]+"
+)
+
+
+def scan_github_release_resources(repo_root: Path) -> List[GitHubReleaseItem]:
+    items: List[GitHubReleaseItem] = []
+    for app_dir in _app_dirs(repo_root):
+        app_name = str(app_dir.relative_to(repo_root))
+        kustomization = app_dir / "kustomization.yaml"
+        data = load_yaml(kustomization)
+        if not data:
+            continue
+        seen: set = set()
+        for resource in data.get("resources", []):
+            if not isinstance(resource, str):
+                continue
+            m = _GITHUB_RELEASE_RE.match(resource)
+            if not m:
+                continue
+            owner_repo, tag = m.group(1), m.group(2)
+            if owner_repo in seen:
+                continue
+            seen.add(owner_repo)
+            items.append(GitHubReleaseItem(
+                app_name=app_name,
+                owner_repo=owner_repo,
+                current_tag=tag,
+                source_file=str(kustomization.relative_to(repo_root)),
             ))
     return items
 
@@ -314,6 +361,23 @@ def _query_helm(item: HelmItem, cache: VersionCache) -> Tuple[Optional[str], Opt
         return None, str(e)
 
 
+def _query_github(item: GitHubReleaseItem, cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
+    """Return (latest_tag, error_message)."""
+    try:
+        latest, err = get_latest_github_release_version(item.owner_repo, cache)
+        if err:
+            return None, err
+        if latest is None:
+            return None, "no stable release found"
+        cur = item.current_tag.lstrip("v")
+        lat = latest.lstrip("v")
+        if cur == lat:
+            return item.current_tag, None
+        return latest, None
+    except Exception as e:
+        return None, str(e)
+
+
 def _query_image(item: ImageItem, cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
     """Return (latest_tag, error_message)."""
     try:
@@ -363,16 +427,19 @@ def _print_section(result: CategoryResult) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Check for available updates to Helm charts and container images."
+        description="Check for available updates to Helm charts, GitHub releases, and container images."
     )
     scope = parser.add_mutually_exclusive_group()
     scope.add_argument("--helm", action="store_true", help="Check Helm chart versions only")
+    scope.add_argument("--github", action="store_true", help="Check GitHub release resource versions only")
     scope.add_argument("--images", action="store_true", help="Check container image versions only")
     parser.add_argument("--workers", type=int, default=8,
                         help="Concurrent registry queries (default: 8)")
     args = parser.parse_args()
 
-    check_helm = args.helm or not args.images
+    # Default run (no flags): helm + github. Images remain opt-in via --images.
+    check_helm = args.helm or (not args.github and not args.images)
+    check_github = args.github or (not args.helm and not args.images)
     check_images = args.images
 
     repo_root = Path(__file__).resolve().parent.parent
@@ -380,29 +447,33 @@ def main() -> int:
 
     # --- Phase 1: Scan (fast, no network) ---
     helm_items: List[HelmItem] = []
+    github_items: List[GitHubReleaseItem] = []
     image_items: List[ImageItem] = []
 
     if check_helm:
         helm_items = scan_helm_charts(repo_root)
+    if check_github:
+        github_items = scan_github_release_resources(repo_root)
     if check_images:
         image_items = scan_values_images(repo_root) + scan_resource_images(repo_root)
 
-    total_items = len(helm_items) + len(image_items)
+    total_items = len(helm_items) + len(github_items) + len(image_items)
     if total_items == 0:
         print("No versioned resources found.")
         return 0
 
-    if check_helm and check_images:
-        print(f"Scanning {len(helm_items)} Helm charts and {len(image_items)} images...\n")
-    elif check_helm:
-        print(f"Scanning {len(helm_items)} Helm charts...\n")
-    elif check_images:
-        print(f"Scanning {len(image_items)} images...\n")
-    else:
-        print("No checks selected.\n")
+    parts = []
+    if check_helm:
+        parts.append(f"{len(helm_items)} Helm charts")
+    if check_github:
+        parts.append(f"{len(github_items)} GitHub release resources")
+    if check_images:
+        parts.append(f"{len(image_items)} images")
+    print(f"Scanning {', '.join(parts)}...\n")
 
     # --- Phase 2: Query (network, parallel) ---
     helm_result = CategoryResult(title="Helm Chart Versions")
+    github_result = CategoryResult(title="GitHub Release Resources")
     values_result = CategoryResult(title="Container Images (values files)")
     resource_result = CategoryResult(title="Container Images (resource files)")
 
@@ -424,6 +495,15 @@ def main() -> int:
     def _print_image_error(e: CheckError) -> None:
         print(f"  ERROR:  {e.app_name:40s} {e.resource_name:30s} [{e.source_file}] {e.message}", flush=True)
 
+    def _print_github_update(u: Update) -> None:
+        print(f"  UPDATE: {u.app_name:40s} {u.resource_name:45s} {u.current:15s} -> {u.latest}  [{u.source_file}]", flush=True)
+
+    def _print_github_ok(app: str, name: str, ver: str) -> None:
+        print(f"  OK:     {app:40s} {name:45s} {ver:15s}", flush=True)
+
+    def _print_github_error(e: CheckError) -> None:
+        print(f"  ERROR:  {e.app_name:40s} {e.resource_name:30s} [{e.source_file}] {e.message}", flush=True)
+
     # Submit all queries
     futures: dict = {}
 
@@ -431,6 +511,10 @@ def main() -> int:
         for item in helm_items:
             f = pool.submit(_query_helm, item, cache)
             futures[f] = ("helm", item)
+
+        for item in github_items:
+            f = pool.submit(_query_github, item, cache)
+            futures[f] = ("github", item)
 
         # Track which image items come from values vs resources
         values_sources = {str(i.source_file) for i in scan_values_images(repo_root)} if check_images else set()
@@ -467,6 +551,32 @@ def main() -> int:
                     helm_result.up_to_date.append((item.app_name, item.chart_name, item.current_version))
                     _print_helm_ok(item.app_name, item.chart_name, item.current_version)
 
+            elif category == "github":
+                item: GitHubReleaseItem  # type: ignore
+                github_result.total += 1
+                if error:
+                    err_obj = CheckError(
+                        app_name=item.app_name,
+                        resource_name=item.owner_repo,
+                        source_file=item.source_file,
+                        message=error,
+                    )
+                    github_result.errors.append(err_obj)
+                    _print_github_error(err_obj)
+                elif latest and latest.lstrip("v") != item.current_tag.lstrip("v"):
+                    upd = Update(
+                        app_name=item.app_name,
+                        resource_name=item.owner_repo,
+                        current=item.current_tag,
+                        latest=latest,
+                        source_file=item.source_file,
+                    )
+                    github_result.updates.append(upd)
+                    _print_github_update(upd)
+                else:
+                    github_result.up_to_date.append((item.app_name, item.owner_repo, item.current_tag))
+                    _print_github_ok(item.app_name, item.owner_repo, item.current_tag)
+
             elif category == "image":
                 item: ImageItem  # type: ignore
                 target = values_result if item.source_file in values_sources else resource_result
@@ -498,6 +608,8 @@ def main() -> int:
     all_results = []
     if check_helm:
         all_results.append(helm_result)
+    if check_github:
+        all_results.append(github_result)
     if check_images:
         all_results.extend([values_result, resource_result])
 

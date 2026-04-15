@@ -480,6 +480,53 @@ def get_latest_helm_version_oci(chart_name: str, repo_url: str,
 
 
 # ---------------------------------------------------------------------------
+# GitHub release version lookup
+# ---------------------------------------------------------------------------
+
+def get_latest_github_release_version(owner_repo: str,
+                                       cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
+    """Query the GitHub Releases API for the latest stable release that is at
+    least *_MIN_AGE_DAYS* old.
+
+    *owner_repo* should be ``"owner/repo"`` (e.g. ``"tektoncd/operator"``).
+    Returns *(version_tag, error_message)*.
+    """
+    key = ("github_release", owner_repo)
+    cached = cache.get(key)
+    if cached is not None:
+        return cached, None
+
+    url = f"https://api.github.com/repos/{owner_repo}/releases?per_page=20"
+    req = urllib.request.Request(url)
+    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("User-Agent", _helm_user_agent())
+    req.add_header("X-GitHub-Api-Version", "2022-11-28")
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            releases = json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        return None, f"HTTP {e.code} {e.reason}"
+    except Exception as e:
+        return None, str(e)
+
+    candidates = [
+        r for r in releases
+        if not r.get("prerelease") and not r.get("draft")
+        and _is_old_enough(r.get("published_at"))
+        and parse_semver(r.get("tag_name", ""))
+    ]
+    if not candidates:
+        cache.put(key, None)
+        return None, "no stable release at least 7 days old"
+
+    candidates.sort(key=lambda r: parse_semver(r["tag_name"]), reverse=True)
+    latest = candidates[0]["tag_name"]
+    cache.put(key, latest)
+    return latest, None
+
+
+# ---------------------------------------------------------------------------
 # Container image tag lookup (Docker Registry v2)
 # ---------------------------------------------------------------------------
 
