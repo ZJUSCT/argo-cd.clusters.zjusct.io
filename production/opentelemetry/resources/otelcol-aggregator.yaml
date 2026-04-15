@@ -22,6 +22,8 @@ spec:
       # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
       otlp_grpc/tempo:
         endpoint: "tempo.kube-prometheus-stack:4317"
+        tls:
+          insecure: true
       # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter
       otlp_http/loki:
         endpoint: "http://loki.kube-prometheus-stack:3100/otlp"
@@ -54,10 +56,13 @@ spec:
       pipelines:
         metrics:
           receivers: [otlp]
+          processors: [memory_limiter, resource/cloud, batch]
           exporters: [debug, prometheusremotewrite]
         traces:
           receivers: [otlp]
+          processors: [memory_limiter, resource/cloud, batch]
           exporters: [debug, otlp_grpc/tempo]
         logs:
           receivers: [otlp]
+          processors: [memory_limiter, resource/cloud, batch]
           exporters: [debug, otlp_http/loki]
