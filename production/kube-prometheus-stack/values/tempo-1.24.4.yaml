@@ -47,8 +47,8 @@ tempo:
   reportingEnabled: true
   metricsGenerator:
     # -- If true, enables Tempo's metrics generator (https://grafana.com/docs/tempo/next/metrics-generator/)
-    enabled: false
-    remoteWriteUrl: "http://prometheus.monitoring:9090/api/v1/write"
+    enabled: true
+    remoteWriteUrl: "http://mimir-gateway.kube-prometheus-stack.svc:80/api/v1/push"
     # -- Processor-specific configuration for metrics generator (optional)
     # Supports service_graphs, span_metrics, and local_blocks processors
     processor: {}
