@@ -297,9 +297,11 @@ def _query_helm(item: HelmItem, cache: VersionCache) -> Tuple[Optional[str], Opt
     """Return (latest_version, error_message)."""
     try:
         if item.is_oci:
-            latest = get_latest_helm_version_oci(item.chart_name, item.repo, cache)
+            latest, error = get_latest_helm_version_oci(item.chart_name, item.repo, cache)
         else:
-            latest = get_latest_helm_version_http(item.chart_name, item.repo, cache)
+            latest, error = get_latest_helm_version_http(item.chart_name, item.repo, cache)
+        if error:
+            return None, error
         if latest is None:
             return None, "failed to fetch latest version"
         # Normalize for comparison
@@ -371,7 +373,7 @@ def main() -> int:
     args = parser.parse_args()
 
     check_helm = args.helm or not args.images
-    check_images = args.images or not args.helm
+    check_images = args.images
 
     repo_root = Path(__file__).resolve().parent.parent
     cache = VersionCache()
@@ -390,12 +392,37 @@ def main() -> int:
         print("No versioned resources found.")
         return 0
 
-    print(f"Scanning {len(helm_items)} Helm charts and {len(image_items)} images...\n")
+    if check_helm and check_images:
+        print(f"Scanning {len(helm_items)} Helm charts and {len(image_items)} images...\n")
+    elif check_helm:
+        print(f"Scanning {len(helm_items)} Helm charts...\n")
+    elif check_images:
+        print(f"Scanning {len(image_items)} images...\n")
+    else:
+        print("No checks selected.\n")
 
     # --- Phase 2: Query (network, parallel) ---
     helm_result = CategoryResult(title="Helm Chart Versions")
     values_result = CategoryResult(title="Container Images (values files)")
     resource_result = CategoryResult(title="Container Images (resource files)")
+
+    def _print_helm_update(u: Update) -> None:
+        print(f"  UPDATE: {u.app_name:40s} {u.resource_name:45s} {u.current:15s} -> {u.latest}", flush=True)
+
+    def _print_helm_ok(app: str, name: str, ver: str) -> None:
+        print(f"  OK:     {app:40s} {name:45s} {ver:15s}", flush=True)
+
+    def _print_helm_error(e: CheckError) -> None:
+        print(f"  ERROR:  {e.app_name:40s} {e.resource_name:30s} {e.message}", flush=True)
+
+    def _print_image_update(u: Update) -> None:
+        print(f"  UPDATE: {u.app_name:40s} {u.resource_name:45s} {u.current:15s} -> {u.latest}  [{u.source_file}]", flush=True)
+
+    def _print_image_ok(app: str, name: str, ver: str) -> None:
+        print(f"  OK:     {app:40s} {name:45s} {ver:15s}", flush=True)
+
+    def _print_image_error(e: CheckError) -> None:
+        print(f"  ERROR:  {e.app_name:40s} {e.resource_name:30s} [{e.source_file}] {e.message}", flush=True)
 
     # Submit all queries
     futures: dict = {}
@@ -420,49 +447,52 @@ def main() -> int:
                 item: HelmItem  # type: ignore
                 helm_result.total += 1
                 if error:
-                    helm_result.errors.append(CheckError(
+                    err_obj = CheckError(
                         app_name=item.app_name,
                         resource_name=item.chart_name,
                         message=error,
-                    ))
+                    )
+                    helm_result.errors.append(err_obj)
+                    _print_helm_error(err_obj)
                 elif latest and latest.lstrip("v") != item.current_version.lstrip("v"):
-                    helm_result.updates.append(Update(
+                    upd = Update(
                         app_name=item.app_name,
                         resource_name=item.chart_name,
                         current=item.current_version,
                         latest=latest,
-                    ))
+                    )
+                    helm_result.updates.append(upd)
+                    _print_helm_update(upd)
                 else:
                     helm_result.up_to_date.append((item.app_name, item.chart_name, item.current_version))
+                    _print_helm_ok(item.app_name, item.chart_name, item.current_version)
 
             elif category == "image":
                 item: ImageItem  # type: ignore
                 target = values_result if item.source_file in values_sources else resource_result
                 target.total += 1
                 if error:
-                    target.errors.append(CheckError(
+                    err_obj = CheckError(
                         app_name=item.app_name,
                         resource_name=item.image_ref,
                         source_file=item.source_file,
                         message=error,
-                    ))
+                    )
+                    target.errors.append(err_obj)
+                    _print_image_error(err_obj)
                 elif latest and latest.lstrip("v") != item.current_tag.lstrip("v"):
-                    target.updates.append(Update(
+                    upd = Update(
                         app_name=item.app_name,
                         resource_name=item.image_ref,
                         current=item.current_tag,
                         latest=latest,
                         source_file=item.source_file,
-                    ))
+                    )
+                    target.updates.append(upd)
+                    _print_image_update(upd)
                 else:
                     target.up_to_date.append((item.app_name, item.image_ref, item.current_tag))
-
-    # --- Phase 3: Report ---
-    if check_helm:
-        _print_section(helm_result)
-    if check_images:
-        _print_section(values_result)
-        _print_section(resource_result)
+                    _print_image_ok(item.app_name, item.image_ref, item.current_tag)
 
     # Summary
     all_results = []

@@ -5,6 +5,8 @@ import re
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -21,6 +23,26 @@ HARBOR_PREFIX = "harbor.clusters.zjusct.io/"
 
 _SCAN_RE = re.compile(r"^v?\d+\.\d+\.\d+")
 _PRERELEASE_RE = re.compile(r"^v?\d+\.\d+\.\d+[-.]", re.IGNORECASE)
+
+_MIN_AGE_DAYS = 7
+_MAX_OCI_CANDIDATES = 20
+_MAX_TAG_PAGES = 10
+_TAG_PAGE_SIZE = 1000
+
+
+# ---------------------------------------------------------------------------
+# Age filter
+# ---------------------------------------------------------------------------
+
+def _is_old_enough(timestamp_str: Optional[str]) -> bool:
+    """Return True if *timestamp_str* is at least *_MIN_AGE_DAYS* old."""
+    if not timestamp_str:
+        return False
+    try:
+        created = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+        return datetime.now(timezone.utc) - created >= timedelta(days=_MIN_AGE_DAYS)
+    except Exception:
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -147,58 +169,174 @@ def parse_image_ref(ref: str) -> Optional[Tuple[str, str, Optional[str]]]:
 
 
 # ---------------------------------------------------------------------------
-# Helm chart version lookups (HTTP and OCI)
+# Generic OCI registry auth
 # ---------------------------------------------------------------------------
 
-def get_oci_auth_token(registry: str, repository: str,
-                       max_retries: int = 2) -> Tuple[Optional[str], Optional[str]]:
-    """Get Bearer auth token for Docker Hub.
+def _get_oci_auth_token(registry: str, repository: str) -> Tuple[Optional[str], Optional[str]]:
+    """Obtain a Bearer token for an OCI registry by following the WWW-Authenticate challenge.
 
     Returns *(token, error_message)*.
-    Only handles Docker Hub; other registries return ``(None, None)`` (no auth).
     """
-    if "docker.io" not in registry and registry != "registry-1.docker.io":
-        return None, None
+    tags_url = f"https://{registry}/v2/{repository}/tags/list"
+    req = urllib.request.Request(tags_url)
+    req.add_header("Accept", "application/json")
+    req.add_header("User-Agent", _helm_user_agent())
 
-    auth_url = "https://auth.docker.io/token"
-    service = "registry.docker.io"
-    if "/" not in repository:
-        repository = f"library/{repository}"
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            # Registry allows anonymous access.
+            return None, None
+    except urllib.error.HTTPError as e:
+        if e.code != 401:
+            return None, f"HTTP {e.code} {e.reason}"
+        www_auth = e.headers.get("WWW-Authenticate", "")
+        if not www_auth.startswith("Bearer "):
+            return None, f"unsupported auth scheme: {www_auth}"
 
-    token_url = f"{auth_url}?service={service}&scope=repository:{repository}:pull"
+        params = {}
+        for match in re.finditer(r'(\w+)="([^"]+)"', www_auth):
+            params[match.group(1)] = match.group(2)
 
-    last_error: Optional[str] = None
-    for attempt in range(max_retries):
+        realm = params.get("realm")
+        if not realm:
+            return None, "missing realm in WWW-Authenticate header"
+
+        query = {}
+        if "service" in params:
+            query["service"] = params["service"]
+        if "scope" in params:
+            query["scope"] = params["scope"]
+
+        token_url = realm
+        if query:
+            token_url += "?" + urllib.parse.urlencode(query)
+
         try:
             req = urllib.request.Request(token_url)
-            req.add_header("User-Agent", "renovate-check/1.0")
+            req.add_header("User-Agent", _helm_user_agent())
             with urllib.request.urlopen(req, timeout=20) as resp:
                 data = json.loads(resp.read())
-                token = data.get("token")
-                return (token, None) if token else (None, "No token in response")
-        except urllib.error.URLError as e:
-            last_error = f"network error: {e.reason}"
-            if attempt < max_retries - 1:
-                time.sleep(1)
-        except Exception as e:
-            last_error = f"auth error: {e}"
-            if attempt < max_retries - 1:
-                time.sleep(1)
+                token = data.get("token") or data.get("access_token")
+                if not token:
+                    return None, "empty token response from auth server"
+                return token, None
+        except urllib.error.HTTPError as ae:
+            return None, f"auth HTTP {ae.code} {ae.reason}"
+        except Exception as ae:
+            return None, f"auth error: {ae}"
+    except Exception as e:
+        return None, str(e)
 
-    return None, last_error
 
+# ---------------------------------------------------------------------------
+# OCI helpers
+# ---------------------------------------------------------------------------
 
 def _helm_user_agent() -> str:
     return "helm-chart-validator/1.0"
 
 
+def _fetch_oci_tags(registry: str, repository: str,
+                    token: Optional[str]) -> Tuple[List[str], Optional[str]]:
+    """Fetch all tags from an OCI registry, following pagination.
+
+    Returns *(tags_list, error_message)*.
+    """
+    all_tags: List[str] = []
+    url = f"https://{registry}/v2/{repository}/tags/list?n={_TAG_PAGE_SIZE}"
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": _helm_user_agent(),
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    for _ in range(_MAX_TAG_PAGES):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read())
+                tags = data.get("tags") or []
+                all_tags.extend(tags)
+
+                link_hdr = resp.headers.get("Link", "")
+                if 'rel="next"' not in link_hdr:
+                    break
+
+                for part in link_hdr.split(","):
+                    if 'rel="next"' in part:
+                        match = re.search(r"<(.+?)>", part)
+                        if match:
+                            raw_next = match.group(1)
+                            url = urllib.parse.urljoin(f"https://{registry}", raw_next)
+                        else:
+                            return all_tags, None
+                        break
+                else:
+                    break
+        except urllib.error.HTTPError as e:
+            return all_tags, f"HTTP {e.code} {e.reason}"
+        except Exception as e:
+            return all_tags, str(e)
+
+    return all_tags, None
+
+
+def _get_oci_manifest_created(registry: str, repository: str,
+                              tag: str, token: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+    """Return the created timestamp for an OCI manifest (or None + error)."""
+    url = f"https://{registry}/v2/{repository}/manifests/{tag}"
+    headers = {
+        "Accept": (
+            "application/vnd.oci.image.manifest.v1+json,"
+            "application/vnd.docker.distribution.manifest.v2+json"
+        ),
+        "User-Agent": _helm_user_agent(),
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            manifest = json.loads(resp.read())
+            created = manifest.get("annotations", {}).get("org.opencontainers.image.created")
+            if created:
+                return created, None
+
+            # Fallback to config blob
+            config = manifest.get("config", {})
+            digest = config.get("digest")
+            if digest:
+                blob_url = f"https://{registry}/v2/{repository}/blobs/{digest}"
+                req = urllib.request.Request(blob_url, headers=headers)
+                with urllib.request.urlopen(req, timeout=15) as bresp:
+                    config_data = json.loads(bresp.read())
+                    created = config_data.get("created")
+                    if created:
+                        return created, None
+            return None, "no created timestamp in manifest"
+    except urllib.error.HTTPError as e:
+        return None, f"HTTP {e.code} {e.reason}"
+    except Exception as e:
+        return None, str(e)
+
+
+# ---------------------------------------------------------------------------
+# Helm chart version lookups (HTTP and OCI)
+# ---------------------------------------------------------------------------
+
 def get_latest_helm_version_http(chart_name: str, repo_url: str,
-                                 cache: VersionCache) -> Optional[str]:
-    """Query an HTTP Helm repo ``index.yaml`` for the latest chart version."""
+                                 cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
+    """Query an HTTP Helm repo ``index.yaml`` for the latest stable chart version
+    that is at least 7 days old.
+
+    Returns *(version, error_message)*.
+    """
     key = ("helm_http", f"{repo_url}/{chart_name}")
     cached = cache.get(key)
     if cached is not None:
-        return cached
+        return cached, None
 
     if not repo_url.endswith("/"):
         repo_url += "/"
@@ -209,88 +347,99 @@ def get_latest_helm_version_http(chart_name: str, repo_url: str,
         req.add_header("User-Agent", _helm_user_agent())
         with urllib.request.urlopen(req, timeout=15) as resp:
             index_data = yaml.safe_load(resp.read())
-
-        entries = index_data.get("entries", {})
-        chart_entries = entries.get(chart_name, [])
-        if not chart_entries:
-            cache.put(key, None)
-            return None
-
-        # Find latest stable version (skip pre-releases)
-        for entry in chart_entries:
-            ver = entry.get("version", "")
-            if ver and not is_prerelease(ver):
-                cache.put(key, ver)
-                return ver
-
-        # Fallback: return whatever is first if all are pre-release
-        latest = chart_entries[0].get("version")
-        cache.put(key, latest)
-        return latest
-
-    except Exception:
+    except urllib.error.HTTPError as e:
         cache.put(key, None)
-        return None
+        return None, f"HTTP {e.code} {e.reason}"
+    except Exception as e:
+        cache.put(key, None)
+        return None, str(e)
+
+    entries = index_data.get("entries", {})
+    chart_entries = entries.get(chart_name, [])
+    if not chart_entries:
+        cache.put(key, None)
+        return None, "chart not found in index"
+
+    for entry in chart_entries:
+        ver = entry.get("version", "")
+        created = entry.get("created", "")
+        if ver and not is_prerelease(ver) and _is_old_enough(created):
+            cache.put(key, ver)
+            return ver, None
+
+    cache.put(key, None)
+    return None, "no stable version at least 7 days old"
 
 
 def get_latest_helm_version_oci(chart_name: str, repo_url: str,
-                                cache: VersionCache) -> Optional[str]:
-    """Query an OCI registry for the latest Helm chart version (semver tag)."""
+                                cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
+    """Query an OCI registry for the latest stable Helm chart version that is
+    at least 7 days old.
+
+    Returns *(version, error_message)*.
+    """
     key = ("helm_oci", f"{repo_url}/{chart_name}")
     cached = cache.get(key)
     if cached is not None:
-        return cached
+        return cached, None
 
     try:
-        from urllib.parse import urlparse
-        parsed = urlparse(repo_url)
+        parsed = urllib.parse.urlparse(repo_url)
         registry = parsed.netloc
         path_part = parsed.path.strip("/")
         image = f"{path_part}/{chart_name}" if path_part else chart_name
 
-        # Map to Docker Hub API endpoint
+        # Docker Hub remapping
         if "docker.io" in registry:
             api_registry = "registry-1.docker.io"
         else:
             api_registry = registry
 
-        # Docker Hub library prefix
         docker_image = image
         if api_registry == "registry-1.docker.io" and "/" not in image:
             docker_image = f"library/{image}"
 
-        token, auth_err = get_oci_auth_token(api_registry, docker_image)
-        if api_registry == "registry-1.docker.io" and not token:
+        token, auth_err = _get_oci_auth_token(api_registry, docker_image)
+        if auth_err:
             cache.put(key, None)
-            return None
+            return None, auth_err
 
-        tags_url = f"https://{api_registry}/v2/{docker_image}/tags/list"
-        req = urllib.request.Request(tags_url)
-        req.add_header("Accept", "application/json")
-        req.add_header("User-Agent", _helm_user_agent())
-        if token:
-            req.add_header("Authorization", f"Bearer {token}")
+        tags, tags_err = _fetch_oci_tags(api_registry, docker_image, token)
+        if tags_err:
+            cache.put(key, None)
+            return None, tags_err
+        if not tags:
+            cache.put(key, None)
+            return None, "no tags found"
 
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read())
+        version_tags = sort_semver_tags(
+            [t for t in tags if _SCAN_RE.match(t) and not is_prerelease(t)]
+        )
+        if not version_tags:
+            cache.put(key, None)
+            return None, "no stable semver tags found"
 
-        tags = data.get("tags", [])
-        version_tags = sort_semver_tags([t for t in tags if _SCAN_RE.match(t) and not is_prerelease(t)])
-        latest = version_tags[0] if version_tags else None
-        cache.put(key, latest)
-        return latest
+        for tag in version_tags[:_MAX_OCI_CANDIDATES]:
+            created, created_err = _get_oci_manifest_created(
+                api_registry, docker_image, tag, token
+            )
+            if created_err:
+                continue
+            if _is_old_enough(created):
+                cache.put(key, tag)
+                return tag, None
 
-    except Exception:
         cache.put(key, None)
-        return None
+        return None, "no stable OCI chart version at least 7 days old"
+
+    except Exception as e:
+        cache.put(key, None)
+        return None, str(e)
 
 
 # ---------------------------------------------------------------------------
 # Container image tag lookup (Docker Registry v2)
 # ---------------------------------------------------------------------------
-
-_MAX_TAG_PAGES = 10
-_TAG_PAGE_SIZE = 1000
 
 
 def _fetch_all_tags(api_registry: str, docker_repo: str,
@@ -299,8 +448,6 @@ def _fetch_all_tags(api_registry: str, docker_repo: str,
 
     Returns (tags_list, error_message).
     """
-    import urllib.parse
-
     all_tags: List[str] = []
     url = f"https://{api_registry}/v2/{docker_repo}/tags/list?n={_TAG_PAGE_SIZE}"
     headers = {
@@ -374,10 +521,10 @@ def get_latest_image_tag(registry: str, repository: str,
     # Auth
     token = None
     if api_registry == "registry-1.docker.io":
-        token, auth_err = get_oci_auth_token(api_registry, docker_repo)
+        token, auth_err = _get_oci_auth_token(api_registry, docker_repo)
         if not token:
             cache.put(key, None)
-            return (None, auth_err)
+            return (None, auth_err or "docker hub auth failed")
 
     tags, err = _fetch_all_tags(api_registry, docker_repo, token)
     if err:

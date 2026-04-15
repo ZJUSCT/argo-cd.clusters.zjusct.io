@@ -12,16 +12,18 @@ resources:
 helmCharts:
   - name: mongodb
     repo: https://charts.bitnami.com/bitnami
-    version: 13.18.5
+    version: 13.18.5 # Overleaf upstream requires MongoDB 6, so PIN this version until upstream updates to newer MongoDB
     releaseName: overleaf-mongodb
     namespace: overleaf
     valuesFile: values/mongodb-13.18.5.yaml
+    includeCRDs: true
   - name: redis
     repo: https://charts.bitnami.com/bitnami
     version: 25.3.7
     releaseName: overleaf-redis
     namespace: overleaf
     valuesFile: values/redis-25.3.7.yaml
+    includeCRDs: true
 
 transformers:
   - ../../image-prefix.yaml
