@@ -80,12 +80,12 @@ manager:
   extraEnvVars: []
   # -- Extra volumes for manager.
   extraVolumes:
-  - name: logs
-    emptyDir: {}
+    - name: logs
+      emptyDir: {}
   # -- Extra volumeMounts for manager.
   extraVolumeMounts:
-  - name: logs
-    mountPath: /var/log/dragonfly/manager
+    - name: logs
+      mountPath: /var/log/dragonfly/manager
   # -- REST service port.
   restPort: 8080
   # -- GRPC service port.
@@ -276,46 +276,46 @@ manager:
       additionalLabels: {}
       # -- Prometheus rules.
       rules:
-      - alert: ManagerDown
-        expr: sum(dragonfly_manager_version{}) == 0
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Manager instance is down
-          message: Manager instance {{ "{{ $labels.instance }}" }} is down
-      - alert: ManagerHighNumberOfFailedGRPCRequest
-        expr: sum(rate(grpc_server_started_total{grpc_service="manager.Manager",grpc_type="unary"}[1m])) - sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="InvalidArgument"}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Manager has a high number of failed grpc request
-          message: Manager has a high number of failed grpc request
-      - alert: ManagerSuccessRateOfGRPCRequest
-        expr: (sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="InvalidArgument"}[1m]))) / sum(rate(grpc_server_started_total{grpc_service="manager.Manager",grpc_type="unary"}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Manager's success rate of grpc request is low
-          message: Manager's success rate of grpc request is low
-      - alert: ManagerHighNumberOfFailedRESTRequest
-        expr: sum(rate(dragonfly_manager_requests_total{}[1m])) - sum(rate(dragonfly_manager_requests_total{code=~"[12].."}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Manager has a high number of failed rest request
-          message: Manager has a high number of failed rest request
-      - alert: ManagerSuccessRateOfRESTRequest
-        expr: sum(rate(dragonfly_manager_requests_total{code=~"[12].."}[1m])) / sum(rate(dragonfly_manager_requests_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Manager's success rate of rest request is low
-          message: Manager's success rate of rest request is low
+        - alert: ManagerDown
+          expr: sum(dragonfly_manager_version{}) == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Manager instance is down
+            message: Manager instance {{ "{{ $labels.instance }}" }} is down
+        - alert: ManagerHighNumberOfFailedGRPCRequest
+          expr: sum(rate(grpc_server_started_total{grpc_service="manager.Manager",grpc_type="unary"}[1m])) - sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="InvalidArgument"}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Manager has a high number of failed grpc request
+            message: Manager has a high number of failed grpc request
+        - alert: ManagerSuccessRateOfGRPCRequest
+          expr: (sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="manager.Manager",grpc_type="unary",grpc_code="InvalidArgument"}[1m]))) / sum(rate(grpc_server_started_total{grpc_service="manager.Manager",grpc_type="unary"}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Manager's success rate of grpc request is low
+            message: Manager's success rate of grpc request is low
+        - alert: ManagerHighNumberOfFailedRESTRequest
+          expr: sum(rate(dragonfly_manager_requests_total{}[1m])) - sum(rate(dragonfly_manager_requests_total{code=~"[12].."}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Manager has a high number of failed rest request
+            message: Manager has a high number of failed rest request
+        - alert: ManagerSuccessRateOfRESTRequest
+          expr: sum(rate(dragonfly_manager_requests_total{code=~"[12].."}[1m])) / sum(rate(dragonfly_manager_requests_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Manager's success rate of rest request is low
+            message: Manager's success rate of rest request is low
 
 scheduler:
   # -- Enable scheduler.
@@ -390,12 +390,12 @@ scheduler:
   extraEnvVars: []
   # -- Extra volumes for scheduler.
   extraVolumes:
-  - name: logs
-    emptyDir: {}
+    - name: logs
+      emptyDir: {}
   # -- Extra volumeMounts for scheduler.
   extraVolumeMounts:
-  - name: logs
-    mountPath: /var/log/dragonfly/scheduler
+    - name: logs
+      mountPath: /var/log/dragonfly/scheduler
   initContainer:
     # -- Pod resource requests and limits.
     resources:
@@ -569,142 +569,142 @@ scheduler:
       additionalLabels: {}
       # -- Prometheus rules.
       rules:
-      - alert: SchedulerDown
-        expr: sum(dragonfly_scheduler_version{}) == 0
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler instance is down
-          message: Scheduler instance {{ "{{ $labels.instance }}" }} is down
-      - alert: SchedulerHighNumberOfFailedDownloadPeer
-        expr: sum(irate(dragonfly_scheduler_download_peer_finished_failure_total{}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed download peer
-          message: Scheduler has a high number of failed download peer
-      - alert: SchedulerSuccessRateOfDownloadingPeer
-        expr: (sum(rate(dragonfly_scheduler_download_peer_finished_total{}[1m])) - sum(rate(dragonfly_scheduler_download_peer_finished_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_download_peer_finished_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of downloading peer is low
-          message: Scheduler's success rate of downloading peer is low
-      - alert: SchedulerHighNumberOfFailedRegisterPeer
-        expr: sum(irate(dragonfly_scheduler_register_peer_failure_total{}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed register peer
-          message: Scheduler has a high number of failed register peer
-      - alert: SchedulerSuccessRateOfRegisterTask
-        expr: (sum(rate(dragonfly_scheduler_register_peer_total{}[1m])) - sum(rate(dragonfly_scheduler_register_peer_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_register_peer_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of register peer is low
-          message: Scheduler's success rate of register peer is low
-      - alert: SchedulerHighNumberOfFailedLeavePeer
-        expr: sum(irate(dragonfly_scheduler_leave_peer_failure_total{}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed leave peer
-          message: Scheduler has a high number of failed leave peer
-      - alert: SchedulerSuccessRateOfLeavingPeer
-        expr: (sum(rate(dragonfly_scheduler_leave_peer_total{}[1m])) - sum(rate(dragonfly_scheduler_leave_peer_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_leave_peer_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of leaving peer is low
-          message: Scheduler's success rate of leaving peer is low
-      - alert: SchedulerHighNumberOfFailedStatTask
-        expr: sum(irate(dragonfly_scheduler_stat_task_failure_total{}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed stat task
-          message: Scheduler has a high number of failed stat task
-      - alert: SchedulerSuccessRateOfStatTask
-        expr: (sum(rate(dragonfly_scheduler_stat_task_total{}[1m])) - sum(rate(dragonfly_scheduler_stat_task_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_stat_task_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of stat task is low
-          message: Scheduler's success rate of stat task is low
-      - alert: SchedulerHighNumberOfFailedAnnouncePeer
-        expr: sum(irate(dragonfly_scheduler_announce_peer_failure_total{}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed announce peer
-          message: Scheduler has a high number of failed announce peer
-      - alert: SchedulerSuccessRateOfAnnouncingPeer
-        expr: (sum(rate(dragonfly_scheduler_announce_peer_total{}[1m])) - sum(rate(dragonfly_scheduler_announce_peer_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_announce_peer_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of announcing peer is low
-          message: Scheduler's success rate of announcing peer is low
-      - alert: SchedulerHighNumberOfFailedLeaveHost
-        expr: sum(irate(dragonfly_scheduler_leave_host_failure_total{}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed leave host
-          message: Scheduler has a high number of failed leave host
-      - alert: SchedulerSuccessRateOfLeavingHost
-        expr: (sum(rate(dragonfly_scheduler_leave_host_total{}[1m])) - sum(rate(dragonfly_scheduler_leave_host_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_leave_host_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of leaving host is low
-          message: Scheduler's success rate of leaving host is low
-      - alert: SchedulerHighNumberOfFailedAnnounceHost
-        expr: sum(irate(dragonfly_scheduler_announce_host_failure_total{}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed annoucne host
-          message: Scheduler has a high number of failed annoucne host
-      - alert: SchedulerSuccessRateOfAnnouncingHost
-        expr: (sum(rate(dragonfly_scheduler_announce_host_total{}[1m])) - sum(rate(dragonfly_scheduler_announce_host_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_announce_host_total{}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of announcing host is low
-          message: Scheduler's success rate of announcing host is low
-      - alert: SchedulerHighNumberOfFailedGRPCRequest
-        expr: sum(rate(grpc_server_started_total{grpc_service="scheduler.Scheduler",grpc_type="unary"}[1m])) - sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="InvalidArgument"}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Scheduler has a high number of failed grpc request
-          message: Scheduler has a high number of failed grpc request
-      - alert: SchedulerSuccessRateOfGRPCRequest
-        expr: (sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="InvalidArgument"}[1m]))) / sum(rate(grpc_server_started_total{grpc_service="scheduler.Scheduler",grpc_type="unary"}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Scheduler's success rate of grpc request is low
-          message: Scheduler's success rate of grpc request is low
+        - alert: SchedulerDown
+          expr: sum(dragonfly_scheduler_version{}) == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler instance is down
+            message: Scheduler instance {{ "{{ $labels.instance }}" }} is down
+        - alert: SchedulerHighNumberOfFailedDownloadPeer
+          expr: sum(irate(dragonfly_scheduler_download_peer_finished_failure_total{}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed download peer
+            message: Scheduler has a high number of failed download peer
+        - alert: SchedulerSuccessRateOfDownloadingPeer
+          expr: (sum(rate(dragonfly_scheduler_download_peer_finished_total{}[1m])) - sum(rate(dragonfly_scheduler_download_peer_finished_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_download_peer_finished_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of downloading peer is low
+            message: Scheduler's success rate of downloading peer is low
+        - alert: SchedulerHighNumberOfFailedRegisterPeer
+          expr: sum(irate(dragonfly_scheduler_register_peer_failure_total{}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed register peer
+            message: Scheduler has a high number of failed register peer
+        - alert: SchedulerSuccessRateOfRegisterTask
+          expr: (sum(rate(dragonfly_scheduler_register_peer_total{}[1m])) - sum(rate(dragonfly_scheduler_register_peer_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_register_peer_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of register peer is low
+            message: Scheduler's success rate of register peer is low
+        - alert: SchedulerHighNumberOfFailedLeavePeer
+          expr: sum(irate(dragonfly_scheduler_leave_peer_failure_total{}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed leave peer
+            message: Scheduler has a high number of failed leave peer
+        - alert: SchedulerSuccessRateOfLeavingPeer
+          expr: (sum(rate(dragonfly_scheduler_leave_peer_total{}[1m])) - sum(rate(dragonfly_scheduler_leave_peer_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_leave_peer_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of leaving peer is low
+            message: Scheduler's success rate of leaving peer is low
+        - alert: SchedulerHighNumberOfFailedStatTask
+          expr: sum(irate(dragonfly_scheduler_stat_task_failure_total{}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed stat task
+            message: Scheduler has a high number of failed stat task
+        - alert: SchedulerSuccessRateOfStatTask
+          expr: (sum(rate(dragonfly_scheduler_stat_task_total{}[1m])) - sum(rate(dragonfly_scheduler_stat_task_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_stat_task_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of stat task is low
+            message: Scheduler's success rate of stat task is low
+        - alert: SchedulerHighNumberOfFailedAnnouncePeer
+          expr: sum(irate(dragonfly_scheduler_announce_peer_failure_total{}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed announce peer
+            message: Scheduler has a high number of failed announce peer
+        - alert: SchedulerSuccessRateOfAnnouncingPeer
+          expr: (sum(rate(dragonfly_scheduler_announce_peer_total{}[1m])) - sum(rate(dragonfly_scheduler_announce_peer_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_announce_peer_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of announcing peer is low
+            message: Scheduler's success rate of announcing peer is low
+        - alert: SchedulerHighNumberOfFailedLeaveHost
+          expr: sum(irate(dragonfly_scheduler_leave_host_failure_total{}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed leave host
+            message: Scheduler has a high number of failed leave host
+        - alert: SchedulerSuccessRateOfLeavingHost
+          expr: (sum(rate(dragonfly_scheduler_leave_host_total{}[1m])) - sum(rate(dragonfly_scheduler_leave_host_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_leave_host_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of leaving host is low
+            message: Scheduler's success rate of leaving host is low
+        - alert: SchedulerHighNumberOfFailedAnnounceHost
+          expr: sum(irate(dragonfly_scheduler_announce_host_failure_total{}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed annoucne host
+            message: Scheduler has a high number of failed annoucne host
+        - alert: SchedulerSuccessRateOfAnnouncingHost
+          expr: (sum(rate(dragonfly_scheduler_announce_host_total{}[1m])) - sum(rate(dragonfly_scheduler_announce_host_failure_total{}[1m]))) / sum(rate(dragonfly_scheduler_announce_host_total{}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of announcing host is low
+            message: Scheduler's success rate of announcing host is low
+        - alert: SchedulerHighNumberOfFailedGRPCRequest
+          expr: sum(rate(grpc_server_started_total{grpc_service="scheduler.Scheduler",grpc_type="unary"}[1m])) - sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="InvalidArgument"}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Scheduler has a high number of failed grpc request
+            message: Scheduler has a high number of failed grpc request
+        - alert: SchedulerSuccessRateOfGRPCRequest
+          expr: (sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="OK"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="NotFound"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="PermissionDenied"}[1m])) + sum(rate(grpc_server_handled_total{grpc_service="scheduler.Scheduler",grpc_type="unary",grpc_code="InvalidArgument"}[1m]))) / sum(rate(grpc_server_started_total{grpc_service="scheduler.Scheduler",grpc_type="unary"}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Scheduler's success rate of grpc request is low
+            message: Scheduler's success rate of grpc request is low
 
 seedClient:
   # -- Enable seed client.
@@ -786,12 +786,12 @@ seedClient:
   extraEnvVars: []
   # -- Extra volumes for dfdaemon.
   extraVolumes:
-  - name: logs
-    emptyDir: {}
+    - name: logs
+      emptyDir: {}
   # -- Extra volumeMounts for dfdaemon.
   extraVolumeMounts:
-  - name: logs
-    mountPath: /var/log/dragonfly/dfdaemon/
+    - name: logs
+      mountPath: /var/log/dragonfly/dfdaemon/
   persistence:
     # -- Enable persistence for seed peer.
     enable: true
@@ -799,7 +799,7 @@ seedClient:
     annotations: {}
     # -- Persistence access modes.
     accessModes:
-    - ReadWriteOnce
+      - ReadWriteOnce
     # -- Persistence persistence size.
     size: 100Gi
   # # Seed client data Persistent Volume Storage Class.
@@ -1073,7 +1073,7 @@ seedClient:
       # the request will use P2P technology to distribute the content. If the value is "false",
       # but url matches the regular expression in rules. The request will also use P2P technology to distribute the content.
       rules:
-      - regex: "blobs/sha256.*"
+        - regex: "blobs/sha256.*"
           # useTLS: false
           # redirect: ""
           # filteredQueryParams: []
@@ -1196,30 +1196,30 @@ seedClient:
       additionalLabels: {}
       # -- Prometheus rules.
       rules:
-      - alert: SeedClientDown
-        expr: sum(dragonfly_client_version{container="seed-client"}) == 0
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Seed client instance is down
-          message: Seed client instance {{ "{{ $labels.instance }}" }} is down
-      - alert: SeedClientHighNumberOfFailedDownloadTask
-        expr: sum(irate(dragonfly_client_download_task_failure_total{container="seed-client"}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Seed client has a high number of failed download task
-          message: Seed client has a high number of failed download task
-      - alert: SeedClientSuccessRateOfDownloadingTask
-        expr: (sum(rate(dragonfly_client_download_task_total{container="seed-client"}[1m])) - sum(rate(dragonfly_client_download_task_failure_total{container="seed-client"}[1m]))) / sum(rate(dragonfly_client_download_task_total{container="seed-client"}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Seed client's success rate of downloading task is low
-          message: Seed client's success rate of downloading task is low
+        - alert: SeedClientDown
+          expr: sum(dragonfly_client_version{container="seed-client"}) == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Seed client instance is down
+            message: Seed client instance {{ "{{ $labels.instance }}" }} is down
+        - alert: SeedClientHighNumberOfFailedDownloadTask
+          expr: sum(irate(dragonfly_client_download_task_failure_total{container="seed-client"}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Seed client has a high number of failed download task
+            message: Seed client has a high number of failed download task
+        - alert: SeedClientSuccessRateOfDownloadingTask
+          expr: (sum(rate(dragonfly_client_download_task_total{container="seed-client"}[1m])) - sum(rate(dragonfly_client_download_task_failure_total{container="seed-client"}[1m]))) / sum(rate(dragonfly_client_download_task_total{container="seed-client"}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Seed client's success rate of downloading task is low
+            message: Seed client's success rate of downloading task is low
 
 client:
   # -- Enable client.
@@ -1307,19 +1307,19 @@ client:
   extraEnvVars: []
   # -- Extra volumes for dfdaemon.
   extraVolumes:
-  - name: storage
-    emptyDir: {}
-  - name: logs
-    emptyDir: {}
+    - name: storage
+      emptyDir: {}
+    - name: logs
+      emptyDir: {}
   # -- Extra volumeMounts for dfdaemon.
   extraVolumeMounts:
-  - name: storage
-    mountPath: /var/lib/dragonfly/
-  - name: logs
-    mountPath: /var/log/dragonfly/dfdaemon/
+    - name: storage
+      mountPath: /var/lib/dragonfly/
+    - name: logs
+      mountPath: /var/log/dragonfly/dfdaemon/
   dfinit:
     # -- Enable dfinit to override configuration of container runtime.
-    enable: true
+    enable: false
     # -- restartContainerRuntime indicates whether to restart container runtime when dfinit is enabled. it should be set to true when your first install dragonfly. If non-hot load configuration changes are made, the container runtime needs to be restarted.
     restartContainerRuntime: true
     image:
@@ -1358,26 +1358,62 @@ client:
           # to a ca file for use in authenticating with the registry namespace, refer to
           # https://github.com/containerd/containerd/blob/main/docs/hosts.md#ca-field.
           registries:
-          - hostNamespace: harbor.clusters.zjusct.io
-            serverAddr: https://harbor.clusters.zjusct.io
-            capabilities: ["pull", "resolve"]
-            skipVerify: true
-          - hostNamespace: docker.io
-            serverAddr: https://index.docker.io
-            capabilities: ["pull", "resolve"]
-            skipVerify: true
-          - hostNamespace: ghcr.io
-            serverAddr: https://ghcr.io
-            capabilities: ["pull", "resolve"]
-            skipVerify: true
-          - hostNamespace: quay.io
-            serverAddr: https://quay.io
-            capabilities: ["pull", "resolve"]
-            skipVerify: true
-          - hostNamespace: registry.k8s.io
-            serverAddr: https://registry.k8s.io
-            capabilities: ["pull", "resolve"]
-            skipVerify: true
+            - hostNamespace: docker.io
+              serverAddr: https://index.docker.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+              # ca: []
+            - hostNamespace: ghcr.io
+              serverAddr: https://ghcr.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+              # ca: []
+            - hostNamespace: quay.io
+              serverAddr: https://quay.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+            - hostNamespace: registry.k8s.io
+              serverAddr: https://registry.k8s.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+            - hostNamespace: harbor.clusters.zjusct.io
+              serverAddr: https://harbor.clusters.zjusct.io
+              capabilities: ["pull", "resolve"]
+              skipVerify: true
+        crio:
+          # -- configPath is the path of cri-o registries's configuration file.
+          configPath: /etc/containers/registries.conf
+          # -- unqualifiedSearchRegistries is an array of host[:port] registries to try when pulling an unqualified image, in order.
+          # Refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#global-settings.
+          unqualifiedSearchRegistries: ["registry.fedoraproject.org", "registry.access.redhat.com", "docker.io"]
+          # -- registries is the list of cri-o registries, refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#namespaced-registry-settings.
+          # prefix is the prefix of the user-specified image name, refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#choosing-a-registry-toml-table.
+          # location accepts the same format as the prefix field, and specifies the physical location of the prefix-rooted namespace,
+          # refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#remapping-and-mirroring-registries.
+          registries:
+            - prefix: docker.io
+            # location: docker.io
+            - prefix: ghcr.io
+            # location: ghcr.io
+        podman:
+          # -- configPath is the path of cri-o registries's configuration file.
+          configPath: /etc/containers/registries.conf
+          # -- unqualifiedSearchRegistries is an array of host[:port] registries to try when pulling an unqualified image, in order.
+          # Refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#global-settings.
+          unqualifiedSearchRegistries: ["registry.fedoraproject.org", "registry.access.redhat.com", "docker.io"]
+          # -- registries is the list of cri-o registries, refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#namespaced-registry-settings.
+          # prefix is the prefix of the user-specified image name, refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#choosing-a-registry-toml-table.
+          # location accepts the same format as the prefix field, and specifies the physical location of the prefix-rooted namespace,
+          # refer to https://github.com/containers/image/blob/main/docs/containers-registries.conf.5.md#remapping-and-mirroring-registries.
+          registries:
+            - prefix: docker.io
+            # location: docker.io
+            - prefix: ghcr.io
+            # location: ghcr.io
+        docker:
+          # # -- configPath is the path of docker configuration file where the proxy addr will be set.
+          # # Refer to https://docs.docker.com/engine/daemon/proxy/
+          configPath: /etc/docker/daemon.json
   config:
     # -- console prints log.
     console: true
@@ -1629,7 +1665,7 @@ client:
       # the request will use P2P technology to distribute the content. If the value is "false",
       # but url matches the regular expression in rules. The request will also use P2P technology to distribute the content.
       rules:
-      - regex: "blobs/sha256.*"
+        - regex: "blobs/sha256.*"
           # useTLS: false
           # redirect: ""
           # filteredQueryParams: []
@@ -1752,30 +1788,30 @@ client:
       additionalLabels: {}
       # -- Prometheus rules.
       rules:
-      - alert: ClientDown
-        expr: sum(dragonfly_client_version{container="client"}) == 0
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Client instance is down
-          message: Client instance {{ "{{ $labels.instance }}" }} is down
-      - alert: ClientHighNumberOfFailedDownloadTask
-        expr: sum(irate(dragonfly_client_download_task_failure_total{container="client"}[1m])) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: Client has a high number of failed download task
-          message: Client has a high number of failed download task
-      - alert: ClientSuccessRateOfDownloadingTask
-        expr: (sum(rate(dragonfly_client_download_task_total{container="client"}[1m])) - sum(rate(dragonfly_client_download_task_failure_total{container="client"}[1m]))) / sum(rate(dragonfly_client_download_task_total{container="client"}[1m])) < 0.6
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: Client's success rate of downloading task is low
-          message: Client's success rate of downloading task is low
+        - alert: ClientDown
+          expr: sum(dragonfly_client_version{container="client"}) == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Client instance is down
+            message: Client instance {{ "{{ $labels.instance }}" }} is down
+        - alert: ClientHighNumberOfFailedDownloadTask
+          expr: sum(irate(dragonfly_client_download_task_failure_total{container="client"}[1m])) > 100
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Client has a high number of failed download task
+            message: Client has a high number of failed download task
+        - alert: ClientSuccessRateOfDownloadingTask
+          expr: (sum(rate(dragonfly_client_download_task_total{container="client"}[1m])) - sum(rate(dragonfly_client_download_task_failure_total{container="client"}[1m]))) / sum(rate(dragonfly_client_download_task_total{container="client"}[1m])) < 0.6
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Client's success rate of downloading task is low
+            message: Client's success rate of downloading task is low
 
 externalManager:
   # -- External manager hostname.
@@ -1809,9 +1845,6 @@ mysql:
     service:
       # -- Mysql port.
       port: 3306
-    startupProbe:
-      enabled: true
-      failureThreshold: 60
 
 externalMysql:
   # -- Running GORM migration.
@@ -1848,7 +1881,7 @@ redis:
 externalRedis:
   # -- External redis server addresses.
   addrs:
-  - "redis.example.com:6379"
+    - "redis.example.com:6379"
   # -- External redis sentinel master name.
   masterName: ""
   # -- External redis username.
