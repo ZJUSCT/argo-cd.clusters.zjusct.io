@@ -134,12 +134,33 @@ feat(agent): update helm chart for nginx ingress
     - 一次会话仅迁移一个命名空间下的服务，不要同时对多个服务进行升级，以免出现混乱。
 2. 进行配置文件迁移：
     - Helm Chart：
-        1. 生成 charts/<chart>-<version>/<chart>/values.yaml 和 values/<chart>-<version>.yaml 的 Diff 文件，以保存我们对 Chart 的自定义修改。
-        2. 拉取新版本 Value 文件到 values/<chart>-<new_version>.yaml。这一步可以通过修改 kustomize 中的版本号然后执行 `kubectl kustomize` 来令 kustomize 自动拉取相应版本 Chart，Value 文件位于 Chart 目录下。
-        3. 按照 Diff 文件修改 values/<chart>-<new_version>.yaml。如果 Value 文件发生了变更，则应当根据具体情况处理。如果只是字段移动了位置，则找到新位置进行修改；如果发生了增删、引入新功能等变更，则需要视情况向用户报告并提供修改建议，与用户沟通确认后进行修改。
-        4. 删去旧的 Value 文件，修改 kustomization.yaml 中的相应字段
-        5. 运行 `helm dependency build` 和 `kubectl kustomize` 验证配置合法性
+        1. 生成旧版本上游默认值 `charts/<chart>-<version>/<chart>/values.yaml` 与当前仓库中的 `values/<chart>-<version>.yaml` 的 Diff 文件。这个 Diff 文件表示“我们相对上游做了哪些定制”，后续迁移必须以它为依据，而不是凭感觉修改。
+        2. 修改 `kustomization.yaml` 中的 Chart 版本，执行 `kubectl kustomize --enable-helm --load-restrictor=LoadRestrictionsNone`，令 Kustomize 自动拉取新版本 Chart。然后将新版本 Chart 自带的默认值文件 `charts/<chart>-<new_version>/<chart>/values.yaml` 复制为 `values/<chart>-<new_version>.yaml`，作为迁移起点。
+        3. 基于第 1 步得到的 Diff，逐项、手工地将旧定制迁移到新的 `values/<chart>-<new_version>.yaml` 中。核心目标是保持与新上游默认值之间的 Diff **尽可能小且清晰**，使后续审阅者能够一眼看出“哪些行是我们有意修改的”。
+            - 禁止直接复制旧的 `values/<chart>-<version>.yaml` 覆盖新文件，这会把上游新增字段、注释、格式调整、默认值写法一并抹掉，导致 Diff 噪音很大。
+            - 禁止为了“结果等价”而保留旧文件中的格式细节；例如上游已改为 `podSecurityContext: {}`，就不要继续写成两行形式；上游新增了注释或默认字段，也应保留。
+            - 每迁移一处配置，都应尽量在新文件中直接修改对应字段，而不是连带改动周围无关内容。
+            - 迁移完成后，应再次比较 `charts/<chart>-<new_version>/<chart>/values.yaml` 与 `values/<chart>-<new_version>.yaml`，确认 Diff 只包含业务上确有必要的定制项，不包含无意义的格式漂移、注释缺失、空值写法差异等噪音。
+            - 如果新版本 Value 文件发生结构变化，则按具体情况处理：字段仅移动位置时，在新位置重新施加同一项定制；字段被删除、重命名、语义改变或引入了新功能时，需要先分析影响，再向用户报告并沟通确认。
+        4. 确认迁移完成后，删除旧的 Value 文件，并更新 `kustomization.yaml` 中对应的 `valuesFile` 路径。
+        5. 运行 `helm dependency build`（如适用）和 `kubectl kustomize --enable-helm --load-restrictor=LoadRestrictionsNone` 验证配置合法性。
     - Raw Resource：TODO
-3. 向用户报告配置文件迁移结果，并提供升级后可能需要注意的事项（如新版本引入了新的配置项、旧版本的某些配置项被废弃了等）。如果用户有任何问题或需要进一步的解释，提供详细的说明和帮助。
+3. 向用户报告配置文件迁移结果。报告不应只说“已经升级完成”，而应当按固定结构说明迁移结论，帮助用户快速判断本次升级的风险、影响与后续动作。建议至少包含以下内容：
+    - **本次更新**：说明服务名、Chart 版本变化、对应应用版本变化。例如：`headlamp 0.40.0 -> 0.41.0`，或 `harbor chart 1.18.2 -> 1.18.3，对应 app 2.14.2 -> 2.14.3`。
+    - **上游 Values 变更**：总结新旧上游默认值之间发生了什么变化。
+        - 如果只有镜像 Tag、Chart 元数据、注释等小改动，应明确说明“上游 Values 基本无结构性变化，本次主要是版本号/镜像版本更新”。
+        - 如果新增了字段、删除了字段、字段语义变化、默认值变化、暴露方式变化、存储行为变化、安全相关默认值变化等，应逐条列出。
+    - **对我们的影响**：说明这些上游变更对当前仓库配置的实际影响。
+        - 哪些变更对我们无影响，为什么无影响。
+        - 哪些变更要求我们迁移字段位置、调整配置写法或新增配置。
+        - 哪些变更可能影响运行时行为、兼容性、资源占用、数据路径、访问方式或安全性。
+    - **本次迁移结果**：说明我们最终保留了哪些定制项，是否实现了与新上游默认值的最小 Diff，是否删除了旧 values 文件，是否更新了 `kustomization.yaml`。
+    - **验证结果**：明确列出运行了哪些验证命令，以及结果是否通过。例如 `helm dependency build`、`kubectl kustomize --enable-helm --load-restrictor=LoadRestrictionsNone`。
+    - **后续注意事项**：提示升级后需要重点关注的内容，例如首次启动时间、数据库迁移、镜像同步、访问路径变化、新增告警、废弃字段、行为变化等。如果没有特别注意事项，也应明确写“暂未发现需要特别关注的额外事项”。
+    - **待用户确认事项**：如果升级过程中遇到语义变化、新增功能开关、废弃字段替代方案、潜在破坏性调整等，需要明确列出“哪些点需要用户决策”，而不是直接替用户拍板。
+
+    推荐输出顺序为：**本次更新** → **上游 Values 变更** → **对我们的影响** → **本次迁移结果** → **验证结果** → **后续注意事项/待确认事项**。
+
+    如果用户有任何问题或需要进一步的解释，提供详细的说明和帮助。
 4. 提交 Git，由用户推送到远程仓库，触发 Argo CD 同步。
 5. 监控升级过程，检查升级后服务的状态和日志，确保服务正常运行。如果出现问题，按照排查流程进行问题排查，并及时向用户报告问题和解决方案。
