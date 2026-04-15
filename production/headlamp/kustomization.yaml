@@ -9,8 +9,8 @@ helmCharts:
   repo: https://kubernetes-sigs.github.io/headlamp/
   includeCRDs: true
   releaseName: headlamp
-  valuesFile: values/headlamp-0.40.0.yaml
-  version: 0.40.0
+  valuesFile: values/headlamp-0.41.0.yaml
+  version: 0.41.0
   namespace: headlamp
 transformers:
   - ../../image-prefix.yaml

@@ -122,4 +122,24 @@ feat(agent): update helm chart for nginx ingress
 
 ## 经验
 
-- 执行复杂命令时（不管是在 K8S Pod 还是本地）建议写脚本执行，否则可能出现格式、转义等问题
+- 执行复杂命令时（不管是在 K8S Pod 还是本地）建议先在本地写好脚本，然后拷贝到目标环境执行。否则可能出现格式、转义等问题。
+
+## 升级
+
+本节描述 K8S 服务升级流程，Agent 应当严格按照本节描述的流程进行服务升级。
+
+1. 查询新版本：
+    - 运行 scripts/check-version.py 查询是否有可升级的版本。该脚本自动从上游获取已发布超过 7 天的最新稳定版。
+    - 注意配置文件中是否有关于版本升级的特殊说明，例如 Overleaf 依赖老版本 MongoDB，注释中有说明不应升级。
+    - 一次会话仅迁移一个命名空间下的服务，不要同时对多个服务进行升级，以免出现混乱。
+2. 进行配置文件迁移：
+    - Helm Chart：
+        1. 生成 charts/<chart>-<version>/<chart>/values.yaml 和 values/<chart>-<version>.yaml 的 Diff 文件，以保存我们对 Chart 的自定义修改。
+        2. 拉取新版本 Value 文件到 values/<chart>-<new_version>.yaml。这一步可以通过修改 kustomize 中的版本号然后执行 `kubectl kustomize` 来令 kustomize 自动拉取相应版本 Chart，Value 文件位于 Chart 目录下。
+        3. 按照 Diff 文件修改 values/<chart>-<new_version>.yaml。如果 Value 文件发生了变更，则应当根据具体情况处理。如果只是字段移动了位置，则找到新位置进行修改；如果发生了增删、引入新功能等变更，则需要视情况向用户报告并提供修改建议，与用户沟通确认后进行修改。
+        4. 删去旧的 Value 文件，修改 kustomization.yaml 中的相应字段
+        5. 运行 `helm dependency build` 和 `kubectl kustomize` 验证配置合法性
+    - Raw Resource：TODO
+3. 向用户报告配置文件迁移结果，并提供升级后可能需要注意的事项（如新版本引入了新的配置项、旧版本的某些配置项被废弃了等）。如果用户有任何问题或需要进一步的解释，提供详细的说明和帮助。
+4. 提交 Git，由用户推送到远程仓库，触发 Argo CD 同步。
+5. 监控升级过程，检查升级后服务的状态和日志，确保服务正常运行。如果出现问题，按照排查流程进行问题排查，并及时向用户报告问题和解决方案。
