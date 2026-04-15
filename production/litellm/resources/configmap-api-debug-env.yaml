@@ -6,7 +6,7 @@ metadata:
 data:
   # https://docs.litellm.ai/docs/proxy/debugging
   JSON_LOGS: "True"
-  LITELLM_LOG: "DEBUG"
+  LITELLM_LOG: "WARNING"
   # HTTP Proxy Request Debug
   # https://docs.litellm.ai/docs/guides/security_settings
   # HTTPS_PROXY: 'http://username:password@proxy_uri:port'

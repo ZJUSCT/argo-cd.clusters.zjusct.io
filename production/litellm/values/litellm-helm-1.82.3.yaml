@@ -89,7 +89,7 @@ service:
 # Separate health app configuration
 # When enabled, health checks will use a separate port and the application
 # will receive SEPARATE_HEALTH_APP=1 and SEPARATE_HEALTH_PORT from environment variables
-separateHealthApp: false
+separateHealthApp: true
 separateHealthPort: 8081
 
 # Probe tuning for proxy container
