@@ -8,7 +8,7 @@ replicaCount: 1
 image:
   # Use "ghcr.io/berriai/litellm-database" for optimized image with database
   repository: ghcr.io/berriai/litellm-database
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   # tag: "main-latest"
   tag: ""
@@ -19,13 +19,11 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
-  annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
+  annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
@@ -33,9 +31,19 @@ serviceAccount:
 # annotations for litellm deployment
 deploymentAnnotations: {}
 deploymentLabels: {}
+deploymentMinReadySeconds: 0
+
 # annotations for litellm pods
 podAnnotations: {}
 podLabels: {}
+
+# -- Deployment strategy configuration
+# Example:
+#   type: RollingUpdate
+#   rollingUpdate:
+#     maxUnavailable: 0
+#     maxSurge: 1
+strategy: {}
 
 terminationGracePeriodSeconds: 90
 topologySpreadConstraints:
@@ -84,6 +92,31 @@ service:
 separateHealthApp: false
 separateHealthPort: 8081
 
+# Probe tuning for proxy container
+livenessProbe:
+  path: /health/liveliness
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  path: /health/readiness
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
+
+startupProbe:
+  path: /health/readiness
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 30
+
 ingress:
   enabled: false
   className: "nginx"
@@ -126,7 +159,6 @@ proxy_config:
     callbacks: ["otel", "prometheus"]
 
   mcp_servers:
-    # HTTP
     zhipu_websearch:
       url: "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
       transport: "http"
@@ -139,7 +171,6 @@ proxy_config:
       auth_type: "bearer_token"
       auth_value: "os.environ/PLAN_ZHIPU_API_KEY"
 
-    # stdio 视觉理解
     zhipu_vision:
       transport: "stdio"
       command: "npx"
@@ -514,6 +545,40 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# Autoscaling with keda is mutually exclusive with hpa
+keda:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  pollingInterval: 30
+  cooldownPeriod: 300
+  # fallback:
+  #   failureThreshold: 3
+  #   replicas: 11
+  restoreToOriginalReplicaCount: false
+  scaledObject:
+    annotations: {}
+  triggers: []
+  # - type: prometheus
+  #   metadata:
+  #     serverAddress: http://<prometheus-host>:9090
+  #     metricName: http_requests_total
+  #     threshold: '100'
+  #     query: sum(rate(http_requests_total{deployment="my-deployment"}[2m]))
+  behavior: {}
+  # scaleDown:
+  #   stabilizationWindowSeconds: 300
+  #   policies:
+  #   - type: Pods
+  #     value: 1
+  #     periodSeconds: 180
+  # scaleUp:
+  #   stabilizationWindowSeconds: 300
+  #   policies:
+  #   - type: Pods
+  #     value: 2
+  #     periodSeconds: 60
+
 # Additional volumes on the output Deployment definition.
 volumes: []
 # - name: foo
@@ -558,6 +623,14 @@ db:
   #  instance.  See the "postgresql" top level key for additional configuration.
   deployStandalone: true
 
+# Lifecycle hooks for the LiteLLM container
+# Example:
+# lifecycle:
+#   preStop:
+#     exec:
+#       command: ["/bin/sh", "-c", "sleep 10"]
+lifecycle: {}
+
 # Settings for Bitnami postgresql chart (if db.deployStandalone is true, ignored
 #  otherwise)
 postgresql:
@@ -573,10 +646,9 @@ postgresql:
 
     # A secret is created by this chart (litellm-helm) with the credentials that
     #  the new Postgres instance should use.
-    existingSecret: "litellm-dbcredentials" # Created by litellm-helm with the username and password specified above.
+    # existingSecret: ""
     # secretKeys:
     #   userPasswordKey: password
-
   primary:
     persistence:
       storageClass: openebs-hostpath
@@ -595,6 +667,10 @@ migrationJob:
   retries: 3 # Number of retries for the Job in case of failure
   backoffLimit: 4 # Backoff limit for Job restarts
   disableSchemaUpdate: false # Skip schema migrations for specific environments. When True, the job will exit with code 0.
+  # Optional service account for the migration job.
+  # Only used when migrationJob.hooks.helm.enabled=true and serviceAccount.create=true.
+  # In that case, pre-install/pre-upgrade hooks run before normal resources, so this defaults to "default".
+  serviceAccountName: ""
   annotations: {}
   ttlSecondsAfterFinished: 120
   resources: {}
@@ -602,6 +678,7 @@ migrationJob:
   #    cpu: 100m
   #    memory: 100Mi
   extraContainers: []
+  extraInitContainers: []
 
   # Hook configuration
   hooks:
