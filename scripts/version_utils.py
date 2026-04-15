@@ -2,18 +2,21 @@
 
 import json
 import re
+import threading
 import time
 import urllib.request
 import urllib.error
 import urllib.parse
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 try:
     import yaml
 except ImportError:
     raise SystemExit("Error: PyYAML not installed. Install with: pip install pyyaml")
+
+_YAML_LOADER = yaml.CSafeLoader if hasattr(yaml, "CSafeLoader") else yaml.SafeLoader
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -50,16 +53,48 @@ def _is_old_enough(timestamp_str: Optional[str]) -> bool:
 # ---------------------------------------------------------------------------
 
 class VersionCache:
-    """Simple dict-based cache keyed by (type, identifier)."""
+    """Simple dict-based cache keyed by (type, identifier).
+
+    Supports per-key locking so that expensive operations (e.g. downloading a
+    large Helm index.yaml) are only performed once even when multiple threads
+    request the same key concurrently.
+    """
 
     def __init__(self) -> None:
-        self._data: Dict[Tuple[str, str], Optional[str]] = {}
+        self._data: Dict[Tuple[str, str], Any] = {}
+        self._lock = threading.Lock()
+        self._key_locks: Dict[Tuple[str, str], threading.Lock] = {}
 
-    def get(self, key: Tuple[str, str]) -> Optional[str]:
+    def _key_lock(self, key: Tuple[str, str]) -> threading.Lock:
+        with self._lock:
+            if key not in self._key_locks:
+                self._key_locks[key] = threading.Lock()
+            return self._key_locks[key]
+
+    def get(self, key: Tuple[str, str]) -> Any:
         return self._data.get(key)
 
-    def put(self, key: Tuple[str, str], value: Optional[str]) -> None:
+    def put(self, key: Tuple[str, str], value: Any) -> None:
         self._data[key] = value
+
+    def get_or_compute(self, key: Tuple[str, str], compute: Callable[[], Any]) -> Any:
+        """Return cached value for *key* or run *compute* to produce it.
+
+        *compute* is guaranteed to run at most once per key, even across
+        multiple threads.
+        """
+        value = self.get(key)
+        if value is not None:
+            return value
+
+        lock = self._key_lock(key)
+        with lock:
+            value = self.get(key)
+            if value is not None:
+                return value
+            value = compute()
+            self.put(key, value)
+            return value
 
 
 # ---------------------------------------------------------------------------
@@ -70,7 +105,7 @@ def load_yaml(file_path: Path) -> Optional[dict]:
     """Load and parse a YAML file."""
     try:
         with open(file_path, "r") as f:
-            return yaml.safe_load(f)
+            return yaml.load(f, Loader=_YAML_LOADER)
     except FileNotFoundError:
         return None
     except yaml.YAMLError:
@@ -340,19 +375,26 @@ def get_latest_helm_version_http(chart_name: str, repo_url: str,
 
     if not repo_url.endswith("/"):
         repo_url += "/"
-    index_url = repo_url + "index.yaml"
 
-    try:
-        req = urllib.request.Request(index_url)
-        req.add_header("User-Agent", _helm_user_agent())
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            index_data = yaml.safe_load(resp.read())
-    except urllib.error.HTTPError as e:
+    # Cache parsed index.yaml per repo URL to avoid repeated large downloads.
+    # Use get_or_compute so that concurrent requests for the same repo block
+    # on a per-key lock and only one thread performs the download+parse.
+    index_key = ("helm_index", repo_url)
+
+    def _fetch_index() -> Optional[dict]:
+        index_url = repo_url + "index.yaml"
+        try:
+            req = urllib.request.Request(index_url)
+            req.add_header("User-Agent", _helm_user_agent())
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                return yaml.load(resp.read(), Loader=_YAML_LOADER)
+        except Exception:
+            return None
+
+    index_data = cache.get_or_compute(index_key, _fetch_index)
+    if index_data is None:
         cache.put(key, None)
-        return None, f"HTTP {e.code} {e.reason}"
-    except Exception as e:
-        cache.put(key, None)
-        return None, str(e)
+        return None, "failed to fetch or parse index.yaml"
 
     entries = index_data.get("entries", {})
     chart_entries = entries.get(chart_name, [])
