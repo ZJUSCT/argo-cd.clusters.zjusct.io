@@ -9,6 +9,6 @@ helmCharts:
   repo: https://helm.goharbor.io
   includeCRDs: true
   releaseName: harbor
-  valuesFile: values/harbor-1.18.2.yaml
-  version: 1.18.2
+  valuesFile: values/harbor-1.18.3.yaml
+  version: 1.18.3
   namespace: harbor
