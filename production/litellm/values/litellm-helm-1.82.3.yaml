@@ -266,237 +266,183 @@ proxy_config:
         api_key: os.environ/PLAN_MINIMAX_API_KEY
         custom_llm_provider: hosted_vllm
 
-    ####################################################################
-    # 智谱华章 - GLM - Max
-    ####################################################################
-    - model_name: plan/zhipu/glm-4.5/openai
-      litellm_params:
-        model: glm-4.5
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-4.5-air/openai
-      litellm_params:
-        model: glm-4.5-air
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-4.6/openai
-      litellm_params:
-        model: glm-4.6
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-4.7/openai
-      litellm_params:
-        model: glm-4.7
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-5/openai
-      litellm_params:
-        model: glm-5
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-5-turbo/openai
-      litellm_params:
-        model: glm-5-turbo
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-5.1/openai
-      litellm_params:
-        model: glm-5.1
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-4.5/anthropic
-      litellm_params:
-        model: glm-4.5
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-4.5-air/anthropic
-      litellm_params:
-        model: glm-4.5-air
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-4.6/anthropic
-      litellm_params:
-        model: glm-4.6
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-4.7/anthropic
-      litellm_params:
-        model: glm-4.7
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-5/anthropic
-      litellm_params:
-        model: glm-5
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-5-turbo/anthropic
-      litellm_params:
-        model: glm-5-turbo
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-5.1/anthropic
-      litellm_params:
-        model: glm-5.1
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY
-        custom_llm_provider: anthropic
+    # ####################################################################
+    # # 智谱华章 - GLM - Max
+    # ####################################################################
+    # - model_name: plan/zhipu/glm-4.5/openai
+    #   litellm_params:
+    #     model: glm-4.5
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-4.5-air/openai
+    #   litellm_params:
+    #     model: glm-4.5-air
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-4.6/openai
+    #   litellm_params:
+    #     model: glm-4.6
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-4.7/openai
+    #   litellm_params:
+    #     model: glm-4.7
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-5/openai
+    #   litellm_params:
+    #     model: glm-5
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-5-turbo/openai
+    #   litellm_params:
+    #     model: glm-5-turbo
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-5.1/openai
+    #   litellm_params:
+    #     model: glm-5.1
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-4.5/anthropic
+    #   litellm_params:
+    #     model: glm-4.5
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-4.5-air/anthropic
+    #   litellm_params:
+    #     model: glm-4.5-air
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-4.6/anthropic
+    #   litellm_params:
+    #     model: glm-4.6
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-4.7/anthropic
+    #   litellm_params:
+    #     model: glm-4.7
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-5/anthropic
+    #   litellm_params:
+    #     model: glm-5
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-5-turbo/anthropic
+    #   litellm_params:
+    #     model: glm-5-turbo
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-5.1/anthropic
+    #   litellm_params:
+    #     model: glm-5.1
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY
+    #     custom_llm_provider: anthropic
 
-    ####################################################################
-    # 智谱华章 - GLM - pro (Key 2)  presented by Rorineko
-    ####################################################################
-    # OpenAI API
-    - model_name: plan/zhipu/glm-4.5/openai
-      litellm_params:
-        model: glm-4.5
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-4.5-air/openai
-      litellm_params:
-        model: glm-4.5-air
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-4.6/openai
-      litellm_params:
-        model: glm-4.6
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-4.7/openai
-      litellm_params:
-        model: glm-4.7
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-5/openai
-      litellm_params:
-        model: glm-5
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-5-turbo/openai
-      litellm_params:
-        model: glm-5-turbo
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu/glm-5.1/openai
-      litellm_params:
-        model: glm-5.1
-        api_base: https://open.bigmodel.cn/api/coding/paas/v4
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: hosted_vllm
-    # Anthropic API
-    - model_name: plan/zhipu/glm-4.5/anthropic
-      litellm_params:
-        model: glm-4.5
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-4.5-air/anthropic
-      litellm_params:
-        model: glm-4.5-air
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-4.6/anthropic
-      litellm_params:
-        model: glm-4.6
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-4.7/anthropic
-      litellm_params:
-        model: glm-4.7
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-5/anthropic
-      litellm_params:
-        model: glm-5
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-5-turbo/anthropic
-      litellm_params:
-        model: glm-5-turbo
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: anthropic
-    - model_name: plan/zhipu/glm-5.1/anthropic
-      litellm_params:
-        model: glm-5.1
-        api_base: https://open.bigmodel.cn/api/anthropic
-        api_key: os.environ/PLAN_ZHIPU_API_KEY_2
-        custom_llm_provider: anthropic
-
-    ####################################################################
-    # Duckcoding
-    ####################################################################
-    - model_name: api/duckcoding/claude-opus-4-6
-      litellm_params:
-        model: claude-opus-4-6
-        api_base: https://api.duckcoding.ai
-        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
-        custom_llm_provider: anthropic
-        extra_headers:
-          User-Agent: "claude-code/0.1.0"
-    - model_name: api/duckcoding/claude-sonnet-4-6
-      litellm_params:
-        model: claude-sonnet-4-6
-        api_base: https://api.duckcoding.ai
-        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
-        custom_llm_provider: anthropic
-        extra_headers:
-          User-Agent: "claude-code/0.1.0"
-    - model_name: api/duckcoding/claude-haiku-4-5-20251001
-      litellm_params:
-        model: claude-haiku-4-5-20251001
-        api_base: https://api.duckcoding.ai
-        api_key: os.environ/API_DUCKCODING_CLAUDE_API_KEY
-        custom_llm_provider: anthropic
-        extra_headers:
-          User-Agent: "claude-code/0.1.0"
-    - model_name: api/duckcoding/gpt-5.3-codex
-      litellm_params:
-        model: gpt-5.3-codex
-        api_base: https://api.duckcoding.ai/v1
-        api_key: os.environ/API_DUCKCODING_CODEX_API_KEY
-        custom_llm_provider: openai
-    - model_name: api/duckcoding/gpt-5.4
-      litellm_params:
-        model: gpt-5.4
-        api_base: https://api.duckcoding.ai/v1
-        api_key: os.environ/API_DUCKCODING_CODEX_API_KEY
-        custom_llm_provider: openai
-    - model_name: api/duckcoding/gemini-3.1-pro
-      litellm_params:
-        model: gemini-3.1-pro-preview
-        api_base: https://api.duckcoding.ai/v1
-        api_key: os.environ/API_DUCKCODING_GEMINI_API_KEY
-        custom_llm_provider: openai
-
-    ####################################################################
-    # Openrouter
-    ####################################################################
-    - model_name: api/openrouter/auto
-      litellm_params:
-        model: openrouter/openrouter/auto
-        api_key: os.environ/API_OPENROUTER_API_KEY
+    # ####################################################################
+    # # 智谱华章 - GLM - pro (Key 2)  presented by Rorineko
+    # ####################################################################
+    # # OpenAI API
+    # - model_name: plan/zhipu/glm-4.5/openai
+    #   litellm_params:
+    #     model: glm-4.5
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-4.5-air/openai
+    #   litellm_params:
+    #     model: glm-4.5-air
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-4.6/openai
+    #   litellm_params:
+    #     model: glm-4.6
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-4.7/openai
+    #   litellm_params:
+    #     model: glm-4.7
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-5/openai
+    #   litellm_params:
+    #     model: glm-5
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-5-turbo/openai
+    #   litellm_params:
+    #     model: glm-5-turbo
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: hosted_vllm
+    # - model_name: plan/zhipu/glm-5.1/openai
+    #   litellm_params:
+    #     model: glm-5.1
+    #     api_base: https://open.bigmodel.cn/api/coding/paas/v4
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: hosted_vllm
+    # # Anthropic API
+    # - model_name: plan/zhipu/glm-4.5/anthropic
+    #   litellm_params:
+    #     model: glm-4.5
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-4.5-air/anthropic
+    #   litellm_params:
+    #     model: glm-4.5-air
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-4.6/anthropic
+    #   litellm_params:
+    #     model: glm-4.6
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-4.7/anthropic
+    #   litellm_params:
+    #     model: glm-4.7
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-5/anthropic
+    #   litellm_params:
+    #     model: glm-5
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-5-turbo/anthropic
+    #   litellm_params:
+    #     model: glm-5-turbo
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: anthropic
+    # - model_name: plan/zhipu/glm-5.1/anthropic
+    #   litellm_params:
+    #     model: glm-5.1
+    #     api_base: https://open.bigmodel.cn/api/anthropic
+    #     api_key: os.environ/PLAN_ZHIPU_API_KEY_2
+    #     custom_llm_provider: anthropic
 
   router_settings:
     # Options: simple-shuffle (random, default), latency-based-routing, usage-based-routing (perf impact), least-busy, cost-based-routing
