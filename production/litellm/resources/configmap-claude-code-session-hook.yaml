@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-claude-code-session-hook
+  namespace: litellm
+data:
+  claude_code_session.py: |
+    from litellm.integrations.custom_logger import CustomLogger
+
+
+    class ClaudeCodeSessionMapper(CustomLogger):
+        CLAUDE_CODE_SESSION_HEADER = "x-claude-code-session-id"
+
+        async def async_pre_call_hook(
+            self, user_api_key_dict, cache, data, call_type
+        ):
+            headers = (data.get("proxy_server_request") or {}).get("headers", {})
+
+            session_id = headers.get(self.CLAUDE_CODE_SESSION_HEADER)
+
+            if session_id:
+                if "metadata" not in data:
+                    data["metadata"] = {}
+                data["metadata"]["session_id"] = session_id
+
+            return data
+
+
+    proxy_handler_instance = ClaudeCodeSessionMapper()

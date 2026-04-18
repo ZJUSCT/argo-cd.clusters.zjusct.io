@@ -157,6 +157,7 @@ proxyConfigMap:
 proxy_config:
   litellm_settings:
     callbacks: ["otel", "prometheus"]
+    custom_callback_module: /app/hooks/claude_code_session.py
 
   mcp_servers:
     zhipu_websearch:
@@ -537,6 +538,9 @@ proxy_config:
   router_settings:
     # Options: simple-shuffle (random, default), latency-based-routing, usage-based-routing (perf impact), least-busy, cost-based-routing
     routing_strategy: least-busy
+    optional_pre_call_checks:
+      - session_affinity
+    deployment_affinity_ttl_seconds: 3600
 
     # Failure tolerance
     allowed_fails: 3          # Max failures per minute before deployment enters cooldown
@@ -616,17 +620,16 @@ keda:
   #     periodSeconds: 60
 
 # Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+volumes:
+  - name: claude-code-session-hook
+    configMap:
+      name: litellm-claude-code-session-hook
 
 # Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
+volumeMounts:
+  - name: claude-code-session-hook
+    mountPath: /app/hooks
+    readOnly: true
 
 nodeSelector: {}
 
