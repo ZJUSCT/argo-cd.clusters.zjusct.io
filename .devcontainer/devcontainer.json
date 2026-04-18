@@ -9,6 +9,11 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "privileged": true,
   "init": true,
+  "containerEnv": {
+    "HTTP_PROXY": "http://172.28.0.4:3128",
+    "HTTPS_PROXY": "http://172.28.0.4:3128",
+    "NO_PROXY": "localhost,zjusct.io"
+  },
   "mounts": [
     "source=/dev/kvm,target=/dev/kvm,type=bind",
     "source=${localEnv:HOME},target=/home/host,type=bind,readonly",
@@ -26,6 +31,7 @@
       "moby": false
     }
   },
+  "shutdownAction": "none",
   "customizations": {
     "vscode": {
       "extensions": [

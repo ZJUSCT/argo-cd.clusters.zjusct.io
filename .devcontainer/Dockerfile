@@ -1,21 +1,23 @@
 # https://mcr.microsoft.com/en-us/artifact/mar/devcontainers/base/about
 ARG DEBIAN_VERSION=trixie
+# FROM mcr.microsoft.com/devcontainers/base:${DEBIAN_VERSION}
 FROM harbor.clusters.zjusct.io/mcr.microsoft.com/devcontainers/base:${DEBIAN_VERSION}
+
+ARG HTTP_PROXY=http://172.28.0.4:3128
+ARG HTTPS_PROXY=http://172.28.0.4:3128
+ARG NO_PROXY=localhost,zjusct.io
 
 ARG MIRROR=mirrors.zju.edu.cn
 ARG K8S_VERSION=v1.35
 ARG KUBESEAL_VERSION=0.36.1
-ARG PROXY_URL=http://172.28.0.4:3128
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY squid.crt /usr/local/share/ca-certificates/squid.crt
-COPY proxy.sh /etc/profile.d/proxy.sh
 RUN update-ca-certificates
 
 RUN <<EOF
 set -xe
 . /etc/os-release
-. /etc/profile.d/proxy.sh
 
 cat <<EOT > /etc/apt/sources.list.d/debian.sources
 Types: deb
@@ -62,7 +64,6 @@ apt-get install -y --no-install-recommends \
     wget \
     jq \
     git \
-    npm \
     packer \
     kubectl \
     helm \
@@ -79,7 +80,8 @@ apt-get install -y --no-install-recommends \
     qemu-utils \
     ovmf \
     cloud-init \
-    cloud-image-utils
+    cloud-image-utils \
+    minio-client
 apt-get autoremove -y
 apt-get distclean
 
@@ -91,7 +93,6 @@ EOF
 RUN <<EOF
 set -xe
 . /etc/os-release
-. /etc/profile.d/proxy.sh
 
 # https://argo-cd.readthedocs.io/en/stable/cli_installation/
 curl -sSL "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64" -o /usr/local/bin/argocd
@@ -101,20 +102,18 @@ chmod +x /usr/local/bin/argocd
 cd /usr/local/bin
 curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
 
-# https://github.com/minio/mc
-wget -q https://dl.min.io/client/mc/release/linux-amd64/mc
-chmod +x mc
-
 # https://github.com/bitnami-labs/sealed-secrets
 curl -sSL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" | tar xz -C /usr/local/bin/
 chmod +x /usr/local/bin/kubeseal
 
-npm config --global set registry https://registry.npmmirror.com
-npm install -g \
-    opencode-ai \
-    @anthropic-ai/claude-code \
-    @openai/codex \
-    @google/gemini-cli
+# https://github.com/zellij-org/zellij
+curl -sSL "https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /usr/local/bin/
+chmod +x /usr/local/bin/zellij
+
+# https://claude.ai/install.sh
+version=$(curl -fsSL https://downloads.claude.ai/claude-code-releases/latest)
+curl -fsSL -o /usr/local/bin/claude "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
+chmod 755 /usr/local/bin/claude
 
 pip config --global set global.index-url https://${MIRROR}/pypi/web/simple
 EOF
