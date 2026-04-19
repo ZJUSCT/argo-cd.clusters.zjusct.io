@@ -46,8 +46,7 @@ podLabels: {}
 strategy: {}
 
 terminationGracePeriodSeconds: 90
-topologySpreadConstraints:
-  []
+topologySpreadConstraints: []
   # - maxSkew: 1
   #   topologyKey: kubernetes.io/hostname
   #   whenUnsatisfiable: DoNotSchedule
@@ -58,8 +57,7 @@ topologySpreadConstraints:
 # At the time of writing, the litellm docker image requires write access to the
 #  filesystem on startup so that prisma can install some dependencies.
 podSecurityContext: {}
-securityContext:
-  {}
+securityContext: {}
   # capabilities:
   #   drop:
   #     - ALL
@@ -86,9 +84,9 @@ service:
   # optionally specify loadBalancerClass
   # loadBalancerClass: tailscale
 
-# Separate health app configuration
-# When enabled, health checks will use a separate port and the application
-# will receive SEPARATE_HEALTH_APP=1 and SEPARATE_HEALTH_PORT from environment variables
+  # Separate health app configuration
+  # When enabled, health checks will use a separate port and the application
+  # will receive SEPARATE_HEALTH_APP=1 and SEPARATE_HEALTH_PORT from environment variables
 separateHealthApp: true
 separateHealthPort: 8081
 
@@ -121,8 +119,7 @@ ingress:
   enabled: false
   className: "nginx"
   labels: {}
-  annotations:
-    {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
@@ -135,9 +132,9 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# masterkey: changeit
+  # masterkey: changeit
 
-# if set, use this secret for the master key; otherwise, autogenerate a new one
+  # if set, use this secret for the master key; otherwise, autogenerate a new one
 masterkeySecretName: "litellm-masterkey"
 
 # if set, use this secret key for the master key; otherwise, use the default key
@@ -151,12 +148,12 @@ proxyConfigMap:
   # name: ""
   # key: "config.yaml"
 
-# The elements within proxy_config are rendered as config.yaml for the proxy
-#  Examples: https://github.com/BerriAI/litellm/tree/main/litellm/proxy/example_config_yaml
-#  Reference: https://docs.litellm.ai/docs/proxy/configs
+  # The elements within proxy_config are rendered as config.yaml for the proxy
+  #  Examples: https://github.com/BerriAI/litellm/tree/main/litellm/proxy/example_config_yaml
+  #  Reference: https://docs.litellm.ai/docs/proxy/configs
 proxy_config:
   litellm_settings:
-    callbacks: ["otel", "prometheus"]
+    callbacks: [ "otel", "prometheus" ]
     custom_callback_module: /app/hooks/claude_code_session.py
 
   mcp_servers:
@@ -175,7 +172,7 @@ proxy_config:
     zhipu_vision:
       transport: "stdio"
       command: "npx"
-      args: ["-y", "@z_ai/mcp-server@latest"]
+      args: [ "-y", "@z_ai/mcp-server@latest" ]
       env:
         Z_AI_API_KEY: "os.environ/PLAN_ZHIPU_PRO_ZBL"
         Z_AI_MODE: "ZHIPU"
@@ -359,86 +356,86 @@ proxy_config:
     # 智谱华章 - GLM - Max - GH
     ####################################################################
     # OpenAI API
-    - model_name: plan/zhipu_2/glm-4.5/openai
+    - model_name: plan/zhipu/glm-4.5/openai
       litellm_params:
         model: glm-4.5
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_2/glm-4.5-air/openai
+    - model_name: plan/zhipu/glm-4.5-air/openai
       litellm_params:
         model: glm-4.5-air
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_2/glm-4.6/openai
+    - model_name: plan/zhipu/glm-4.6/openai
       litellm_params:
         model: glm-4.6
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_2/glm-4.7/openai
+    - model_name: plan/zhipu/glm-4.7/openai
       litellm_params:
         model: glm-4.7
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_2/glm-5/openai
+    - model_name: plan/zhipu/glm-5/openai
       litellm_params:
         model: glm-5
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_2/glm-5-turbo/openai
+    - model_name: plan/zhipu/glm-5-turbo/openai
       litellm_params:
         model: glm-5-turbo
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_2/glm-5.1/openai
+    - model_name: plan/zhipu/glm-5.1/openai
       litellm_params:
         model: glm-5.1
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: hosted_vllm
     # Anthropic API
-    - model_name: plan/zhipu_2/glm-4.5/anthropic
+    - model_name: plan/zhipu/glm-4.5/anthropic
       litellm_params:
         model: glm-4.5
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_2/glm-4.5-air/anthropic
+    - model_name: plan/zhipu/glm-4.5-air/anthropic
       litellm_params:
         model: glm-4.5-air
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_2/glm-4.6/anthropic
+    - model_name: plan/zhipu/glm-4.6/anthropic
       litellm_params:
         model: glm-4.6
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_2/glm-4.7/anthropic
+    - model_name: plan/zhipu/glm-4.7/anthropic
       litellm_params:
         model: glm-4.7
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_2/glm-5/anthropic
+    - model_name: plan/zhipu/glm-5/anthropic
       litellm_params:
         model: glm-5
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_2/glm-5-turbo/anthropic
+    - model_name: plan/zhipu/glm-5-turbo/anthropic
       litellm_params:
         model: glm-5-turbo
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_GH
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_2/glm-5.1/anthropic
+    - model_name: plan/zhipu/glm-5.1/anthropic
       litellm_params:
         model: glm-5.1
         api_base: https://open.bigmodel.cn/api/anthropic
@@ -449,86 +446,86 @@ proxy_config:
     # 智谱华章 - GLM - Max - GH
     ####################################################################
     # OpenAI API
-    - model_name: plan/zhipu_3/glm-4.5/openai
+    - model_name: plan/zhipu/glm-4.5/openai
       litellm_params:
         model: glm-4.5
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_3/glm-4.5-air/openai
+    - model_name: plan/zhipu/glm-4.5-air/openai
       litellm_params:
         model: glm-4.5-air
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_3/glm-4.6/openai
+    - model_name: plan/zhipu/glm-4.6/openai
       litellm_params:
         model: glm-4.6
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_3/glm-4.7/openai
+    - model_name: plan/zhipu/glm-4.7/openai
       litellm_params:
         model: glm-4.7
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_3/glm-5/openai
+    - model_name: plan/zhipu/glm-5/openai
       litellm_params:
         model: glm-5
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_3/glm-5-turbo/openai
+    - model_name: plan/zhipu/glm-5-turbo/openai
       litellm_params:
         model: glm-5-turbo
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: hosted_vllm
-    - model_name: plan/zhipu_3/glm-5.1/openai
+    - model_name: plan/zhipu/glm-5.1/openai
       litellm_params:
         model: glm-5.1
         api_base: https://open.bigmodel.cn/api/coding/paas/v4
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: hosted_vllm
     # Anthropic API
-    - model_name: plan/zhipu_3/glm-4.5/anthropic
+    - model_name: plan/zhipu/glm-4.5/anthropic
       litellm_params:
         model: glm-4.5
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_3/glm-4.5-air/anthropic
+    - model_name: plan/zhipu/glm-4.5-air/anthropic
       litellm_params:
         model: glm-4.5-air
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_3/glm-4.6/anthropic
+    - model_name: plan/zhipu/glm-4.6/anthropic
       litellm_params:
         model: glm-4.6
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_3/glm-4.7/anthropic
+    - model_name: plan/zhipu/glm-4.7/anthropic
       litellm_params:
         model: glm-4.7
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_3/glm-5/anthropic
+    - model_name: plan/zhipu/glm-5/anthropic
       litellm_params:
         model: glm-5
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_3/glm-5-turbo/anthropic
+    - model_name: plan/zhipu/glm-5-turbo/anthropic
       litellm_params:
         model: glm-5-turbo
         api_base: https://open.bigmodel.cn/api/anthropic
         api_key: os.environ/PLAN_ZHIPU_PRO_ZSY
         custom_llm_provider: anthropic
-    - model_name: plan/zhipu_3/glm-5.1/anthropic
+    - model_name: plan/zhipu/glm-5.1/anthropic
       litellm_params:
         model: glm-5.1
         api_base: https://open.bigmodel.cn/api/anthropic
@@ -543,19 +540,19 @@ proxy_config:
     deployment_affinity_ttl_seconds: 3600
 
     # Failure tolerance
-    allowed_fails: 3          # Max failures per minute before deployment enters cooldown
-    cooldown_time: 30         # Cooldown duration in seconds
-    disable_cooldowns: false  # Set true to disable cooldown mechanism
+    allowed_fails: 3 # Max failures per minute before deployment enters cooldown
+    cooldown_time: 30 # Cooldown duration in seconds
+    disable_cooldowns: false # Set true to disable cooldown mechanism
 
     # Retries
-    num_retries: 2            # Retry count on failure (tries different deployments)
-    retry_after: 0            # Min seconds to wait before retrying
+    num_retries: 2 # Retry count on failure (tries different deployments)
+    retry_after: 0 # Min seconds to wait before retrying
 
     # Concurrency
-    default_max_parallel_requests: null  # Max concurrent requests per deployment, null for unlimited
+    default_max_parallel_requests: null # Max concurrent requests per deployment, null for unlimited
 
     # Pre-call checks
-    enable_pre_call_check: false  # Filter deployments by context window and region before calling
+    enable_pre_call_check: false # Filter deployments by context window and region before calling
 
     # Cache
     cache_responses: false
@@ -565,8 +562,7 @@ proxy_config:
     store_model_in_db: true
     store_prompts_in_spend_logs: true
 
-resources:
-  {}
+resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -585,7 +581,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-# Autoscaling with keda is mutually exclusive with hpa
+  # Autoscaling with keda is mutually exclusive with hpa
 keda:
   enabled: false
   minReplicas: 1
@@ -619,7 +615,7 @@ keda:
   #     value: 2
   #     periodSeconds: 60
 
-# Additional volumes on the output Deployment definition.
+  # Additional volumes on the output Deployment definition.
 volumes:
   - name: claude-code-session-hook
     configMap:
@@ -682,7 +678,6 @@ postgresql:
     #  `--set postgresql.auth.postgres-password=<some good password>,postgresql.auth.password=<some good password>`
     password: NoTaGrEaTpAsSwOrD
     postgres-password: NoTaGrEaTpAsSwOrD
-
     # A secret is created by this chart (litellm-helm) with the credentials that
     #  the new Postgres instance should use.
     # existingSecret: ""
@@ -761,12 +756,8 @@ pdb:
 serviceMonitor:
   # LiteLLM only exposes Prometheus metrics after the prometheus callback is enabled above.
   enabled: true
-  labels:
-    {}
-    # test: test
-  annotations:
-    {}
-    # kubernetes.io/test: test
+  labels: {} # test: test
+  annotations: {} # kubernetes.io/test: test
   interval: 15s
   scrapeTimeout: 10s
   relabelings: []
