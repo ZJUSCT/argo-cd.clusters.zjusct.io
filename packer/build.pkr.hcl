@@ -10,9 +10,12 @@ build {
     # iso_url = "https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
     # iso_checksum = "file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS"
 
-    # pipeline
-    iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/upstream/debian-13-generic-amd64.qcow2"
-    iso_checksum = "file:http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/upstream/SHA512SUMS"
+    # # pipeline
+    # iso_url = "http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/upstream/debian-13-generic-amd64.qcow2"
+    # iso_checksum = "file:http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc/packer-images/upstream/SHA512SUMS"
+    # local pipeline
+    iso_url = "https://radosgw.clusters.zjusct.io/packer-images/upstream/debian-13-generic-amd64.qcow2"
+    iso_checksum = "file:http://radosgw.clusters.zjusct.io/packer-images/upstream/SHA512SUMS"
 
     # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
     cd_files = ["base/user-data", "base/meta-data"]
@@ -43,6 +46,7 @@ build {
     scripts = [
       "base/scripts/01-software.sh",
       "base/scripts/02-config.sh",
+      "base/scripts/10-claude.sh",
       "base/scripts/10-doca.sh",
       "99-clean.sh"
     ]

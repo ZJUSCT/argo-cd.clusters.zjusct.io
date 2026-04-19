@@ -137,13 +137,6 @@ install_tarball_from_github() {
 }
 
 ########################################################################
-# APT Update
-# we should update index before installing any package, otherwise we may get "Unable to locate package"
-########################################################################
-
-apt-get update -y
-
-########################################################################
 # OpenTelemetry Collector Contrib
 # https://github.com/open-telemetry/opentelemetry-collector-releases
 ########################################################################
@@ -171,9 +164,6 @@ install_tarball_from_github "kubernetes-sigs/kustomize" 'kustomize_*_linux_amd64
 
 # https://kubevirt.io/
 install_bin_from_github "kubevirt/kubevirt" "virtctl-v*-linux-amd64" "virtctl"
-
-# https://helm.sh/docs/intro/install/
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
 
 ########################################################################
 # Misc

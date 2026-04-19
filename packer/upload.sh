@@ -18,9 +18,11 @@ fi
 
 SRC_BASE="$(basename "${SRC}")"
 
-mc alias set ceph "https://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
+MC="$(command -v minio-client 2>/dev/null || command -v mc 2>/dev/null || { echo "ERROR: neither minio-client nor mc found" >&2; exit 1; })"
 
-mc cp "${SRC}" "ceph/${BUCKET_NAME}/${S3_PREFIX}${SRC_BASE}"
+$MC alias set ceph "https://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
+
+$MC cp "${SRC}" "ceph/${BUCKET_NAME}/${S3_PREFIX}${SRC_BASE}"
 echo "Uploaded: s3://${BUCKET_NAME}/${S3_PREFIX}${SRC_BASE}"
 
-mc ls "ceph/${BUCKET_NAME}/${S3_PREFIX}" | tail -n 20
+$MC ls "ceph/${BUCKET_NAME}/${S3_PREFIX}" | tail -n 20

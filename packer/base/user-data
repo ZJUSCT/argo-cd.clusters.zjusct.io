@@ -5,7 +5,7 @@
 # https://docs.cloud-init.io/en/latest/reference/modules.html#users-and-groups
 users:
   - name: root
-    # Password: ubuntu
+    # Password: ubuntu, cleaned in 99-clean.sh
     hashed_passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
@@ -16,7 +16,6 @@ users:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFLWhdaV/o6iOdVNzBiL+SDO1qLqlqXrabaSxO0QevBp shouss
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO9wjW2N09v0YzCd0gnhhlQ1uMtQjMGBWbpl6I/2CYoO star
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDBBPqHWQILtXhbKK4kO7w7ZJYz+ic204Cf3vQh8vUQm xyang
-    ssh_redirect_user: false
     lock_passwd: false
 # https://docs.cloud-init.io/en/latest/reference/modules.html#set-passwords
 ssh_pwauth: true
@@ -66,7 +65,8 @@ apt:
     docker:
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 # https://mirrors.zju.edu.cn/docker-ce/linux/debian/gpg
       keyserver: hkps://keyserver.ubuntu.com/
-      source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
+      # source: deb [signed-by=$KEY_FILE] https://mirrors.zju.edu.cn/docker-ce/linux/debian $RELEASE stable
+      source: deb [signed-by=$KEY_FILE] https://mirrors.cernet.edu.cn/docker-ce/linux/debian $RELEASE stable
     nvidia:
       keyid: 02182E60104FCDC26EAE1B8597A5D4CB8793F200 # https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/8793F200.pub
       keyserver: hkps://keyserver.ubuntu.com/
@@ -143,6 +143,7 @@ packages:
   - lxcfs
   - mc
   - meson
+  - minio-client
   - neovim
   - netplan.io
   - net-tools
@@ -151,7 +152,6 @@ packages:
   - nfs-kernel-server
   - ninja-build
   - nmap
-  - npm
   - numactl
   - nvme-cli
   - nvtop
@@ -216,9 +216,5 @@ packages:
 # https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
 package_update: true
 package_upgrade: true
-# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-locale
-# locale: en_US.UTF-8
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-timezone
 timezone: "Asia/Shanghai"
-# https://docs.cloud-init.io/en/latest/reference/modules.html#set-hostname
-preserve_hostname: true

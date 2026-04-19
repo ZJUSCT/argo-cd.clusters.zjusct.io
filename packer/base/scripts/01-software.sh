@@ -137,13 +137,6 @@ install_tarball_from_github() {
 }
 
 ########################################################################
-# APT Update
-# we should update index before installing any package, otherwise we may get "Unable to locate package"
-########################################################################
-
-apt-get update -y
-
-########################################################################
 # ctld
 # unknown source
 ########################################################################
@@ -177,18 +170,34 @@ install_pkg_from_github "apptainer/apptainer" "apptainer_*_amd64.deb"
 
 ########################################################################
 # AI Coding Assistant
-# https://opencode.ai/download
 # https://code.claude.com/docs/en/setup
-# https://developers.openai.com/codex/quickstart
-# https://geminicli.com/docs/get-started/installation/
 ########################################################################
 
-npm config --global set registry https://registry.npmmirror.com
-npm install --global \
-    opencode-ai \
-    @anthropic-ai/claude-code \
-    @openai/codex \
-    @google/gemini-cli
+# https://github.com/anomalyco/opencode
+case "$(uname -m)" in
+x86_64)
+    install_tarball_from_github "anomalyco/opencode" "opencode-linux-x64-musl.tar.gz"
+    ;;
+aarch64 | arm64)
+    install_tarball_from_github "anomalyco/opencode" "opencode-linux-arm64-musl.tar.gz"
+    ;;
+esac
+
+# https://github.com/openai/codex
+# Binary is extracted as codex-{arch}-unknown-linux-gnu, so we rename to "codex".
+codex_tmpdir=$(mktemp -d)
+case "$(uname -m)" in
+x86_64)   codex_arch="x86_64" ;;
+aarch64 | arm64) codex_arch="aarch64" ;;
+esac
+if [ -n "${codex_arch:-}" ]; then
+    gh_release_download --repo "openai/codex" \
+        --pattern "codex-${codex_arch}-unknown-linux-gnu.tar.gz" --dir "$codex_tmpdir"
+    tar xzvf "$codex_tmpdir"/*.tar.gz -C "$codex_tmpdir"
+    rm "$codex_tmpdir"/*.tar.gz
+    install -m 755 "$codex_tmpdir"/codex-* /usr/local/bin/codex
+fi
+rm -rf "$codex_tmpdir"
 
 ########################################################################
 # Python
