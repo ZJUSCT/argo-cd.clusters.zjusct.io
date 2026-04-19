@@ -533,7 +533,7 @@ proxy_config:
 
   router_settings:
     # Options: simple-shuffle (random, default), latency-based-routing, usage-based-routing (perf impact), least-busy, cost-based-routing
-    routing_strategy: least-busy
+    routing_strategy: simple-shuffle
     optional_pre_call_checks:
       - session_affinity
     deployment_affinity_ttl_seconds: 3600
