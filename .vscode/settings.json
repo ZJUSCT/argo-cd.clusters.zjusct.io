@@ -1,5 +1,10 @@
 {
-  "editor.formatOnSave": true,
+  // 阻止对 YAML 文件的自动格式化，使 values 文件保持默认格式
+  "[yaml]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+  },
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "files.associations": {
