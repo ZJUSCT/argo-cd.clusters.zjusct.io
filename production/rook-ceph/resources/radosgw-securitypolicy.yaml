@@ -1,0 +1,27 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: radosgw-cors
+  namespace: rook-ceph
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: ceph-objectstore
+  cors:
+    allowOrigins:
+      - https://openlist.clusters.zjusct.io
+      - https://openlist.s.zjusct.io
+    allowMethods:
+      - GET
+      - HEAD
+      - OPTIONS
+    allowHeaders:
+      - "*"
+    exposeHeaders:
+      - Accept-Ranges
+      - Content-Length
+      - Content-Type
+      - ETag
+      - Last-Modified
+    maxAge: 24h

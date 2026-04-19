@@ -19,6 +19,7 @@ helmCharts:
 resources:
   - resources/rook-ceph-mgr-monitor.yaml
   - resources/radosgw-backendtrafficpolicy.yaml
+  - resources/radosgw-securitypolicy.yaml
   # TODO: transform ceph images when upgrading
   # transformers:
   #   - ../../image-prefix.yaml

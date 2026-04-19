@@ -486,31 +486,44 @@ cephClusterSpec:
           - name: "/dev/disk/by-id/wwn-0x5000c500a3a22588"
             config:
               deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part1
+              databaseSizeMB: "51200"
           - name: "/dev/disk/by-id/wwn-0x5000c500a39cd7f3"
             config:
               deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part2
+              databaseSizeMB: "51200"
           - name: "/dev/disk/by-id/wwn-0x5000c500a3a1e885"
             config:
               deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part3
+              databaseSizeMB: "51200"
           - name: "/dev/disk/by-id/wwn-0x5000cca24cc17625"
             config:
               deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part4
+              databaseSizeMB: "51200"
           - name: "/dev/disk/by-id/wwn-0x5000cca0bef2f716"
             config:
               deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part5
+              databaseSizeMB: "51200"
           - name: "/dev/disk/by-id/wwn-0x5000cca0c3d521de"
             config:
               deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part6
+              databaseSizeMB: "51200"
           - name: "/dev/disk/by-id/wwn-0x5000c500d5434779"
             config:
               deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part7
+              databaseSizeMB: "51200"
           - name: "/dev/disk/by-id/wwn-0x5000cca0c3d5a7ee"
             config:
               deviceClass: hdd
-
-          - name: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957
-            config:
-              deviceClass: ssd
+              metadataDevice: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_AA000000000000040957-part8
+              databaseSizeMB: "51200"
+          # Fanxiang FP325Q 1TB 已改作 8 块 HDD 的 metadataDevice（分区 part1-8，各 51200MB）
 
       - name: m600
         devices:
@@ -700,6 +713,7 @@ cephBlockPools:
     spec:
       failureDomain: osd
       enableCrushUpdates: true
+      deviceClass: nvme
       replicated:
         size: 2
       parameters:
