@@ -153,8 +153,7 @@ proxyConfigMap:
   #  Reference: https://docs.litellm.ai/docs/proxy/configs
 proxy_config:
   litellm_settings:
-    callbacks: [ "otel", "prometheus" ]
-    custom_callback_module: /app/hooks/claude_code_session.py
+    callbacks: [ "otel", "prometheus", "hooks.claude_code_session.proxy_handler_instance" ]
 
   mcp_servers:
     zhipu_websearch:
@@ -624,7 +623,7 @@ volumes:
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts:
   - name: claude-code-session-hook
-    mountPath: /app/hooks
+    mountPath: /etc/litellm/hooks
     readOnly: true
 
 nodeSelector: {}
