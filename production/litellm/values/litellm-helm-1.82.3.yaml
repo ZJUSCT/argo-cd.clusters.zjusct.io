@@ -229,26 +229,6 @@ proxy_config:
         custom_llm_provider: anthropic
 
     ####################################################################
-    # 月之暗面 - Kimi - Allegretto
-    ####################################################################
-    # Anthropic API
-    - model_name: plan/kimi/kimi-for-coding/anthropic
-      litellm_params:
-        model: kimi-for-coding
-        api_base: https://api.kimi.com/coding/
-        api_key: os.environ/PLAN_KIMI_ALLEGRETTO_ZBL
-        custom_llm_provider: anthropic
-    # OpenAI API
-    - model_name: plan/kimi/kimi-for-coding/openai
-      litellm_params:
-        model: kimi-for-coding
-        api_base: https://api.kimi.com/coding/v1
-        api_key: os.environ/PLAN_KIMI_ALLEGRETTO_ZBL
-        custom_llm_provider: hosted_vllm
-        extra_headers:
-          User-Agent: "claude-code/0.1.0"
-
-    ####################################################################
     # 稀宇科技 - MiniMax - Max-极速版
     ####################################################################
     # Anthropic API
