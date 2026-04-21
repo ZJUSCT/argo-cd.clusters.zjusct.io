@@ -229,24 +229,6 @@ proxy_config:
         custom_llm_provider: anthropic
 
     ####################################################################
-    # 稀宇科技 - MiniMax - Max-极速版
-    ####################################################################
-    # Anthropic API
-    - model_name: plan/minimax/MiniMax-M2.7-highspeed/anthropic
-      litellm_params:
-        model: MiniMax-M2.7-highspeed
-        api_base: https://api.minimaxi.com/anthropic
-        api_key: os.environ/PLAN_MINIMAX_MAX_ZBL
-        custom_llm_provider: anthropic
-    # OpenAI API
-    - model_name: plan/minimax/MiniMax-M2.7-highspeed/openai
-      litellm_params:
-        model: MiniMax-M2.7-highspeed
-        api_base: https://api.minimaxi.com/v1
-        api_key: os.environ/PLAN_MINIMAX_MAX_ZBL
-        custom_llm_provider: hosted_vllm
-
-    ####################################################################
     # 智谱华章 - GLM - Max - ZBL
     ####################################################################
     - model_name: plan/zhipu/glm-4.5/openai

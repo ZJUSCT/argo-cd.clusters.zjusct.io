@@ -39,7 +39,7 @@ spec:
 # spec:
 #   acme:
 #     email: admin@clusters.zjusct.io
-#     server: https://clusters.zjusct.io/acme/directory
+#     server: https://ipa-01.clusters.zjusct.io/acme/directory
 #     caBundle: </etc/ipa/ca.crt base64 -w0 的结果>
 #     privateKeySecretRef:
 #       name: freeipa-acme-account-key
