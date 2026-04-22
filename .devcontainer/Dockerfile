@@ -77,17 +77,17 @@ apt-get install -y --no-install-recommends \
     btop \
     pre-commit \
     qemu-system-x86 \
-    qemu-utils \
     ovmf \
+    qemu-system-arm \
+    qemu-efi-aarch64 \
+    qemu-system-riscv \
+    qemu-efi-riscv64 \
+    qemu-utils \
     cloud-init \
     cloud-image-utils \
     minio-client
 apt-get autoremove -y
 apt-get distclean
-
-# Packer expects OVMF_CODE.fd / OVMF_VARS.fd, Debian ships OVMF_CODE_4M.fd / OVMF_VARS_4M.fd
-ln -sf /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd
-ln -sf /usr/share/OVMF/OVMF_VARS_4M.fd /usr/share/OVMF/OVMF_VARS.fd
 EOF
 
 RUN <<EOF

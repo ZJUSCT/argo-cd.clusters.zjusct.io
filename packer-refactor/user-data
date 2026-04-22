@@ -1,0 +1,55 @@
+#cloud-config
+# https://docs.cloud-init.io/en/latest/reference/modules.html
+# https://docs.cloud-init.io/en/latest/reference/examples.html
+
+# https://docs.cloud-init.io/en/latest/reference/modules.html#users-and-groups
+users:
+  - name: root
+    # Password: ubuntu, cleaned in 99-clean.sh
+    hashed_passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrq5gq9D17lmgpNzk2xwgOkzYabiyDYZkjpwdKl5R7B bowling
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG7FZqOes1C4K87s+fQBDbQJr2Sy4jnI0PMrJYQ2vkfp ckyasb
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMgUUki5hc9cQtT21hkOQ0EByOLwOgm++MjgNKDmy6aP jiahefang
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIxbBx0fU/VLj1TH/uRVzszY/2GQvw1cnS7Ng1xqV4Jb yihao
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFLWhdaV/o6iOdVNzBiL+SDO1qLqlqXrabaSxO0QevBp shouss
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO9wjW2N09v0YzCd0gnhhlQ1uMtQjMGBWbpl6I/2CYoO star
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDBBPqHWQILtXhbKK4kO7w7ZJYz+ic204Cf3vQh8vUQm xyang
+    lock_passwd: false
+# https://docs.cloud-init.io/en/latest/reference/modules.html#set-passwords
+ssh_pwauth: true
+# https://docs.cloud-init.io/en/latest/reference/modules.html#ssh
+disable_root: false
+# https://docs.cloud-init.io/en/latest/reference/modules.html#bootcmd
+bootcmd:
+  - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
+# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
+ca_certs:
+  trusted:
+    # Cache Proxy CA
+    - |
+      -----BEGIN CERTIFICATE-----
+      MIIDEDCCAfigAwIBAgIUNXZxL6wleVbCUKejb+FHKRPwU6QwDQYJKoZIhvcNAQEL
+      BQAwIDEeMBwGA1UEAxMVWkpVU0NUIFNxdWlkIFByb3h5IENBMB4XDTI2MDIxODEz
+      NDIyNloXDTI2MDUxOTEzNDIyNlowIDEeMBwGA1UEAxMVWkpVU0NUIFNxdWlkIFBy
+      b3h5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs4GfDEih4myZ
+      ykMQOAY/AdM2W9xo5Q4luK8/bLOxa2CYi4BxRrhA7EBvHMhJpBF7FAbWdn/Kzt79
+      yAMkNUGvG32f3R/gdQC4rJoWKFAdOEwj7TmIHLK6smwQ8uXA2qJNAD8FstR7XmMD
+      qMlbkp2XOV7rbIF+YeDiAQ+00fM9TBDC4X2acYtGyxtI+9k93bXTNXMkThK8NFxm
+      k0KmsYnFMEmFQ9TIbiUvDNr+j/Tqj7Hw1CJz+4pod38cZPeXY71U+pBTg9lWpEi3
+      97aIIvPB0vvdoVI82v6kFaoPVOrXcpeZdJ22Spu/vxECcBUeJVRmVMmXWUepbOJp
+      8U/mEvbnkwIDAQABo0IwQDAOBgNVHQ8BAf8EBAMCAqQwDwYDVR0TAQH/BAUwAwEB
+      /zAdBgNVHQ4EFgQUCMQoUV5+UuHWCSmuX0bA+AndP6owDQYJKoZIhvcNAQELBQAD
+      ggEBAFgqj89+jbaf0+u+KJDphkTiJSAc1dm4O2G09bbNHxpp5oRr3NT/WWxgyifL
+      9indbnByyXd2ywT5LRXTRhF+RMu6Xf4PO/2sI9k73RVrT3mvdcn96apJXrUb3omp
+      vMpisbakaaREY6GJPfln273uJcQGOyg57kaG2ASMucuJlo70w9JQUx/icF5gjxFl
+      L6FXhdYs5L6KZorYdQLw3OPdmS5Vu22EMlW6GPhFCIXZIHPLdcFEF3toqTKlHRiJ
+      wl/J5hxlSQWIDUZZi28Dm/NkV650nN3MsdAJP33mRwGkFeZSdv3w2Lgnajewj/4m
+      XljL5sQrprvcir5cDWXSAgno1NA=
+      -----END CERTIFICATE-----
+# https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
+package_update: true
+package_upgrade: true
+# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-timezone
+timezone: "Asia/Shanghai"

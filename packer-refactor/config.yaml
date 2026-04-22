@@ -1,0 +1,26 @@
+- name: debian-13-amd64
+  arch: x86_64
+  iso_url: download/debian-13-generic-amd64.qcow2
+  iso_checksum: none
+  modules:
+    - 50-test
+- name: debian-13-arm64
+  arch: arm64
+  iso_url: download/debian-13-generic-arm64.qcow2
+  iso_checksum: none
+- name: debian-13-riscv64
+  arch: riscv64
+  iso_url: download/debian-13-generic-riscv64.qcow2
+  iso_checksum: none
+- name: ubuntu-20.04-amd64-ascend
+  arch: amd64
+
+- name: fedora-43-amd64
+  arch: amd64
+  iso_url: https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/43/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-43-1.6.x86_64.qcow2
+  iso_checksum: https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/43/Cloud/x86_64/images/Fedora-Cloud-43-1.6-x86_64-CHECKSUM
+
+- name: archlinux-amd64
+  arch: amd64
+  iso_url: download/Arch-Linux-x86_64-cloudimg.qcow2
+  iso_checksum: none

@@ -8,8 +8,11 @@ apk upgrade
 apk del xorriso # conflict with cloud-utils-localds
 apk add --no-cache \
     qemu-system-x86_64 \
+    qemu-system-aarch64 \
+    qemu-system-riscv64 \
     qemu-img \
     ovmf \
+    aavmf \
     curl \
     bash \
     cloud-init \
@@ -20,3 +23,5 @@ EOF
 RUN <<EOF
 packer plugins install github.com/hashicorp/qemu
 EOF
+
+ENTRYPOINT ["bash", "-c"]
