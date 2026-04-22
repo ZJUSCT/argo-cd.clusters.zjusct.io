@@ -565,9 +565,6 @@ cephClusterSpec:
           - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e4723bd15451
             config:
               deviceClass: nvme
-          - name: /dev/disk/by-id/nvme-eui.5d8bc59060003a09d8bc591e3b060001
-            config:
-              deviceClass: nvme
           - name: /dev/disk/by-id/nvme-eui.36344830549008810025385300000001
             config:
               deviceClass: nvme
