@@ -5,8 +5,8 @@
 # https://docs.cloud-init.io/en/latest/reference/modules.html#users-and-groups
 users:
   - name: root
-    # Password: ubuntu, cleaned in 99-clean.sh
-    hashed_passwd: $6$wRCAZ7Jx90Q6.57h$EnaX9adttGbiDXqE9wafIKA1wCzYWBg9H7ZBWA2qMK/jXiDm83UGWdkaMwyIkeK/Fl4coaSEY7L9DQ.9N7M2w1
+    # Password: packer, cleaned in 99-clean.sh
+    hashed_passwd: $6$rounds=500000$niPVSypQkKSDB4hQ$yEY9vFcG8WeKql1O3ExXmOO1LhyogcninT00uFNvqANE4/yLgoKU8V0BMeKYfPRDpDgDmexSMUfeGZ2TcGn5//
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAATpl/ZkbUm9WTbdpwMs2ZZKtdniE1VzRYjRjU/OtD7 openng
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrq5gq9D17lmgpNzk2xwgOkzYabiyDYZkjpwdKl5R7B bowling
@@ -48,8 +48,5 @@ ca_certs:
       wl/J5hxlSQWIDUZZi28Dm/NkV650nN3MsdAJP33mRwGkFeZSdv3w2Lgnajewj/4m
       XljL5sQrprvcir5cDWXSAgno1NA=
       -----END CERTIFICATE-----
-# https://docs.cloud-init.io/en/latest/reference/modules.html#package-update-upgrade-install
-package_update: true
-package_upgrade: true
 # https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-timezone
 timezone: "Asia/Shanghai"

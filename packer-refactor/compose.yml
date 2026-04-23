@@ -1,0 +1,13 @@
+services:
+  packer:
+    build: .
+    image: harbor.clusters.zjusct.io/library/packer
+    volumes:
+      - .:/workspace
+      - /dev/kvm:/dev/kvm
+    ports:
+      - "2222:2222" # SSH
+      - "5900:5900" # VNC
+    network_mode: host
+    privileged: true
+    working_dir: /workspace

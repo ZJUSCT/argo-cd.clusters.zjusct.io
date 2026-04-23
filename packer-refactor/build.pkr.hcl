@@ -1,22 +1,15 @@
 build {
   name = "packer"
-  source "source.qemu.ubuntu" {
-    disk_size = "30G"
-
-    iso_url      = var.iso_url
-    iso_checksum = var.iso_checksum
-
-    # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
-    cd_files = ["user-data", "meta-data"]
-    cd_label = "cidata"
-
-    output_directory = "output-${var.vm_name}"
-    vm_name          = "${var.vm_name}.qcow2"
-  }
+  source "source.qemu.ubuntu" {}
 
   provisioner "file" {
     source      = "modules/common.sh"
     destination = "/tmp/"
+  }
+
+  provisioner "file" {
+    source      = "ansible"
+    destination = "/tmp"
   }
 
   provisioner "shell" {

@@ -2,23 +2,23 @@
 
 locals {
   qemu_arch = {
-    "x86_64"   = "x86_64"
+    "x86_64"  = "x86_64"
     "arm64"   = "aarch64"
     "riscv64" = "riscv64"
   }
   machine_type = {
-    "x86_64"   = "pc"
+    "x86_64"  = "pc"
     "arm64"   = "virt"
     "riscv64" = "virt"
   }
   can_kvm = var.host_arch == var.arch
   efi_firmware_code = {
-    "x86_64"   = "/usr/share/OVMF/OVMF_CODE_4M.fd"
+    "x86_64"  = "/usr/share/OVMF/OVMF_CODE_4M.fd"
     "arm64"   = "/usr/share/AAVMF/AAVMF_CODE.fd"
     "riscv64" = "/usr/share/qemu-efi-riscv64/RISCV_VIRT_CODE.fd"
   }
   efi_firmware_vars = {
-    "x86_64"   = "/usr/share/OVMF/OVMF_CODE_4M.fd"
+    "x86_64"  = "/usr/share/OVMF/OVMF_VARS_4M.fd"
     "arm64"   = "/usr/share/AAVMF/AAVMF_VARS.fd"
     "riscv64" = "/usr/share/qemu-efi-riscv64/RISCV_VIRT_VARS.fd"
   }
@@ -34,37 +34,45 @@ packer {
 }
 
 source "qemu" "ubuntu" {
+  qemu_binary = "qemu-system-${lookup(local.qemu_arch, var.arch, "")}"
 
-  disk_image        = true
+  # VM Configuration
+  cpus             = 8
+  machine_type     = local.machine_type[var.arch]
+  cpu_model        = local.can_kvm ? "host" : "max"
+  accelerator      = local.can_kvm ? "kvm" : "tcg"
+  memory           = 16384
+  disk_image       = true
+  disk_size        = "30G"
+  iso_url          = var.iso_url
+  iso_checksum     = var.iso_checksum
+  format           = "qcow2"
+  output_directory = "output-${var.vm_name}"
+  vm_name          = "${var.vm_name}.qcow2"
+
+  # Boot configuration
   efi_boot          = true
   efi_firmware_code = local.efi_firmware_code[var.arch]
   efi_firmware_vars = local.efi_firmware_vars[var.arch]
+  boot_wait         = "10s"
+  shutdown_command  = "poweroff"
 
-  # VM Configuration
-  cpus        = 32
-  memory      = 16384
-  format      = "qcow2"
-  accelerator = local.can_kvm ? "kvm" : "tcg"
-  headless    = true
-
-  machine_type = local.machine_type[var.arch]
-  cpu_model    = local.can_kvm ? "host" : "max"
-
-  qemu_binary = "qemu-system-${lookup(local.qemu_arch, var.arch, "")}"
+  # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
+  cd_files = ["user-data", "meta-data"]
+  cd_label = "cidata"
 
   # Network and display
   net_device       = "virtio-net"
   disk_interface   = "virtio"
-  vnc_bind_address = "127.0.0.1"
-
-  # Boot configuration
-  boot_wait = "10s"
+  headless         = true
+  vnc_bind_address = "0.0.0.0"
+  vnc_port_min     = 5900
+  vnc_port_max     = 5900
+  host_port_min    = 2222
+  host_port_max    = 2222
 
   # SSH Configuration
   ssh_username = "root"
-  ssh_password = "ubuntu"
-  ssh_timeout  = "5m"
-
-  # Shutdown
-  shutdown_command = "poweroff"
+  ssh_password = "packer"
+  ssh_timeout  = "20m" # cross builds takes long time
 }

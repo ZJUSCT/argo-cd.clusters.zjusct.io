@@ -27,7 +27,6 @@ esac
 install_pkg() {
     case $ID in
     ubuntu | debian)
-        apt-get update
         apt-get install "$@"
         ;;
     openEuler)

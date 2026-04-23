@@ -1,28 +1,23 @@
 export PACKER_LOG=1
 export PACKER_LOG_PATH=packer.log
+TARGET?=ubuntu-20.04-amd64-ascend
 
 lint:
 	cloud-init schema -c user-data
 	packer fmt .
 	packer init .
 	packer validate .
-docker-build:
-	docker build -t harbor.clusters.zjusct.io/library/packer . --progress=plain --push
-docker-shell:
-	docker run --rm -it \
-		-v $$(pwd):/workspace \
-		-v /dev/kvm:/dev/kvm \
-		--privileged \
-		-w /workspace \
-		harbor.clusters.zjusct.io/library/packer
-docker-run:
-	docker run --rm \
-		-v $$(pwd):/workspace \
-		-w /workspace \
-		-v /dev/kvm:/dev/kvm \
-		--privileged \
-		harbor.clusters.zjusct.io/library/packer \
-		-c "make debian-13-arm64"
+build:
+	docker compose build packer --progress=plain --push
+shell:
+	docker compose run --rm -it packer
+run:
+	docker compose run --rm packer \
+		-c "make $(TARGET)"
+down:
+	docker compose down --remove-orphans
+clean:
+	rm -rf output-* .*.auto.pkrvars.json *.log
 %:
 	rm -rf output-$@
 	python3 packer.py $@
