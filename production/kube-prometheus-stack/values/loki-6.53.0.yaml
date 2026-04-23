@@ -20,8 +20,7 @@ global:
   dnsNamespace: "kube-system"
   # -- Common additional CLI arguments for all jobs (that is, -log.level debug, -config.expand-env=true or -log-config-reverse-order)
   # scope: admin-api, backend, bloom-builder, bloom-gateway, bloom-planner, compactor, distributor, index-gateway, ingester, overrides-exporter, pattern-ingester, querier, query-frontend, query-scheduler, read, ruler, write.
-  extraArgs:
-  - -config.expand-env=true
+  extraArgs: []
   # -- Common environment variables to add to all pods directly managed by this chart.
   # scope: admin-api, backend, bloom-builder, bloom-gateway, bloom-planner, compactor, distributor, index-gateway, ingester, overrides-exporter, pattern-ingester, querier, query-frontend, query-scheduler, read, ruler, write.
   extraEnv: []
@@ -31,11 +30,7 @@ global:
   # extraEnvFrom:
   #   - secretRef:
   #       name: mysecret
-  extraEnvFrom:
-    - secretRef:
-        name: loki-data
-    - configMapRef:
-        name: loki-data
+  extraEnvFrom: []
   # -- Common volumes to add to all pods directly managed by this chart.
   # scope: admin-api, backend, bloom-builder, bloom-gateway, bloom-planner, compactor, distributor, index-gateway, ingester, overrides-exporter, pattern-ingester, querier, query-frontend, query-scheduler, read, ruler, write.
   extraVolumes: []
@@ -1508,11 +1503,16 @@ singleBinary:
   # -- Comma-separated list of Loki modules to load for the single binary
   targetModule: "all"
   # -- Labels for single binary service
-  extraArgs: []
+  extraArgs:
+    - -config.expand-env=true
   # -- Environment variables to add to the single binary pods
   extraEnv: []
   # -- Environment variables from secrets or configmaps to add to the single binary pods
-  extraEnvFrom: []
+  extraEnvFrom:
+    - secretRef:
+        name: loki-data
+    - configMapRef:
+        name: loki-data
   # -- Extra containers to add to the single binary loki pod
   extraContainers: []
   # -- Init containers to add to the single binary pods
@@ -4418,6 +4418,6 @@ tableManager:
   # -- Tolerations for table-manager pods
   tolerations: []
   # -- Enable deletes by retention
-  retention_deletes_enabled: false
+  retention_deletes_enabled: true
   # -- Set retention period
-  retention_period: 0
+  retention_period: 720h
