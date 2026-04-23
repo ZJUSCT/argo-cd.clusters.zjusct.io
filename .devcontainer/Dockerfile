@@ -1,7 +1,6 @@
 # https://mcr.microsoft.com/en-us/artifact/mar/devcontainers/base/about
-ARG DEBIAN_VERSION=trixie
-# FROM mcr.microsoft.com/devcontainers/base:${DEBIAN_VERSION}
-FROM harbor.clusters.zjusct.io/mcr.microsoft.com/devcontainers/base:${DEBIAN_VERSION}
+# FROM mcr.microsoft.com/devcontainers/base:trixie
+FROM harbor.clusters.zjusct.io/mcr.microsoft.com/devcontainers/base:trixie
 
 ARG HTTP_PROXY=http://172.28.0.4:3128
 ARG HTTPS_PROXY=http://172.28.0.4:3128

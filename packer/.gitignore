@@ -1,13 +1,4 @@
-# Packer build artifacts
-output*/
-packer_cache/
-*.qcow2
-crash.log
-
-# Cloud-init ISO (if generated)
-*.iso
-*.img
-SHA*SUMS
-
-# Packer logs
-*.log
+output*
+download
+.*.auto.pkrvars.json
+.env

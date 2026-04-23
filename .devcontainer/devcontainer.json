@@ -39,6 +39,7 @@
         "editorconfig.editorconfig",
         "iliazeus.vscode-ansi",
         "foxundermoon.shell-format",
+        "timonwong.shellcheck",
         "ms-python.python"
       ]
     }
