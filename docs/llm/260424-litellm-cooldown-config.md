@@ -135,3 +135,60 @@ router_settings:
 - Cooldown 是内存级的（单副本部署下），Pod 重启后 cooldown 状态丢失。如果需要跨重启持久化，需启用 Redis
 - `allowed_fails: 0` 假设下游 API 返回的 4xx/5xx 确实表示该部署不可用。如果网络抖动等瞬态故障频繁，可考虑 `allowed_fails: 1`
 - 修改后仅改变熔断策略，不影响 session_affinity 的 sticky 路由行为
+
+---
+
+## Cooldown 未生效问题排查
+
+> 排查日期：2026-04-24
+> LiteLLM 版本：1.82.3
+> 触发条件：智谱 API 返回 429（code 1310，配额限制）
+
+### 问题现象
+
+配置 `allowed_fails: 0` + `cooldown_time: 600` 后，429 错误仍然持续出现。退出 session 后新建 session 可恢复（新 session 随机选中了另一个 deployment），说明 cooldown 在跨 session 场景下有效，但在同一 session 内的 router retry 完全无效。
+
+### 根因
+
+通过开启 `LITELLM_LOG=DEBUG`（ConfigMap `litellm-env-configmap`）后抓取日志，确认 cooldown **完全没有被触发**：
+
+```
+Router: Entering 'deployment_callback_on_failure'
+Router: Exiting 'deployment_callback_on_failure' without cooldown. No model_info found.
+```
+
+`deployment_callback_on_failure`（`router.py:6053`）在失败回调中需要从 `litellm_params["model_info"]["id"]` 获取 deployment ID 才能触发 cooldown。但在 `_ageneric_api_call_with_fallbacks` 调用路径下（Anthropic passthrough endpoint 使用的路径），`model_info` 未能正确传递到 `failure_handler` 的 kwargs 中，导致回调直接返回 False，跳过 cooldown。
+
+### 调用路径分析
+
+Claude Code 通过 Anthropic 兼容 endpoint `/v1/messages` 发起请求，走的是 `anthropic_response()` → `base_process_llm_request()` → `_ageneric_api_call_with_fallbacks()` → `async_function_with_retries()` 路径，**不是**标准的 `_acompletion()` 路径。
+
+标准路径 `_acompletion()` 通过 `_update_kwargs_with_deployment()` 注入 `model_info`，cooldown 可以正常工作。但 `_ageneric_api_call_with_fallbacks` 路径中，`_ageneric_api_call_with_fallbacks_helper` 虽然也调用了 `_update_kwargs_with_deployment()`，但 `model_info` 在异常传播到 `failure_handler` 时丢失了。
+
+### Session Affinity 在 cooldown 失效时的表现
+
+Session affinity 本身不会在失败时清除绑定，它依赖 cooldown 机制来间接实现故障转移：
+
+1. 请求失败 → cooldown 将 deployment 从 healthy pool 移除
+2. 下次请求 → affinity 在 healthy pool 中查找绑定 deployment → 找不到（已被 cooldown）→ 降级返回全部 healthy deployments
+
+当 cooldown 不工作时，healthy pool 始终为满的 3 个，affinity 每次都能命中绑定的限额 deployment，表现为"绑死"。
+
+### 日志中确认的完整流程
+
+```
+1. 3 个 deployment 全部 healthy（cooldown models: []）
+2. session-id affinity hit -> deployment=e55510c1...（限额账户）
+3. 429 错误 → deployment_callback_on_failure → No model_info found → cooldown 未触发
+4. 重试（num_retries: 2）→ cooldown models 仍为 [] → affinity 仍命中同一 deployment → 再次 429
+5. Router 抛出异常 → Claude Code 客户端约 6 秒后重新发起 HTTP 请求
+6. 重复步骤 1-5，直到 Claude Code 放弃或用户切换 session
+```
+
+### 临时缓解方案
+
+在 LiteLLM 修复此 bug 之前，可以考虑：
+
+1. **降低 session_affinity TTL**：当前 3600 秒太长，缩短到 300 秒可减少"绑死"窗口
+2. **同时启用 `deployment_affinity`**：作为 session affinity 的补充，按 LiteLLM API Key 哈希路由，不同用户分散到不同 deployment
+3. **升级 LiteLLM**：检查新版本是否已修复此路径下的 `model_info` 传递问题
