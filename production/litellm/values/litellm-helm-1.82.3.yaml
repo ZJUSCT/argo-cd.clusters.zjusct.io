@@ -504,8 +504,8 @@ proxy_config:
     deployment_affinity_ttl_seconds: 3600
 
     # Failure tolerance
-    allowed_fails: 3          # Max failures per minute before deployment enters cooldown
-    cooldown_time: 30         # Cooldown duration in seconds
+    allowed_fails: 0          # Cooldown immediately on first failure (avoids hitting quota-limited accounts)
+    cooldown_time: 600        # Longer cooldown for quota-limited scenarios (10 min)
     disable_cooldowns: false  # Set true to disable cooldown mechanism
 
     # Retries
