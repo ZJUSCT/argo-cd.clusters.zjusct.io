@@ -23,3 +23,28 @@ resources:
   # TODO: transform ceph images when upgrading
   # transformers:
   #   - ../../image-prefix.yaml
+patches:
+  - target:
+      group: apiextensions.k8s.io
+      version: v1
+      kind: CustomResourceDefinition
+      name: operatorconfigs.csi.ceph.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: operatorconfigs.csi.ceph.io
+        annotations:
+          argocd.argoproj.io/sync-options: Replace=true
+  - target:
+      group: apiextensions.k8s.io
+      version: v1
+      kind: CustomResourceDefinition
+      name: drivers.csi.ceph.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: drivers.csi.ceph.io
+        annotations:
+          argocd.argoproj.io/sync-options: Replace=true
