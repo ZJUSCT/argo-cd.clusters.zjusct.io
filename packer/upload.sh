@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -xeu
 
 export BUCKET_NAME="packer-images"
 export BUCKET_HOST="radosgw.clusters.zjusct.io"
@@ -9,7 +9,7 @@ export BUCKET_PORT="443"
 : "${AWS_SECRET_ACCESS_KEY:?ENV AWS_SECRET_ACCESS_KEY is required}"
 
 SRC="${1:?Usage: upload.sh <file> [s3_prefix]}"
-S3_PREFIX="${2:-}"
+S3_PREFIX="$(git rev-parse --short HEAD)"
 
 if [ ! -f "${SRC}" ]; then
     echo "ERROR: File not found: ${SRC}" >&2
@@ -22,7 +22,7 @@ MC="$(command -v minio-client 2>/dev/null || command -v mc 2>/dev/null || { echo
 
 $MC alias set ceph "https://${BUCKET_HOST}:${BUCKET_PORT}" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
 
-$MC cp "${SRC}" "ceph/${BUCKET_NAME}/${S3_PREFIX}${SRC_BASE}"
-echo "Uploaded: s3://${BUCKET_NAME}/${S3_PREFIX}${SRC_BASE}"
+$MC cp "${SRC}" "ceph/${BUCKET_NAME}/${S3_PREFIX}/${SRC_BASE}"
+echo "Uploaded: s3://${BUCKET_NAME}/${S3_PREFIX}/${SRC_BASE}"
 
 $MC ls "ceph/${BUCKET_NAME}/${S3_PREFIX}" | tail -n 20
