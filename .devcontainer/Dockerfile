@@ -8,7 +8,7 @@ ARG NO_PROXY=localhost,zjusct.io
 
 ENV MIRROR=mirrors.cernet.edu.cn
 ARG K8S_VERSION=v1.35
-ARG KUBESEAL_VERSION=0.36.1
+ARG KUBESEAL_VERSION=0.36.6
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOF

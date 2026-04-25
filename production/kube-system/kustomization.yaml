@@ -5,7 +5,7 @@ namespace: kube-system
 
 # https://github.com/bitnami-labs/sealed-secrets/releases
 resources:
-  - https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.34.0/controller.yaml
+  - https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.36.6/controller.yaml
 
 helmCharts:
   - name: coredns
