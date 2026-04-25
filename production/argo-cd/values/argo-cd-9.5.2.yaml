@@ -2795,7 +2795,7 @@ server:
   # Not all Gateway controllers support this resource (e.g., Cilium does not support it yet)
   backendTLSPolicy:
     # -- Enable BackendTLSPolicy resource for Argo CD server (Gateway API)
-    enabled: true
+    enabled: false
     # -- Additional BackendTLSPolicy labels
     labels: {}
     # -- Additional BackendTLSPolicy annotations
