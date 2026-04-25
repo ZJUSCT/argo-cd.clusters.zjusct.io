@@ -35,6 +35,11 @@ EOF
 
 systemctl disable systemd-networkd # prefer NetworkManager
 
+if [ -f /etc/netplan/50-cloud-init.yaml ] && ! grep -q '^[[:space:]]*renderer:' /etc/netplan/50-cloud-init.yaml; then
+    sed -i '/^network:[[:space:]]*$/a\  renderer: NetworkManager' /etc/netplan/50-cloud-init.yaml
+    command -v netplan >/dev/null && netplan generate
+fi
+
 install -D -m 0644 /dev/stdin /etc/udev/hwdb.d/50-net-naming-denylist.hwdb <<'EOF'
 net:naming:*:*
 ID_NET_NAME_ALLOW=1
