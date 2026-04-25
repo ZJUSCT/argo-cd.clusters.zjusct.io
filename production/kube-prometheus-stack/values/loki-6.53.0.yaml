@@ -564,7 +564,12 @@ loki:
     #   local:
     #     directory: /etc/loki/rules
   # -- Structured loki configuration, takes precedence over `loki.config`, `loki.schemaConfig`, `loki.storageConfig`
-  structuredConfig: {}
+  structuredConfig:
+    structured_metadata_config:
+      index:
+        - name: severity_text
+        - name: host_name
+        - name: detected_level
   # -- Additional query scheduler config
   query_scheduler: {}
   # -- Additional storage config
