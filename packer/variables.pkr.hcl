@@ -1,13 +1,3 @@
-variable "arch" {
-  type    = string
-  default = "amd64"
-}
-
-variable "host_arch" {
-  type    = string
-  default = "amd64"
-}
-
 variable "iso_url" {
   type    = string
   default = "none.qcow2"
@@ -25,5 +15,35 @@ variable "vm_name" {
 
 variable "modules" {
   type    = list(string)
-  default = []
+  default = ["modules-always/00-shared.sh"]
+}
+
+variable "qemu_binary" {
+  type    = string
+  default = "qemu-system-x86_64"
+}
+
+variable "machine_type" {
+  type    = string
+  default = "pc"
+}
+
+variable "cpu_model" {
+  type    = string
+  default = "max"
+}
+
+variable "accelerator" {
+  type    = string
+  default = "tcg"
+}
+
+variable "efi_firmware_code" {
+  type    = string
+  default = "/usr/share/OVMF/OVMF_CODE_4M.fd"
+}
+
+variable "efi_firmware_vars" {
+  type    = string
+  default = "/usr/share/OVMF/OVMF_VARS_4M.fd"
 }

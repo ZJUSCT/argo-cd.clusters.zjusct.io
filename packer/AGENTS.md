@@ -4,6 +4,18 @@
 
 - See `config.yaml` for available build targets. A target is a combination of a base image and a set of modules to be installed on top of it.
 - Run `make <target>` to build the image for the specified target. See the `Makefile` for details on how the build is executed.
+- `packer.py` is the main script that resolves the variables in the target configuration, prepares the Packer variable file, and executes the Packer build command.
+
+## Debug
+
+```bash
+python3 packer.py --debug <target_image>
+```
+
+Two methods are available for debugging(can be changed in build.pkr.hcl):
+
+- SSH port 2222
+- VNC port 5901
 
 ## Modules
 
@@ -77,9 +89,9 @@ To speed up the build process, we always use HTTP cache proxy and mirrors.
     - General: `https://mirrors.cernet.edu.cn/`. Documents on how to use the mirror can be found at `https://help.mirrors.cernet.edu.cn/`.
     - NPM: `https://registry.npmmirror.com/`.
 
-## Find Distro Packages
+## Package Indexes
 
-- Cross Distro
+- Cross Distro:
     - https://pkgs.org/
     - https://repology.org/
 - Debian: https://packages.debian.org/
@@ -87,6 +99,55 @@ To speed up the build process, we always use HTTP cache proxy and mirrors.
 - Fedora: https://apps.fedoraproject.org/packages/
 - Arch: https://archlinux.org/packages/
 
-## Tests
+## Names
 
-Scripts under `tests` are convienient scripts for operators to quickly check **in deployed instances** whether specific features are working as expected. They are not meant to be run in the build stage because they may require hardware support or runtime environment that is not available during the build stage.
+Follow [OCI Image Index Specification](https://github.com/opencontainers/image-spec/blob/v1.0.2/image-index.md), which is the same as [Go Language Documentation](https://go.dev/doc/install/source#environment):
+
+```text
+$GOOS	$GOARCH
+aix	ppc64
+android	386
+android	amd64
+android	arm
+android	arm64
+darwin	amd64
+darwin	arm64
+dragonfly	amd64
+freebsd	386
+freebsd	amd64
+freebsd	arm
+illumos	amd64
+ios	arm64
+js	wasm
+linux	386
+linux	amd64
+linux	arm
+linux	arm64
+linux	loong64
+linux	mips
+linux	mipsle
+linux	mips64
+linux	mips64le
+linux	ppc64
+linux	ppc64le
+linux	riscv64
+linux	s390x
+netbsd	386
+netbsd	amd64
+netbsd	arm
+openbsd	386
+openbsd	amd64
+openbsd	arm
+openbsd	arm64
+plan9	386
+plan9	amd64
+plan9	arm
+solaris	amd64
+wasip1	wasm
+windows	386
+windows	amd64
+windows	arm
+windows	arm64
+```
+
+If other tools returns different names, we need to map them to the above names. For example, `uname -m` may return `x86_64` for `amd64` and `aarch64` for `arm64`.

@@ -33,11 +33,6 @@ case $ID in
 debian | ubuntu)
     find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
         -exec sed -i -e "s/[a-z]*\.debian\.org/mirrors.cernet.edu.cn/g; s/[a-z]*\.ubuntu\.com/$MIRROR/g" {} +
-    # shellcheck disable=SC2154
-    install -D -m 0644 /dev/stdin /etc/apt/apt.conf.d/99proxy <<EOF
-Acquire::http::Proxy "$http_proxy";
-Acquire::https::Proxy "$https_proxy";
-EOF
     case $ID in
     debian)
         # Enable contrib, non-free, non-free-firmware components for DKMS and NVIDIA drivers
@@ -48,10 +43,6 @@ EOF
     apt-get update
     ;;
 fedora)
-    install -D -m 0644 /dev/stdin /etc/dnf/dnf.conf.d/99proxy.conf <<EOF
-[main]
-proxy=$http_proxy
-EOF
     sed -e 's|^metalink=|#metalink=|g' \
         -e 's|^#baseurl=http://download.example/pub/fedora/linux|baseurl=https://'"$MIRROR"'/fedora|g' \
         -i.bak \
@@ -60,10 +51,6 @@ EOF
     dnf makecache
     ;;
 rocky)
-    install -D -m 0644 /dev/stdin /etc/dnf/dnf.conf.d/99proxy.conf <<EOF
-[main]
-proxy=$http_proxy
-EOF
     # shellcheck disable=SC2016
     sed -i \
         -e 's|^mirrorlist=|#mirrorlist=|g' \

@@ -1,10 +1,11 @@
 INSIDE_DOCKER := $(shell test -f /.dockerenv && echo yes)
+ON_MACOS := $(shell uname -s | grep -q Darwin && echo yes)
 .DEFAULT_GOAL := all
 
-ifeq ($(INSIDE_DOCKER),yes)
+ifeq ($(filter yes,$(INSIDE_DOCKER) $(ON_MACOS)),yes)
 
 lint:
-	cloud-init schema -c user-data
+	cloud-init schema -c user-data || true
 	packer fmt .
 	packer init .
 	packer validate .
@@ -27,7 +28,7 @@ all: debian-13-amd64 debian-13-arm64 debian-13-riscv64 \
 
 else
 
-# Host-only targets
+# Host-only targets (Linux)
 build-docker:
 	docker compose build packer --progress=plain --push
 

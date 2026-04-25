@@ -1,29 +1,5 @@
 # https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
 
-locals {
-  qemu_arch = {
-    "x86_64"  = "x86_64"
-    "arm64"   = "aarch64"
-    "riscv64" = "riscv64"
-  }
-  machine_type = {
-    "x86_64"  = "pc"
-    "arm64"   = "virt"
-    "riscv64" = "virt"
-  }
-  can_kvm = var.host_arch == var.arch
-  efi_firmware_code = {
-    "x86_64"  = "/usr/share/OVMF/OVMF_CODE_4M.fd"
-    "arm64"   = "/usr/share/AAVMF/AAVMF_CODE.fd"
-    "riscv64" = "/usr/share/qemu-efi-riscv64/RISCV_VIRT_CODE.fd"
-  }
-  efi_firmware_vars = {
-    "x86_64"  = "/usr/share/OVMF/OVMF_VARS_4M.fd"
-    "arm64"   = "/usr/share/AAVMF/AAVMF_VARS.fd"
-    "riscv64" = "/usr/share/qemu-efi-riscv64/RISCV_VIRT_VARS.fd"
-  }
-}
-
 packer {
   required_plugins {
     qemu = {
@@ -34,13 +10,13 @@ packer {
 }
 
 source "qemu" "packer" {
-  qemu_binary = "qemu-system-${lookup(local.qemu_arch, var.arch, "")}"
+  qemu_binary = var.qemu_binary
 
   # VM Configuration
   cpus             = 8
-  machine_type     = local.machine_type[var.arch]
-  cpu_model        = local.can_kvm ? "host" : "max"
-  accelerator      = local.can_kvm ? "kvm" : "tcg"
+  machine_type     = var.machine_type
+  cpu_model        = var.cpu_model
+  accelerator      = var.accelerator
   memory           = 16384
   disk_image       = true
   disk_size        = "30G"
@@ -52,8 +28,8 @@ source "qemu" "packer" {
 
   # Boot configuration
   efi_boot          = true
-  efi_firmware_code = local.efi_firmware_code[var.arch]
-  efi_firmware_vars = local.efi_firmware_vars[var.arch]
+  efi_firmware_code = var.efi_firmware_code
+  efi_firmware_vars = var.efi_firmware_vars
   boot_wait         = "10s"
   shutdown_command  = "poweroff"
 
@@ -62,15 +38,9 @@ source "qemu" "packer" {
   cd_label = "cidata"
 
   # Network and display
-  net_device       = "virtio-net"
-  disk_interface   = "virtio"
-  headless         = true
-  # Fix port only for debug, not for production parallel build, otherwise it will cause port conflict
-  # vnc_bind_address = "0.0.0.0"
-  # vnc_port_min     = 5900
-  # vnc_port_max     = 5900
-  # host_port_min    = 2222
-  # host_port_max    = 2222
+  net_device     = "virtio-net"
+  disk_interface = "virtio"
+  headless       = true
 
   # SSH Configuration
   ssh_username = "root"

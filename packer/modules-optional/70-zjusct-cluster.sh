@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# ZJUSCT cluster specific configuration
+
 # shellcheck disable=SC1091
 source /tmp/00-shared.sh
 
@@ -44,12 +46,30 @@ groupmod -g 1109200066 docker
 ##########################################################################
 # Ceph
 ##########################################################################
-
 case $ID in
 ubuntu | debian | fedora | rocky)
     install_pkg ceph-common
     ;;
 *)
     echo "Ceph client: unsupported distro $ID, skipping"
+    ;;
+esac
+
+##########################################################################
+# HTTP/HTTPS cache proxy
+##########################################################################
+case $ID in
+debian | ubuntu)
+    # shellcheck disable=SC2154
+    install -D -m 0644 /dev/stdin /etc/apt/apt.conf.d/99proxy <<EOF
+Acquire::http::Proxy "$http_proxy";
+Acquire::https::Proxy "$https_proxy";
+EOF
+    ;;
+fedora | rocky)
+    install -D -m 0644 /dev/stdin /etc/dnf/dnf.conf.d/99proxy.conf <<EOF
+[main]
+proxy=$http_proxy
+EOF
     ;;
 esac
