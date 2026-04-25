@@ -34,7 +34,8 @@ crds:
   # -- Keep CRDs on chart uninstall
   keep: true
   # -- Annotations to be added to all CRDs
-  annotations: {}
+  annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=true
   # -- Additional labels to be added to all CRDs
   additionalLabels: {}
 
@@ -75,6 +76,9 @@ global:
 
   # -- Annotations for the all deployed Statefulsets
   statefulsetAnnotations: {}
+
+  # -- Labels for the all deployed Statefulsets
+  statefulsetLabels: {}
 
   # -- Annotations for the all deployed Deployments
   deploymentAnnotations: {}
@@ -172,7 +176,6 @@ global:
   #       - key: bundle.pem
   #         path: ca-certificates.crt
 
-
   # -- Extra volume mounts to add to all deployed Deployments and StatefulSets
   extraVolumeMounts: []
   # Example of adding a custom CA bundle mount:
@@ -214,7 +217,10 @@ configs:
     admin.enabled: true
 
     # -- Timeout to discover if a new manifests version got published to the repository
-    timeout.reconciliation: 180s
+    timeout.reconciliation: 120s
+
+    # -- Maximum jitter added to the reconciliation timeout to spread out refreshes and reduce repo-server load
+    timeout.reconciliation.jitter: 60s
 
     # -- Timeout to refresh application data as well as target manifests cache
     timeout.hard.reconciliation: 0s
@@ -425,7 +431,6 @@ configs:
         - ClusterBackgroundScanReport
         - UpdateRequest
 
-
   # Argo CD configuration parameters
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cmd-params-cm.yaml
   params:
@@ -463,11 +468,11 @@ configs:
 
     # -- The name of the default role which Argo CD will falls back to, when authorizing API requests (optional).
     # If omitted or empty, users may be still be able to login, but will see no apps, projects, etc...
-    policy.default: ''
+    policy.default: ""
 
     # -- File containing user-defined policies and role definitions.
     # @default -- `''` (See [values.yaml])
-    policy.csv: ''
+    policy.csv: ""
     # Policy rules are in the form:
     #  p, subject, resource, action, object, effect
     # Role definitions and bindings are in the form:
@@ -530,7 +535,7 @@ configs:
       vs-ssh.visualstudio.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
 
     # -- Additional known hosts for private repositories
-    extraHosts: ''
+    extraHosts: ""
 
   # Repository TLS certificates
   # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#repositories-using-self-signed-tls-certificates-or-are-signed-by-custom-ca
@@ -690,7 +695,7 @@ configs:
   # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#sensitive-data-and-sso-client-secrets
   secret:
     # -- Create the argocd-secret
-    createSecret: false
+    createSecret: true
     # -- Labels to be added to argocd-secret
     labels: {}
     # -- Annotations to be added to argocd-secret
@@ -717,8 +722,7 @@ configs:
     ## Custom secrets. Useful for injecting SSO secrets into environment variables.
     ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#sensitive-data-and-sso-client-secrets
     ## Note that all values must be non-empty.
-    extra:
-      {}
+    extra: {}
       # LDAP_PASSWORD: "mypassword"
 
     # -- Bcrypt hashed admin password
@@ -838,7 +842,6 @@ controller:
       #   cpu: 1
       #   memory: 1Gi
 
-
   ## Application controller image
   image:
     # -- Repository to use for the application controller
@@ -911,6 +914,9 @@ controller:
   # -- Annotations for the application controller StatefulSet
   statefulsetAnnotations: {}
 
+  # -- Labels for the application controller StatefulSet
+  statefulsetLabels: {}
+
   # -- Annotations for the application controller Deployment
   deploymentAnnotations: {}
 
@@ -955,7 +961,7 @@ controller:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   # Readiness probe for application controller
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -1189,12 +1195,36 @@ dex:
     ## Has higher precedence over `dex.pdb.minAvailable`
     maxUnavailable: ""
 
+  ## Dex Vertical Pod Autoscaler
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
+  vpa:
+    # -- Deploy a [VerticalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/) for the Dex server
+    enabled: false
+    # -- Labels to be added to Dex server vpa
+    labels: {}
+    # -- Annotations to be added to Dex server vpa
+    annotations: {}
+    # -- One of the VPA operation modes
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically
+    ## Note: Recreate update mode requires more than one replica unless the min-replicas VPA controller flag is overridden
+    updateMode: Initial
+    # -- Controls how VPA computes the recommended resources for Dex server container
+    ## Ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/examples/hamster.yaml
+    containerPolicy: {}
+      # controlledResources: ["cpu", "memory"]
+      # minAllowed:
+      #   cpu: 250m
+      #   memory: 256Mi
+      # maxAllowed:
+      #   cpu: 1
+      #   memory: 1Gi
+
   ## Dex image
   image:
     # -- Dex image repository
     repository: ghcr.io/dexidp/dex
     # -- Dex image tag
-    tag: v2.44.0
+    tag: v2.45.1
     # -- Dex imagePullPolicy
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -1267,11 +1297,11 @@ dex:
     # -- Annotations to be added to argocd-dex-server-tls secret
     annotations: {}
     # -- Certificate authority. Required for self-signed certificates.
-    ca: ''
+    ca: ""
     # -- Certificate private key
-    key: ''
+    key: ""
     # -- Certificate data. Must contain SANs of Dex service (ie: argocd-dex-server, argocd-dex-server.argo-cd.svc)
-    crt: ''
+    crt: ""
 
   # -- Annotations to be added to the Dex server Deployment
   deploymentAnnotations: {}
@@ -1313,13 +1343,14 @@ dex:
   # @default -- See [values.yaml]
   containerSecurityContext:
     runAsNonRoot: true
+    runAsUser: 1001
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     seccompProfile:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Probes for Dex server
   ## Supported from Dex >= 2.28.0
@@ -1463,6 +1494,30 @@ redis:
     ## Has higher precedence over `redis.pdb.minAvailable`
     maxUnavailable: ""
 
+  ## Redis Vertical Pod Autoscaler
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
+  vpa:
+    # -- Deploy a [VerticalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/) for the Redis
+    enabled: false
+    # -- Labels to be added to Redis vpa
+    labels: {}
+    # -- Annotations to be added to Redis vpa
+    annotations: {}
+    # -- One of the VPA operation modes
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically
+    ## Note: Recreate update mode requires more than one replica unless the min-replicas VPA controller flag is overridden
+    updateMode: Initial
+    # -- Controls how VPA computes the recommended resources for Redis container
+    ## Ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/examples/hamster.yaml
+    containerPolicy: {}
+      # controlledResources: ["cpu", "memory"]
+      # minAllowed:
+      #   cpu: 250m
+      #   memory: 256Mi
+      # maxAllowed:
+      #   cpu: 1
+      #   memory: 1Gi
+
   ## Redis image
   image:
     # -- Redis repository
@@ -1485,7 +1540,7 @@ redis:
       # -- Repository to use for the redis-exporter
       repository: ghcr.io/oliver006/redis_exporter
       # -- Tag to use for the redis-exporter
-      tag: v1.80.2
+      tag: v1.82.0
       # -- Image pull policy for the redis-exporter
       # @default -- `""` (defaults to global.image.imagePullPolicy)
       imagePullPolicy: ""
@@ -1500,7 +1555,7 @@ redis:
         type: RuntimeDefault
       capabilities:
         drop:
-        - ALL
+          - ALL
 
     ## Probes for Redis exporter (optional)
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -1651,7 +1706,7 @@ redis:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   # -- Redis service port
   servicePort: 6379
@@ -2011,6 +2066,30 @@ server:
     ## Has higher precedence over `server.pdb.minAvailable`
     maxUnavailable: ""
 
+  ## Argo CD server Vertical Pod Autoscaler
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
+  vpa:
+    # -- Deploy a [VerticalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/) for the Argo CD server
+    enabled: false
+    # -- Labels to be added to Argo CD server vpa
+    labels: {}
+    # -- Annotations to be added to Argo CD server vpa
+    annotations: {}
+    # -- One of the VPA operation modes
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically
+    ## Note: Recreate update mode requires more than one replica unless the min-replicas VPA controller flag is overridden
+    updateMode: Initial
+    # -- Controls how VPA computes the recommended resources for Argo CD server container
+    ## Ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/examples/hamster.yaml
+    containerPolicy: {}
+      # controlledResources: ["cpu", "memory"]
+      # minAllowed:
+      #   cpu: 250m
+      #   memory: 256Mi
+      # maxAllowed:
+      #   cpu: 1
+      #   memory: 1Gi
+
   ## Argo CD server image
   image:
     # -- Repository to use for the Argo CD server
@@ -2058,7 +2137,7 @@ server:
       # -- Repository to use for extension installer image
       repository: "quay.io/argoprojlabs/argocd-extension-installer"
       # -- Tag to use for extension installer image
-      tag: "v0.0.9"
+      tag: "v1.0.0"
       # -- Image pull policy for extensions
       # @default -- `""` (defaults to global.image.imagePullPolicy)
       imagePullPolicy: ""
@@ -2085,7 +2164,7 @@ server:
         type: RuntimeDefault
       capabilities:
         drop:
-        - ALL
+          - ALL
 
     # -- Resource limits and requests for the argocd-extensions container
     resources: {}
@@ -2200,7 +2279,7 @@ server:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Readiness and liveness probes for default backend
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -2322,9 +2401,9 @@ server:
     # -- Labels to be added to argocd-server-tls secret
     labels: {}
     # -- Private Key of the certificate
-    key: ''
+    key: ""
     # -- Certificate data
-    crt: ''
+    crt: ""
 
   ## Server service configuration
   service:
@@ -2405,7 +2484,7 @@ server:
       # -- Prometheus ServiceMonitor tlsConfig
       tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
-      namespace: ""  # monitoring
+      namespace: "" # monitoring
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor annotations
@@ -2646,15 +2725,11 @@ server:
         namespace: envoy-gateway
         group: gateway.networking.k8s.io
         kind: Gateway
-      # - name: example-gateway
-      #   namespace: example-gateway-namespace
-      #   sectionName: https
     # -- List of hostnames for the HTTPRoute
     # @default -- `[]` (See [values.yaml])
     hostnames:
       - argo-cd.s.zjusct.io
       - argo-cd.clusters.zjusct.io
-      # - argocd.example.com
     # -- HTTPRoute rules configuration
     # @default -- `[]` (See [values.yaml])
     rules:
@@ -2668,11 +2743,14 @@ server:
         #       add:
         #         - name: X-Custom-Header
         #           value: custom-value
+        # timeouts:
+        #   request: 10s
+        #   backendRequest: 2s
 
   # Gateway API GRPCRoute configuration
   # NOTE: Gateway API support is in EXPERIMENTAL status
   # Support depends on your Gateway controller implementation
-  # Refer to https://gateway-api.sigs.k8s.io/implementations for controller-specific details
+  # Refer to https://gateway-api.sigs.k8s.io/implementations/ for controller-specific details
   grpcroute:
     # -- Enable GRPCRoute resource for Argo CD server (Gateway API)
     enabled: true
@@ -2686,14 +2764,14 @@ server:
     parentRefs:
       - name: envoy-gateway
         namespace: envoy-gateway
-    # -- List of hostnames for the GRPCRoute
     ## Use separate hostname to avoid Gateway API Cross Serving conflict with HTTPRoute
+    # -- List of hostnames for the GRPCRoute
     # @default -- `[]` (See [values.yaml])
     hostnames:
       - grpc-argo-cd.clusters.zjusct.io
       - grpc-argo-cd.s.zjusct.io
-    # -- GRPCRoute rules configuration
     ## Match all gRPC methods using RegularExpression to satisfy Gateway API validation
+    # -- GRPCRoute rules configuration
     # @default -- `[]` (See [values.yaml])
     rules:
       - matches:
@@ -2704,6 +2782,12 @@ server:
         backendRefs:
           - name: argo-cd-argocd-server
             port: 80
+        # filters: []
+        #   - type: RequestHeaderModifier
+        #     requestHeaderModifier:
+        #       add:
+        #         - name: X-Custom-Header
+        #           value: custom-value
 
   # Gateway API BackendTLSPolicy configuration
   # NOTE: BackendTLSPolicy support is in EXPERIMENTAL status
@@ -2711,7 +2795,7 @@ server:
   # Not all Gateway controllers support this resource (e.g., Cilium does not support it yet)
   backendTLSPolicy:
     # -- Enable BackendTLSPolicy resource for Argo CD server (Gateway API)
-    enabled: false
+    enabled: true
     # -- Additional BackendTLSPolicy labels
     labels: {}
     # -- Additional BackendTLSPolicy annotations
@@ -2804,6 +2888,30 @@ repoServer:
     # -- Number of pods that are unavailable after eviction as number or percentage (eg.: 50%).
     ## Has higher precedence over `repoServer.pdb.minAvailable`
     maxUnavailable: ""
+
+  ## Repo server Vertical Pod Autoscaler
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
+  vpa:
+    # -- Deploy a [VerticalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/) for the repo server
+    enabled: false
+    # -- Labels to be added to repo server vpa
+    labels: {}
+    # -- Annotations to be added to repo server vpa
+    annotations: {}
+    # -- One of the VPA operation modes
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically
+    ## Note: Recreate update mode requires more than one replica unless the min-replicas VPA controller flag is overridden
+    updateMode: Initial
+    # -- Controls how VPA computes the recommended resources for repo server container
+    ## Ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/examples/hamster.yaml
+    containerPolicy: {}
+      # controlledResources: ["cpu", "memory"]
+      # minAllowed:
+      #   cpu: 250m
+      #   memory: 256Mi
+      # maxAllowed:
+      #   cpu: 1
+      #   memory: 1Gi
 
   ## Repo server image
   image:
@@ -2903,6 +3011,9 @@ repoServer:
   initContainers: []
 
   copyutil:
+    # -- Extra arguments for the cp command in the repo server copyutil initContainer
+    # @default -- `"--update=none"`
+    extraArgs: "--update=none"
     # -- Resource limits and requests for the repo server copyutil initContainer
     resources: {}
     #  limits:
@@ -3004,7 +3115,7 @@ repoServer:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Readiness and liveness probes for Repo Server
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -3082,11 +3193,11 @@ repoServer:
     # -- Labels to be added to argocd-repo-server-tls secret
     labels: {}
     # -- Certificate authority. Required for self-signed certificates.
-    ca: ''
+    ca: ""
     # -- Certificate private key
-    key: ''
+    key: ""
     # -- Certificate data. Must contain SANs of Repo service (ie: argocd-repo-server, argocd-repo-server.argo-cd.svc)
-    crt: ''
+    crt: ""
 
   ## Repo server service configuration
   service:
@@ -3217,6 +3328,30 @@ applicationSet:
     ## Has higher precedence over `applicationSet.pdb.minAvailable`
     maxUnavailable: ""
 
+  ## ApplicationSet controller Vertical Pod Autoscaler
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
+  vpa:
+    # -- Deploy a [VerticalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/) for the ApplicationSet controller
+    enabled: false
+    # -- Labels to be added to ApplicationSet controller vpa
+    labels: {}
+    # -- Annotations to be added to ApplicationSet controller vpa
+    annotations: {}
+    # -- One of the VPA operation modes
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically
+    ## Note: Recreate update mode requires more than one replica unless the min-replicas VPA controller flag is overridden
+    updateMode: Initial
+    # -- Controls how VPA computes the recommended resources for ApplicationSet controller container
+    ## Ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/examples/hamster.yaml
+    containerPolicy: {}
+      # controlledResources: ["cpu", "memory"]
+      # minAllowed:
+      #   cpu: 250m
+      #   memory: 256Mi
+      # maxAllowed:
+      #   cpu: 1
+      #   memory: 1Gi
+
   ## ApplicationSet controller image
   image:
     # -- Repository to use for the ApplicationSet controller
@@ -3309,7 +3444,7 @@ applicationSet:
       # -- Prometheus ServiceMonitor tlsConfig
       tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
-      namespace: ""  # monitoring
+      namespace: "" # monitoring
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor annotations
@@ -3388,7 +3523,7 @@ applicationSet:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Probes for ApplicationSet controller (optional)
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -3600,6 +3735,30 @@ notifications:
     ## Has higher precedence over `notifications.pdb.minAvailable`
     maxUnavailable: ""
 
+  ## Notifications controller Vertical Pod Autoscaler
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
+  vpa:
+    # -- Deploy a [VerticalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/) for the notifications controller
+    enabled: false
+    # -- Labels to be added to notifications controller vpa
+    labels: {}
+    # -- Annotations to be added to notifications controller vpa
+    annotations: {}
+    # -- One of the VPA operation modes
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically
+    ## Note: Recreate update mode requires more than one replica unless the min-replicas VPA controller flag is overridden
+    updateMode: Initial
+    # -- Controls how VPA computes the recommended resources for notifications controller container
+    ## Ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/examples/hamster.yaml
+    containerPolicy: {}
+      # controlledResources: ["cpu", "memory"]
+      # minAllowed:
+      #   cpu: 250m
+      #   memory: 256Mi
+      # maxAllowed:
+      #   cpu: 1
+      #   memory: 1Gi
+
   ## Notifications controller image
   image:
     # -- Repository to use for the notifications controller
@@ -3686,7 +3845,7 @@ notifications:
 
       # email-username:
       # email-password:
-        # For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
+      # For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
 
   metrics:
     # -- Enables prometheus metrics server
@@ -3776,7 +3935,7 @@ notifications:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Probes for notifications controller Pods (optional)
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -4265,7 +4424,7 @@ commitServer:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-      - ALL
+        - ALL
     seccompProfile:
       type: RuntimeDefault
 
@@ -4335,3 +4494,27 @@ commitServer:
     # -- Default network policy rules used by commit server
     # @default -- `false` (defaults to global.networkPolicy.create)
     create: false
+
+  ## Commit server Vertical Pod Autoscaler
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
+  vpa:
+    # -- Deploy a [VerticalPodAutoscaler](https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/) for the commit server
+    enabled: false
+    # -- Labels to be added to commit server vpa
+    labels: {}
+    # -- Annotations to be added to commit server vpa
+    annotations: {}
+    # -- One of the VPA operation modes
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically
+    ## Note: Recreate update mode requires more than one replica unless the min-replicas VPA controller flag is overridden
+    updateMode: Initial
+    # -- Controls how VPA computes the recommended resources for commit server container
+    ## Ref: https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/examples/hamster.yaml
+    containerPolicy: {}
+      # controlledResources: ["cpu", "memory"]
+      # minAllowed:
+      #   cpu: 250m
+      #   memory: 256Mi
+      # maxAllowed:
+      #   cpu: 1
+      #   memory: 1Gi

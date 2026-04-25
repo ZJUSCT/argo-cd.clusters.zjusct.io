@@ -5,14 +5,14 @@ resources:
 - resources/apps.yaml
 - resources/configmap-plugin.yaml
 - resources/namespace.yaml
-- resources/sealedsecret-password.yaml
+- resources/sealedsecret.yaml
 helmCharts:
 - name: argo-cd
   repo: https://argoproj.github.io/argo-helm
   includeCRDs: true
   releaseName: argo-cd
   namespace: argo-cd
-  valuesFile: values/argo-cd-9.4.1.yaml
-  version: 9.4.1
+  valuesFile: values/argo-cd-9.5.2.yaml
+  version: 9.5.2
 transformers:
   - ../../image-prefix.yaml
