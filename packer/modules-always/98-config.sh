@@ -33,12 +33,20 @@ install -D -m 0644 /dev/stdin /etc/systemd/resolved.conf.d/disable-llmnr.conf <<
 LLMNR=no
 EOF
 
-systemctl disable systemd-networkd # prefer NetworkManager
+install -D -m 0644 /dev/stdin /etc/systemd/networkd.conf.d/domain.conf <<'EOF'
+[Network]
+UseDomains=yes
+EOF
 
-if [ -f /etc/netplan/50-cloud-init.yaml ] && ! grep -q '^[[:space:]]*renderer:' /etc/netplan/50-cloud-init.yaml; then
-    sed -i '/^network:[[:space:]]*$/a\  renderer: NetworkManager' /etc/netplan/50-cloud-init.yaml
-    command -v netplan >/dev/null && netplan generate
-fi
+install -D -m 0600 /dev/stdin /etc/netplan/50-cloud-init.yaml <<'EOF'
+network:
+  renderer: NetworkManager
+  ethernets:
+    eth0:
+      match:
+        name: en*
+      dhcp4: yes
+EOF
 
 install -D -m 0644 /dev/stdin /etc/udev/hwdb.d/50-net-naming-denylist.hwdb <<'EOF'
 net:naming:*:*

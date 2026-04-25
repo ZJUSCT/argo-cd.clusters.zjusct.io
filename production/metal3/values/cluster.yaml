@@ -5,8 +5,6 @@ default:
   automatedCleaningMode: disabled
   bmc:
     credentialsName: bmc-credential
-  userData:
-    name: userdata
   image:
     url: https://radosgw.clusters.zjusct.io/packer-images/a625f2b/debian-13-amd64.qcow2
     checksumType: sha256
