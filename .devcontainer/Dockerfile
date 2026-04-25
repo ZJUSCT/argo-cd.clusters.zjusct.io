@@ -138,11 +138,11 @@ chmod 755 /usr/local/bin/claude
 # https://docs.astral.sh/uv/getting-started/installation/
 curl -sSL "https://github.com/astral-sh/uv/releases/latest/download/uv-x86_64-unknown-linux-musl.tar.gz" | tar xz --strip-components=1 -C /usr/local/bin/ uv-x86_64-unknown-linux-musl/uv uv-x86_64-unknown-linux-musl/uvx
 
-install -D -m 0644 /dev/stdin /etc/uv/uv.toml <<EOF
+install -D -m 0644 /dev/stdin /etc/uv/uv.toml <<EOT
 [[index]]
 url = "https://${MIRROR}/pypi/web/simple/"
 default = true
-EOF
+EOT
 
 pip config --global set global.index-url https://${MIRROR}/pypi/web/simple
 
