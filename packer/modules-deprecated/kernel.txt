@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+# Deprecation reason: no kernel customization needed
+
 ########################################################################
 # GRUB - Set default kernel
 ########################################################################

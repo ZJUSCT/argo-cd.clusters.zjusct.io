@@ -18,10 +18,6 @@ arch)
     echo "FreeIPA client: not available on arch, skipping"
     exit 0
     ;;
-openEuler)
-    echo "FreeIPA client: not available on openEuler, skipping"
-    exit 0
-    ;;
 *)
     echo "FreeIPA client: unsupported distro $ID"
     exit 1
@@ -31,14 +27,14 @@ esac
 # Disable systemd socket activation for SSSD responders
 # FreeIPA client configures nss/pam/ssh/sudo directly in sssd.conf;
 # socket activation conflicts with this configuration.
-systemctl disable --now \
+systemctl disable \
     sssd-nss.socket \
     sssd-pam.socket \
-    sssd-pam-priv.socket \
     sssd-ssh.socket \
     sssd-sudo.socket \
     sssd-autofs.socket \
-    sssd-pac.socket 2>/dev/null || true
+    sssd-pac.socket \
+    2>/dev/null || true
 
 # Keep local docker group with same GID as FreeIPA group for boot-time fallback
 # SocketGroup=docker in docker.socket needs the group to exist before SSSD is online
@@ -50,7 +46,7 @@ groupmod -g 1109200066 docker
 ##########################################################################
 
 case $ID in
-ubuntu | debian)
+ubuntu | debian | fedora | rocky)
     install_pkg ceph-common
     ;;
 *)

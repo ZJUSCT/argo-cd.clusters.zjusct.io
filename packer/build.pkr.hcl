@@ -7,11 +7,16 @@ build {
     destination = "/tmp/"
   }
 
+  provisioner "file" {
+    source      = "squid.crt"
+    destination = "/tmp/"
+  }
+
   provisioner "shell" {
     scripts = var.modules
   }
 
   post-processor "manifest" {
-    output = "output-${var.vm_name}/manifest.json"
+    output = "output/${var.vm_name}/manifest.json"
   }
 }

@@ -6,17 +6,38 @@ ARG HTTP_PROXY=http://172.28.0.4:3128
 ARG HTTPS_PROXY=http://172.28.0.4:3128
 ARG NO_PROXY=localhost,zjusct.io
 
-ARG MIRROR=mirrors.zju.edu.cn
+ENV MIRROR=mirrors.cernet.edu.cn
 ARG K8S_VERSION=v1.35
 ARG KUBESEAL_VERSION=0.36.1
 ENV DEBIAN_FRONTEND=noninteractive
 
-COPY squid.crt /usr/local/share/ca-certificates/squid.crt
-RUN update-ca-certificates
-
 RUN <<EOF
 set -xe
 . /etc/os-release
+
+cat <<EOT > /usr/local/share/ca-certificates/squid.crt
+-----BEGIN CERTIFICATE-----
+MIIDEDCCAfigAwIBAgIUNXZxL6wleVbCUKejb+FHKRPwU6QwDQYJKoZIhvcNAQEL
+BQAwIDEeMBwGA1UEAxMVWkpVU0NUIFNxdWlkIFByb3h5IENBMB4XDTI2MDIxODEz
+NDIyNloXDTI2MDUxOTEzNDIyNlowIDEeMBwGA1UEAxMVWkpVU0NUIFNxdWlkIFBy
+b3h5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs4GfDEih4myZ
+ykMQOAY/AdM2W9xo5Q4luK8/bLOxa2CYi4BxRrhA7EBvHMhJpBF7FAbWdn/Kzt79
+yAMkNUGvG32f3R/gdQC4rJoWKFAdOEwj7TmIHLK6smwQ8uXA2qJNAD8FstR7XmMD
+qMlbkp2XOV7rbIF+YeDiAQ+00fM9TBDC4X2acYtGyxtI+9k93bXTNXMkThK8NFxm
+k0KmsYnFMEmFQ9TIbiUvDNr+j/Tqj7Hw1CJz+4pod38cZPeXY71U+pBTg9lWpEi3
+97aIIvPB0vvdoVI82v6kFaoPVOrXcpeZdJ22Spu/vxECcBUeJVRmVMmXWUepbOJp
+8U/mEvbnkwIDAQABo0IwQDAOBgNVHQ8BAf8EBAMCAqQwDwYDVR0TAQH/BAUwAwEB
+/zAdBgNVHQ4EFgQUCMQoUV5+UuHWCSmuX0bA+AndP6owDQYJKoZIhvcNAQELBQAD
+ggEBAFgqj89+jbaf0+u+KJDphkTiJSAc1dm4O2G09bbNHxpp5oRr3NT/WWxgyifL
+9indbnByyXd2ywT5LRXTRhF+RMu6Xf4PO/2sI9k73RVrT3mvdcn96apJXrUb3omp
+vMpisbakaaREY6GJPfln273uJcQGOyg57kaG2ASMucuJlo70w9JQUx/icF5gjxFl
+L6FXhdYs5L6KZorYdQLw3OPdmS5Vu22EMlW6GPhFCIXZIHPLdcFEF3toqTKlHRiJ
+wl/J5hxlSQWIDUZZi28Dm/NkV650nN3MsdAJP33mRwGkFeZSdv3w2Lgnajewj/4m
+XljL5sQrprvcir5cDWXSAgno1NA=
+-----END CERTIFICATE-----
+
+EOT
+update-ca-certificates
 
 cat <<EOT > /etc/apt/sources.list.d/debian.sources
 Types: deb
@@ -33,10 +54,10 @@ Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 EOT
 
 # <<< K8S APT Repo
-curl -fsSL https://mirrors.cernet.edu.cn/kubernetes/core:/stable:/${K8S_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://${MIRROR}/kubernetes/core:/stable:/${K8S_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 cat <<EOT | tee /etc/apt/sources.list.d/kubernetes.list
-deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://mirrors.cernet.edu.cn/kubernetes/core:/stable:/${K8S_VERSION}/deb/ /
+deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://${MIRROR}/kubernetes/core:/stable:/${K8S_VERSION}/deb/ /
 EOT
 chmod 644 /etc/apt/sources.list.d/kubernetes.list
 # >>>
@@ -114,8 +135,27 @@ version=$(curl -fsSL https://downloads.claude.ai/claude-code-releases/latest)
 curl -fsSL -o /usr/local/bin/claude "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
 chmod 755 /usr/local/bin/claude
 
-pip config --global set global.index-url https://${MIRROR}/pypi/web/simple
+# https://docs.astral.sh/uv/getting-started/installation/
+curl -sSL "https://github.com/astral-sh/uv/releases/latest/download/uv-x86_64-unknown-linux-musl.tar.gz" | tar xz --strip-components=1 -C /usr/local/bin/ uv-x86_64-unknown-linux-musl/uv uv-x86_64-unknown-linux-musl/uvx
+
+install -D -m 0644 /dev/stdin /etc/uv/uv.toml <<EOF
+[[index]]
+url = "https://${MIRROR}/pypi/web/simple/"
+default = true
 EOF
 
-COPY post-start.sh /usr/local/share/devcontainer/post-start.sh
-RUN chmod a+rx /usr/local/share/devcontainer/post-start.sh
+pip config --global set global.index-url https://${MIRROR}/pypi/web/simple
+
+install -D -m 755 /dev/stdin /usr/local/share/devcontainer/post-start.sh <<'EOT'
+#!/bin/bash
+set -euo pipefail
+
+[ -f /home/host/.kube/config ] && install -D /home/host/.kube/config /home/vscode/.kube/config
+[ -f /home/host/.config/opencode/opencode.json ] && install -D /home/host/.config/opencode/opencode.json /home/vscode/.config/opencode/opencode.json
+[ -f /home/host/.claude/settings.json ] && install -D /home/host/.claude/settings.json /home/vscode/.claude/settings.json
+[ -f /home/host/.claude.json ] && install -D /home/host/.claude.json /home/vscode/.claude.json
+[ -f /home/host/.gitconfig ] && install -D /home/host/.gitconfig /home/vscode/.gitconfig
+[ -f /home/host/.codex/config.toml ] && install -D /home/host/.codex/config.toml /home/vscode/.codex/config.toml
+EOT
+
+EOF

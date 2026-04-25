@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+# Deprecation reason: no user in our cluster
+
 ########################################################################
 # lmod
 # https://lmod.readthedocs.io/en/latest/030_installing.html
-# lmod is disabled now
 ########################################################################
 
 # bash, zsh

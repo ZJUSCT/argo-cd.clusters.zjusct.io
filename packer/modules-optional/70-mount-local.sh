@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-install -D -m 0755 /dev/stdin /etc/systemd/system/mount-local.service <<EOF
+install -D -m 0644 /dev/stdin /etc/systemd/system/mount-local.service <<EOF
 [Unit]
 Description=Mount /local
 After=local-fs.target
@@ -14,7 +14,9 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
-install -D -m 0644 /dev/stdin /usr/local/bin/mount-local.sh <<'EOF'
+systemctl enable mount-local.service
+
+install -D -m 0755 /dev/stdin /usr/local/bin/mount-local.sh <<'EOF'
 #!/bin/bash
 # Mount ext4 disks to /local/nvme-N or /local/sata-N
 set -e

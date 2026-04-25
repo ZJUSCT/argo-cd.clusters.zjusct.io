@@ -1,0 +1,36 @@
+# Deprecation reason: Dive is not actively maintained since Mar 29, 2025
+# Wait for https://github.com/wagoodman/dive/issues/568
+
+########################################################################
+# Dive — container image explorer
+# https://github.com/wagoodman/dive
+########################################################################
+
+case $ARCH in
+x86_64)   dive_arch="amd64" ;;
+aarch64 | arm64)  dive_arch="arm64" ;;
+*)
+    echo "Dive: unsupported arch $ARCH, skipping"
+    ;;
+esac
+
+if [ -n "${dive_arch:-}" ]; then
+    case $ID in
+    ubuntu | debian)
+        deb=$(get_github_release_asset "wagoodman/dive" "dive_.*_linux_${dive_arch}\\.deb")
+        install_pkg "$deb"
+        rm -f "$deb"
+        ;;
+    fedora | rocky)
+        pkg=$(get_github_release_asset "wagoodman/dive" "dive_.*_linux_${dive_arch}\\.rpm")
+        install_pkg "$pkg"
+        rm -f "$pkg"
+        ;;
+    arch)
+        install_pkg dive
+        ;;
+    *)
+        echo "Dive: unsupported distro $ID, skipping"
+        ;;
+    esac
+fi

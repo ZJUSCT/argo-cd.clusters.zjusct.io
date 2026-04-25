@@ -16,13 +16,13 @@ esac
 # https://developer.download.nvidia.com/compute/cuda/repos/
 nvidia_repo_dir=""
 case $ID in
-debian)  nvidia_repo_dir="debian$(echo "$VERSION_ID" | tr -d .)" ;;
-ubuntu)  nvidia_repo_dir="ubuntu$(echo "$VERSION_ID" | tr -d .)" ;;
-fedora)  nvidia_repo_dir="fedora$(echo "$VERSION_ID" | tr -d .)" ;;
+debian) nvidia_repo_dir="debian$(echo "$VERSION_ID" | tr -d .)" ;;
+ubuntu) nvidia_repo_dir="ubuntu$(echo "$VERSION_ID" | tr -d .)" ;;
+fedora) nvidia_repo_dir="fedora$(echo "$VERSION_ID" | tr -d .)" ;;
 esac
 
 case $ARCH in
-x86_64)  nvidia_arch="x86_64" ;;
+x86_64) nvidia_arch="x86_64" ;;
 aarch64) nvidia_arch="sbsa" ;;
 esac
 
@@ -40,7 +40,7 @@ ensure_cuda_keyring() {
             return 0
         fi
         curl -fsSL "https://developer.download.nvidia.com/compute/cuda/repos/${nvidia_repo}/cuda-keyring_1.1-1_all.deb" \
-            -o /tmp/cuda-keyring.deb
+            -o /tmp/cuda-keyring.deb || return 1
         dpkg -i /tmp/cuda-keyring.deb
         rm -f /tmp/cuda-keyring.deb
         apt-get update
@@ -61,20 +61,17 @@ ensure_cuda_keyring() {
 install_nvidia_container_toolkit() {
     case $ID in
     debian | ubuntu)
-        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
+        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey |
             gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-        curl -fsSL "https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list" | \
-            sed "s#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g" | \
+        curl -fsSL https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list |
+            sed "s#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g" |
             tee /etc/apt/sources.list.d/nvidia-container-toolkit.list >/dev/null
         apt-get update
-        apt-get install -y nvidia-container-toolkit
+        install_pkg nvidia-container-toolkit
         ;;
-    fedora)
-        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
-            gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg 2>/dev/null || true
-        curl -fsSL "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo" \
-            -o /etc/yum.repos.d/nvidia-container-toolkit.repo
-        dnf install -y nvidia-container-toolkit
+    fedora | rocky)
+        add_repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo" \
+            install_pkg nvidia-container-toolkit
         ;;
     *)
         echo "nvidia-container-toolkit: unsupported distro $ID, skipping"
@@ -89,9 +86,10 @@ debian | ubuntu)
         echo "NVIDIA driver: failed to install cuda-keyring for $ID $VERSION_ID, skipping"
         exit 0
     }
+    install_pkg "linux-headers-$(uname -r)" dkms
     case $ID in
-    debian)  apt-get install -y nvidia-open ;;
-    ubuntu)  apt-get install -y nvidia-open ;;
+    debian) install_pkg nvidia-open ;;
+    ubuntu) install_pkg nvidia-open ;;
     esac
     install_nvidia_container_toolkit
     ;;
@@ -100,7 +98,7 @@ fedora)
         echo "NVIDIA driver: failed to install cuda-keyring for $ID $VERSION_ID, skipping"
         exit 0
     }
-    dnf install -y nvidia-driver-open
+    install_pkg nvidia-driver-open
     install_nvidia_container_toolkit
     ;;
 arch)

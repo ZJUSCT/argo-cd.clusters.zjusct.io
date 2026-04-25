@@ -1,11 +1,44 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
 source /tmp/00-shared.sh
-install_pkg_from_github "open-telemetry/opentelemetry-collector-releases" "otelcol-contrib_*_linux_amd64.deb"
 
-systemctl enable otelcol-contrib.service
+case "$ARCH" in
+x86_64) otelcol_arch="amd64" ;;
+aarch64 | arm64) otelcol_arch="arm64" ;;
+riscv64) otelcol_arch="riscv64" ;;
+*)
+    echo "otelcol-contrib: unsupported arch $ARCH, skipping"
+    exit 1
+    ;;
+esac
 
-install -D -m 0644 /dev/stdin /etc/systemd/system/otelcol-contrib.service.d/override.conf <<EOF
+case "$ID" in
+ubuntu | debian)
+    pkg=$(get_github_release_asset "open-telemetry/opentelemetry-collector-releases" \
+        "^otelcol-contrib_[0-9]+\\.[0-9]+\\.[0-9]+_linux_${otelcol_arch}\\.deb$")
+    dpkg -i "$pkg"
+    rm -f "$pkg"
+    ;;
+fedora | rocky)
+    pkg=$(get_github_release_asset "open-telemetry/opentelemetry-collector-releases" \
+        "^otelcol-contrib_[0-9]+\\.[0-9]+\\.[0-9]+_linux_${otelcol_arch}\\.rpm$")
+    dnf install -y "$pkg"
+    rm -f "$pkg"
+    ;;
+*)
+    tarball=$(get_github_release_asset "open-telemetry/opentelemetry-collector-releases" \
+        "^otelcol-contrib_[0-9]+\\.[0-9]+\\.[0-9]+_linux_${otelcol_arch}\\.tar\\.gz$")
+    tar xzf "$tarball" -C /usr/bin/ otelcol-contrib
+    rm -f "$tarball"
+    install -d -m 0755 /etc/otelcol-contrib
+    curl --output /usr/lib/systemd/system/otelcol-contrib.service \
+        https://github.com/open-telemetry/opentelemetry-collector-releases/raw/refs/heads/main/distributions/otelcol-contrib/otelcol-contrib.service
+    curl --output /etc/otelcol-contrib/otelcol-contrib.conf \
+        https://github.com/open-telemetry/opentelemetry-collector-releases/raw/refs/heads/main/distributions/otelcol-contrib/otelcol-contrib.conf
+    ;;
+esac
+
+install -D -m 0644 /dev/stdin /etc/systemd/system/otelcol-contrib.service.d/override.conf <<'EOF'
 [Unit]
 After=docker.service
 Requires=docker.service
@@ -15,11 +48,11 @@ Group=root
 Environment=OTEL_CLOUD_REGION=zjusct
 EOF
 
-install -D -m 0640 /dev/stdin /etc/otelcol-contrib/config.yaml <<EOF
+install -D -m 0640 /dev/stdin /etc/otelcol-contrib/config.yaml <<'EOF'
 # https://opentelemetry.io/docs/collector/configuration/
 # https://github.com/open-telemetry/opentelemetry-collector/blob/main/examples/local/otel-config.yaml
 #
-# Version: otelcol-contrib v0.146.1
+# Version: otelcol-contrib v0.150.1
 
 extensions:
   pprof:
@@ -280,3 +313,5 @@ service:
     metrics:
       level: none
 EOF
+
+systemctl enable otelcol-contrib.service

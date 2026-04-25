@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# K8S and tools
+
 # shellcheck disable=SC1091
 source /tmp/00-shared.sh
 
@@ -7,21 +9,23 @@ source /tmp/00-shared.sh
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 ########################################################################
 
+K8S_VERSION="v1.35"
+
 case $ID in
 ubuntu | debian)
     add_repo "kubernetes" \
-        "https://mirrors.cernet.edu.cn/kubernetes/core:/stable:/v1.32/deb/Release.key" \
-        "deb [signed-by=/etc/apt/keyrings/kubernetes.gpg] https://mirrors.cernet.edu.cn/kubernetes/core:/stable:/v1.32/deb/ /"
+        "https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/deb/Release.key" \
+        "https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/deb/ /"
     install_pkg kubectl kubeadm kubelet
     ;;
-fedora)
+fedora | rocky)
     cat >/etc/yum.repos.d/kubernetes.repo <<EOF
 [kubernetes]
 name=Kubernetes
-baseurl=https://mirrors.cernet.edu.cn/kubernetes/core:/stable:/v1.32/rpm/
+baseurl=https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://mirrors.cernet.edu.cn/kubernetes/core:/stable:/v1.32/rpm/repodata/repomd.xml.key
+gpgkey=https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/rpm/repodata/repomd.xml.key
 EOF
     install_pkg kubectl kubeadm kubelet
     ;;
@@ -29,7 +33,8 @@ arch)
     install_pkg kubectl kubeadm kubelet
     ;;
 *)
-    echo "K8S packages: unsupported distro $ID, skipping"
+    echo "K8S packages: unsupported distro $ID"
+    exit 1
     ;;
 esac
 
@@ -44,9 +49,10 @@ case $ID in
 ubuntu | debian)
     add_repo "helm" \
         "https://packages.buildkite.com/helm-linux/helm-debian/gpgkey" \
-        "deb [signed-by=/etc/apt/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+        "https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+    install_pkg helm
     ;;
-fedora)
+fedora | rocky)
     dnf install -y helm
     ;;
 arch)
@@ -64,16 +70,18 @@ esac
 ########################################################################
 
 case "$ARCH" in
-x86_64 | amd64)
-    install_bin_from_github "argoproj/argo-cd" "argocd-linux-amd64" "argocd"
-    ;;
-aarch64 | arm64)
-    install_bin_from_github "argoproj/argo-cd" "argocd-linux-arm64" "argocd"
-    ;;
+x86_64) argocd_arch="amd64" ;;
+aarch64 | arm64) argocd_arch="arm64" ;;
 *)
     echo "Argo CD: unsupported arch $ARCH, skipping"
     ;;
 esac
+
+if [ -n "${argocd_arch:-}" ]; then
+    bin=$(get_github_release_asset "argoproj/argo-cd" "argocd-linux-${argocd_arch}$")
+    install -m 755 "$bin" /usr/local/bin/argocd
+    rm -f "$bin"
+fi
 
 ########################################################################
 # Cilium CLI + Hubble
@@ -82,7 +90,7 @@ esac
 ########################################################################
 
 case "$ARCH" in
-x86_64 | amd64)
+x86_64)
     cilium_arch="amd64"
     ;;
 aarch64 | arm64)
@@ -95,27 +103,34 @@ aarch64 | arm64)
 esac
 
 if [ -n "${cilium_arch:-}" ]; then
-    install_tarball_from_github "cilium/cilium-cli" "cilium-linux-${cilium_arch}.tar.gz"
-    install_tarball_from_github "cilium/hubble" "hubble-linux-${cilium_arch}.tar.gz"
+    tarball=$(get_github_release_asset "cilium/cilium-cli" "^cilium-linux-${cilium_arch}\\.tar\\.gz$")
+    tar xzf "$tarball" -C /usr/local/bin/ cilium
+    rm -f "$tarball"
+
+    tarball=$(get_github_release_asset "cilium/hubble" "^hubble-linux-${cilium_arch}\\.tar\\.gz$")
+    tar xzf "$tarball" -C /usr/local/bin/ hubble
+    rm -f "$tarball"
 fi
 
 ########################################################################
 # Kubeseal (Sealed Secrets)
 # https://github.com/bitnami-labs/sealed-secrets
-# Supports: amd64, arm64
 ########################################################################
 
 case "$ARCH" in
-x86_64 | amd64)
-    install_tarball_from_github "bitnami-labs/sealed-secrets" "kubeseal-*-linux-amd64.tar.gz"
-    ;;
-aarch64 | arm64)
-    install_tarball_from_github "bitnami-labs/sealed-secrets" "kubeseal-*-linux-arm64.tar.gz"
-    ;;
+x86_64) kubeseal_arch="amd64" ;;
+aarch64 | arm64) kubeseal_arch="arm64" ;;
 *)
     echo "Kubeseal: unsupported arch $ARCH, skipping"
+    kubeseal_arch=""
     ;;
 esac
+
+if [ -n "${kubeseal_arch:-}" ]; then
+    tarball=$(get_github_release_asset "bitnami-labs/sealed-secrets" "^kubeseal-[0-9]+\\.[0-9]+\\.[0-9]+-linux-${kubeseal_arch}\\.tar\\.gz$")
+    tar xzf "$tarball" -C /usr/local/bin/ kubeseal
+    rm -f "$tarball"
+fi
 
 ########################################################################
 # Kustomize
@@ -124,16 +139,19 @@ esac
 ########################################################################
 
 case "$ARCH" in
-x86_64 | amd64)
-    install_tarball_from_github "kubernetes-sigs/kustomize" "kustomize_*_linux_amd64.tar.gz"
-    ;;
-aarch64 | arm64)
-    install_tarball_from_github "kubernetes-sigs/kustomize" "kustomize_*_linux_arm64.tar.gz"
-    ;;
+x86_64) kustomize_arch="amd64" ;;
+aarch64 | arm64) kustomize_arch="arm64" ;;
 *)
     echo "Kustomize: unsupported arch $ARCH, skipping"
+    kustomize_arch=""
     ;;
 esac
+
+if [ -n "${kustomize_arch:-}" ]; then
+    tarball=$(get_github_release_asset "kubernetes-sigs/kustomize" "^kustomize_.*_linux_${kustomize_arch}\\.tar\\.gz$")
+    tar xzf "$tarball" -C /usr/local/bin/ kustomize
+    rm -f "$tarball"
+fi
 
 ########################################################################
 # Virtctl (KubeVirt)
@@ -142,16 +160,19 @@ esac
 ########################################################################
 
 case "$ARCH" in
-x86_64 | amd64)
-    install_bin_from_github "kubevirt/kubevirt" "virtctl-v*-linux-amd64" "virtctl"
-    ;;
-aarch64 | arm64)
-    install_bin_from_github "kubevirt/kubevirt" "virtctl-v*-linux-arm64" "virtctl"
-    ;;
+x86_64) virtctl_arch="amd64" ;;
+aarch64 | arm64) virtctl_arch="arm64" ;;
 *)
     echo "Virtctl: unsupported arch $ARCH, skipping"
+    virtctl_arch=""
     ;;
 esac
+
+if [ -n "${virtctl_arch:-}" ]; then
+    bin=$(get_github_release_asset "kubevirt/kubevirt" "^virtctl-v[0-9]+\\.[0-9]+\\.[0-9]+-linux-${virtctl_arch}$")
+    install -m 755 "$bin" /usr/local/bin/virtctl
+    rm -f "$bin"
+fi
 
 ########################################################################
 # Packer
@@ -162,12 +183,12 @@ case $ID in
 ubuntu | debian)
     add_repo "hashicorp" \
         "https://apt.releases.hashicorp.com/gpg" \
-        "deb [signed-by=/etc/apt/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $VERSION_CODENAME main"
+        "https://apt.releases.hashicorp.com $VERSION_CODENAME main"
     install_pkg packer
     ;;
-fedora)
+fedora | rocky)
     dnf install -y dnf-plugins-core
-    dnf config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+    add_repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
     install_pkg packer
     ;;
 arch)

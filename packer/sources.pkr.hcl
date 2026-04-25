@@ -47,7 +47,7 @@ source "qemu" "packer" {
   iso_url          = var.iso_url
   iso_checksum     = var.iso_checksum
   format           = "qcow2"
-  output_directory = "output-${var.vm_name}"
+  output_directory = "output/${var.vm_name}"
   vm_name          = "${var.vm_name}.qcow2"
 
   # Boot configuration

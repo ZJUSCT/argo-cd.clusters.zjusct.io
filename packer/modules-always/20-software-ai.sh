@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# AI Coding Assistants
+
 # shellcheck disable=SC1091
 source /tmp/00-shared.sh
 
@@ -18,7 +20,7 @@ aarch64 | arm64) claude_arch="arm64" ;;
 esac
 
 if [ -n "${claude_arch:-}" ]; then
-    if ldd /bin/ls 2>&1 | grep -q musl; then
+    if [ "$MUSL" = 1 ]; then
         claude_platform="linux-${claude_arch}-musl"
     else
         claude_platform="linux-${claude_arch}"
@@ -27,8 +29,8 @@ if [ -n "${claude_arch:-}" ]; then
     version=$(curl -fsSL "$DOWNLOAD_BASE_URL/latest")
     curl -fsSL -o /usr/local/bin/claude "$DOWNLOAD_BASE_URL/$version/$claude_platform/claude"
 
-    checksum=$(curl -fsSL "$DOWNLOAD_BASE_URL/$version/manifest.json" \
-        | jq -r ".platforms[\"$claude_platform\"].checksum // empty")
+    checksum=$(curl -fsSL "$DOWNLOAD_BASE_URL/$version/manifest.json" |
+        jq -r ".platforms[\"$claude_platform\"].checksum // empty")
     if [ -z "$checksum" ] || [[ ! "$checksum" =~ ^[a-f0-9]{64}$ ]]; then
         echo "Claude Code: platform $claude_platform not found in manifest" >&2
         rm -f /usr/local/bin/claude
@@ -51,15 +53,29 @@ fi
 
 case "$ARCH" in
 x86_64)
-    install_tarball_from_github "anomalyco/opencode" "opencode-linux-x64-musl.tar.gz"
+    if [ "$MUSL" = 1 ]; then
+        opencode_pattern="opencode-linux-x64-musl\\.tar\\.gz"
+    else
+        opencode_pattern="opencode-linux-x64\\.tar\\.gz"
+    fi
     ;;
 aarch64 | arm64)
-    install_tarball_from_github "anomalyco/opencode" "opencode-linux-arm64-musl.tar.gz"
+    if [ "$MUSL" = 1 ]; then
+        opencode_pattern="opencode-linux-arm64-musl\\.tar\\.gz"
+    else
+        opencode_pattern="opencode-linux-arm64\\.tar\\.gz"
+    fi
     ;;
 *)
     echo "OpenCode: unsupported arch $ARCH, skipping"
     ;;
 esac
+
+if [ -n "${opencode_pattern:-}" ]; then
+    tarball=$(get_github_release_asset "anomalyco/opencode" "$opencode_pattern")
+    tar xzf "$tarball" -C /usr/local/bin/ opencode
+    rm -f "$tarball"
+fi
 
 ########################################################################
 # Codex (OpenAI)
@@ -67,7 +83,7 @@ esac
 ########################################################################
 
 case "$ARCH" in
-x86_64)   codex_arch="x86_64" ;;
+x86_64) codex_arch="x86_64" ;;
 aarch64 | arm64) codex_arch="aarch64" ;;
 *)
     echo "Codex: unsupported arch $ARCH, skipping"
@@ -75,12 +91,9 @@ aarch64 | arm64) codex_arch="aarch64" ;;
 esac
 
 if [ -n "${codex_arch:-}" ]; then
-    codex_tmpdir=$(mktemp -d)
-    if gh_release_download --repo "openai/codex" \
-        --pattern "codex-${codex_arch}-unknown-linux-gnu.tar.gz" --dir "$codex_tmpdir"; then
-        tar xzf "$codex_tmpdir"/*.tar.gz -C "$codex_tmpdir"
-        rm "$codex_tmpdir"/*.tar.gz
-        install -m 755 "$codex_tmpdir"/codex-* /usr/local/bin/codex
-    fi
-    rm -rf "$codex_tmpdir"
+    codex_tarball=$(get_github_release_asset "openai/codex" \
+        "codex-${codex_arch}-unknown-linux-gnu\\.tar\\.gz")
+    tar xzf "$codex_tarball" -C /tmp/
+    install -m 755 "/tmp/codex-${codex_arch}-unknown-linux-gnu" /usr/local/bin/codex
+    rm -f "$codex_tarball" "/tmp/codex-${codex_arch}-unknown-linux-gnu"
 fi

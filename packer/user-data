@@ -2,7 +2,6 @@
 # https://docs.cloud-init.io/en/latest/reference/modules.html
 # https://docs.cloud-init.io/en/latest/reference/examples.html
 
-# https://docs.cloud-init.io/en/latest/reference/modules.html#users-and-groups
 users:
   - name: root
     # Password: packer, cleaned in 99-clean.sh
@@ -17,14 +16,10 @@ users:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO9wjW2N09v0YzCd0gnhhlQ1uMtQjMGBWbpl6I/2CYoO star
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDBBPqHWQILtXhbKK4kO7w7ZJYz+ic204Cf3vQh8vUQm xyang
     lock_passwd: false
-# https://docs.cloud-init.io/en/latest/reference/modules.html#set-passwords
 ssh_pwauth: true
-# https://docs.cloud-init.io/en/latest/reference/modules.html#ssh
 disable_root: false
-# https://docs.cloud-init.io/en/latest/reference/modules.html#bootcmd
 bootcmd:
   - sed -i -e '/^[#]*PermitRootLogin/s/^.*$/PermitRootLogin yes/' /etc/ssh/sshd_config
-# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-ca-certs
 ca_certs:
   trusted:
     # Cache Proxy CA
@@ -48,5 +43,7 @@ ca_certs:
       wl/J5hxlSQWIDUZZi28Dm/NkV650nN3MsdAJP33mRwGkFeZSdv3w2Lgnajewj/4m
       XljL5sQrprvcir5cDWXSAgno1NA=
       -----END CERTIFICATE-----
-# https://docs.cloud-init.io/en/latest/reference/modules.html#mod-cc-timezone
+# Prevent cloud-init from overwriting apt sources.list
+apt:
+  preserve_sources_list: true
 timezone: "Asia/Shanghai"

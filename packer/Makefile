@@ -1,5 +1,5 @@
 INSIDE_DOCKER := $(shell test -f /.dockerenv && echo yes)
-.DEFAULT_GOAL := debian-13-amd64
+.DEFAULT_GOAL := all
 
 ifeq ($(INSIDE_DOCKER),yes)
 
@@ -9,13 +9,20 @@ lint:
 	packer init .
 	packer validate .
 
-clean:
-	rm -rf output-* .*.auto.pkrvars.json *.log
+copy-module:
+	cp modules*/* /tmp
+	cp squid.crt /tmp
 
-all: debian-13-amd64 archlinux-amd64 fedora-43-amd64
+clean:
+	rm -rf output
+
+all: debian-13-amd64 debian-13-arm64 debian-13-riscv64 \
+	ubuntu-25.10-amd64 ubuntu-25.10-arm64 ubuntu-25.10-riscv64 \
+	ubuntu-20.04-amd64-ascend \
+	archlinux-amd64 fedora-43-amd64 rocky-9-amd64
 
 %:
-	rm -rf output-$@
+	rm -rf output/$@
 	python3 packer.py $@
 
 else
@@ -24,14 +31,17 @@ else
 build-docker:
 	docker compose build packer --progress=plain --push
 
-shell:
+shell-packer:
 	docker compose run --rm -it packer
+
+shell-test:
+	docker compose run --rm -it test
 
 down:
 	docker compose down --remove-orphans
 
 # Proxy everything else into Docker
 %:
-	docker compose run --rm packer -c "make $@"
+	docker compose run --rm packer -c "make -j $@"
 
 endif

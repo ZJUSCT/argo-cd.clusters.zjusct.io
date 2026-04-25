@@ -1,82 +1,92 @@
-# packer
+# Cross Distro Linux Image Builder
 
-Modular multiple distro image builder.
+## How to use
 
-Usage:
+- See `config.yaml` for available build targets. A target is a combination of a base image and a set of modules to be installed on top of it.
+- Run `make <target>` to build the image for the specified target. See the `Makefile` for details on how the build is executed.
 
-```bash
-make <config>
-```
+## Modules
 
-Each config can specify a base cloud-init image and a set of modules to run on top of it.
+There are three types of modules:
 
-```yaml
-- name: ubuntu-20.04-amd64-ascend
-  arch: x86_64
-  iso_url: https://mirrors.cernet.edu.cn/ubuntu-cloud-images/focal/current/focal-server-cloudimg-amd64.img
-  iso_checksum: file:https://mirrors.cernet.edu.cn/ubuntu-cloud-images/focal/current/SHA256SUMS
-  modules:
-    - 50-test
-```
+- `modules-always`: These modules are always included in the build, regardless of the target.
+- `modules-optional`: Can be selected for inclusion in the build by adding their names to the `modules` list of a target in `config.yaml`.
+- `modules-deprecated`: These modules are kept in the codebase for reference but are not included in any build targets.
 
-## 跨发行版模块设计
+Modules are gathered and sorted together by packer.py. Packer will execute them in order.
 
-模块运行在目标镜像内（通过 Packer SSH），由 `common.sh` 提供通用函数（`install_pkg`、`install_pkg_from_url` 等），各模块通过 `source common.sh` 引入。
-
-### 分派机制
-
-使用 `case $ID` 做发行版分派，利用 `;;&`（bash 4+）fall-through 实现继承。
+Common module patterns:
 
 ```bash
-case $ID in
-ubuntu)
-    # ubuntu 专属逻辑
-    ;;&
-debian)
-    # debian 家族共用逻辑（ubuntu 会 fall-through 到这里）
+#!/usr/bin/env bash
+# <description of the module>
+
+# shellcheck disable=SC1091
+source /tmp/00-shared.sh
+
+# Each module should consider ARCH, ID, VERSION_ID compatibility
+case "$ID" in
+  debian|ubuntu)
+    case "$VERSION_ID" in
+      13|25.10)
+        # <installation steps for debian 13 and ubuntu 25.10>
+        ;;
+      *)
+        echo "Unsupported version: $VERSION_ID"
+        exit 1
+        ;;
+    esac
     ;;
-fedora)
-    # fedora 专属逻辑
-    ;;&
-openeuler)
-    # openEuler 专属逻辑
-    ;;
-arch)
-    ;;
-*)
-    echo "Unsupported distro: $ID"
+  *)
+    echo "Unsupported distribution: $ID"
     exit 1
     ;;
 esac
+
+# Prefer long options to make the scripts more readable.
+
+# Write file using install command to ensure correct permissions
+install -D -m 0644 /dev/null /path/to/installed/file <<EOF
+<content of the installed file>
+EOF
 ```
 
-禁止使用旧项目的 `check_and_exec` 函数分派模式（定义 `debian()` 等函数再调用）。
+## Running on K8S Tekton CI
 
-### 三个维度
+The above instructions are for running the build locally. After the builds are tested locally, they will be run on the K8S Tekton CI pipeline.
 
-模块可能需要同时考虑：
+## Agent Task Loop
 
-- **架构**（`$ARCH`）：x86_64、arm64、riscv64
-- **发行版**（`$ID`）：ubuntu、debian、fedora、openeuler、arch
-- **发行版代数**（`$VERSION_ID`）：20.04、13、43 等
+1. Run user specified build command
+    - The builds take a long time. Run them as background tasks and check log files under the output directory for the results.
+    - No need to redirect output because the script already does that.
+2. If the build command fails, investigate failure reason and propose a fix
+    - Only trust official documentation and sources, do not propose fixes based on assumptions or incomplete information
+    - Tools that agent can use to get knowledge about distros and test proposed fixes:
+        - Temporary docker containers
+        - Mount the cloud-init/built image as read-only and inspect the filesystem
+3. Wait for user confirmation on the proposed fix
+4. If user confirms the fix, apply the fix and go back to step 1
 
-维度判断应在模块入口处完成，尽早跳过不支持的组合，避免执行到一半失败。
+## Network
 
-### 失败策略
+To speed up the build process, we always use HTTP cache proxy and mirrors.
 
-根据模块的必要性选择：
+- Cluster Squid HTTP/HTTPS cache proxy: `http://172.28.0.4:3128`. Make sure to install `squid.crt` to the trusted CA store to use the HTTPS proxy.
+- Mirror:
+    - General: `https://mirrors.cernet.edu.cn/`. Documents on how to use the mirror can be found at `https://help.mirrors.cernet.edu.cn/`.
+    - NPM: `https://registry.npmmirror.com/`.
 
-- **必要模块**：不支持的发行版/架构应 `exit 1`，阻止构建继续
-- **可选模块**：不支持的组合应打印信息后 `exit 0`，允许构建继续
+## Find Distro Packages
 
-```bash
-# 可选模块示例
-case $ID in
-ubuntu|debian) ;;
-arch)
-    echo "Skipping: not applicable for $ID"
-    exit 0
-    ;;
-*) ;;
-esac
-```
+- Cross Distro
+    - https://pkgs.org/
+    - https://repology.org/
+- Debian: https://packages.debian.org/
+- Ubuntu: https://packages.ubuntu.com/
+- Fedora: https://apps.fedoraproject.org/packages/
+- Arch: https://archlinux.org/packages/
+
+## Tests
+
+Scripts under `tests` are convienient scripts for operators to quickly check **in deployed instances** whether specific features are working as expected. They are not meant to be run in the build stage because they may require hardware support or runtime environment that is not available during the build stage.

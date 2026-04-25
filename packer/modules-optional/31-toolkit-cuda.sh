@@ -54,7 +54,7 @@ esac
 
 # Ensure cuda-keyring is installed
 case $ARCH in
-x86_64)  nvidia_arch="x86_64" ;;
+x86_64) nvidia_arch="x86_64" ;;
 aarch64) nvidia_arch="sbsa" ;;
 esac
 
@@ -80,7 +80,7 @@ esac
 
 case $ID in
 debian | ubuntu)
-    apt-get install -y cuda-toolkit
+    install_pkg cuda-toolkit
     ;;
 fedora)
     dnf install -y cuda-toolkit

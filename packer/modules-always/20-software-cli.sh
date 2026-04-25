@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# CLI Tools
+
 # shellcheck disable=SC1091
 source /tmp/00-shared.sh
 
@@ -9,9 +11,15 @@ source /tmp/00-shared.sh
 
 case "$(uname -m)" in
 x86_64)
-    install_tarball_from_github "zellij-org/zellij" "zellij-x86_64-unknown-linux-musl.tar.gz"
+    zellij_pattern="^zellij-x86_64-unknown-linux-musl\\.tar\\.gz$"
     ;;
 aarch64 | arm64)
-    install_tarball_from_github "zellij-org/zellij" "zellij-aarch64-unknown-linux-musl.tar.gz"
+    zellij_pattern="^zellij-aarch64-unknown-linux-musl\\.tar\\.gz$"
     ;;
 esac
+
+if [ -n "${zellij_pattern:-}" ]; then
+    tarball=$(get_github_release_asset "zellij-org/zellij" "$zellij_pattern")
+    tar xzf "$tarball" -C /usr/local/bin/ zellij
+    rm -f "$tarball"
+fi

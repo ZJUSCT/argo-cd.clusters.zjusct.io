@@ -27,12 +27,12 @@ def find_entry(config, name):
 
 
 def gather_modules(entry):
-    # always modules: sorted by name for deterministic order
-    modules = sorted(
-        f"{MODULES_ALWAYS}/{f}"
-        for f in os.listdir(MODULES_ALWAYS)
-        if f.endswith(".sh")
-    )
+    modules = []
+
+    # always modules
+    for f in os.listdir(MODULES_ALWAYS):
+        if f.endswith(".sh"):
+            modules.append(f"{MODULES_ALWAYS}/{f}")
 
     # optional modules: user-selected
     for m in entry.get("modules", []):
@@ -47,6 +47,9 @@ def gather_modules(entry):
             )
             sys.exit(1)
         modules.append(path)
+
+    # Sort all modules together by filename for correct execution order
+    modules.sort(key=os.path.basename)
 
     return modules
 
@@ -90,7 +93,10 @@ def main():
     if host_arch == arch and not os.path.exists("/dev/kvm"):
         print("warning: /dev/kvm not found, build will use TCG emulation (slow)", file=sys.stderr)
 
-    var_file = f".{target}.auto.pkrvars.json"
+    output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
+    os.makedirs(output_dir, exist_ok=True)
+
+    var_file = os.path.join(output_dir, f".{target}.auto.pkrvars.json")
     variables = {
         "arch": arch,
         "host_arch": host_arch,
@@ -104,7 +110,7 @@ def main():
 
     env = os.environ.copy()
     env["PACKER_LOG"] = "1"
-    env["PACKER_LOG_PATH"] = f"{target}.log"
+    env["PACKER_LOG_PATH"] = os.path.join(output_dir, f"{target}.log")
 
     cmd = ["packer", "build", "-on-error=abort", f"-var-file={var_file}", "."]
     sys.exit(subprocess.run(cmd, env=env).returncode)

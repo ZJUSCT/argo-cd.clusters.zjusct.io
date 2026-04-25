@@ -1,59 +1,42 @@
 #!/usr/bin/env bash
-set -xeuo pipefail
+# NVIDIA DOCA Driver installation
+# https://docs.nvidia.com/doca/sdk/doca-installation-guide-for-linux/index.html
+# Supports: Ubuntu, Debian, Rocky Linux (x86_64, aarch64)
 
-apt-get install -y doca-all || true
+# shellcheck disable=SC1091
+source /tmp/00-shared.sh
 
-KVER="$(uname -r)"
-MFT_VER="$(dkms status kernel-mft-dkms 2>/dev/null | head -1 | grep -oP 'kernel-mft-dkms/\K[^,]+' || true)"
+# Map distro/version to DOCA repo path
+# https://linux.mellanox.com/public/repo/doca/
+DOCA_VERSION="latest"
+DOCA_OS="${ID}${VERSION_ID}"
 
-echo "=== Fixing doca-all / kernel-mft-dkms installation ==="
-echo "Kernel: $KVER"
-echo "MFT version: $MFT_VER"
+DOCA_URL="https://linux.mellanox.com/public/repo/doca/${DOCA_VERSION}/${DOCA_OS}/${ARCH}/"
 
-# Step 1: Remove conflicting unversioned modules
-MOD_DIR="/lib/modules/${KVER}/updates/dkms"
-echo ""
-echo "=== Step 1: Removing conflicting unversioned modules ==="
-for mod in mst_pci.ko.xz mst_pciconf.ko.xz; do
-    if [ -f "${MOD_DIR}/${mod}" ]; then
-        echo "Removing ${MOD_DIR}/${mod}"
-        rm -f "${MOD_DIR}/${mod}"
-    else
-        echo "${mod} not found (already removed)"
-    fi
-done
-
-# Step 2: Remove the failed DKMS state so we can retry cleanly
-echo ""
-echo "=== Step 2: Cleaning DKMS state for kernel-mft-dkms ==="
-dkms remove kernel-mft-dkms/"${MFT_VER}" --all 2>/dev/null || true
-
-# Step 3: Re-add and build/install with --force
-echo ""
-echo "=== Step 3: Rebuilding kernel-mft-dkms ==="
-dkms add kernel-mft-dkms/"${MFT_VER}" 2>/dev/null || true
-dkms build kernel-mft-dkms/"${MFT_VER}" -k "${KVER}"
-dkms install kernel-mft-dkms/"${MFT_VER}" -k "${KVER}" --force
-
-# Step 4: Reconfigure the stuck dpkg packages
-echo ""
-echo "=== Step 4: Reconfiguring dpkg packages ==="
-dpkg --configure -a
-
-# Step 5: Verify
-echo ""
-echo "=== Step 5: Verifying installation ==="
-if dkms status kernel-mft-dkms 2>/dev/null | grep -q "installed"; then
-    echo "SUCCESS: kernel-mft-dkms is installed."
-else
-    echo "WARNING: kernel-mft-dkms may not be fully installed. Check 'dkms status'."
+# Verify the repo exists before proceeding
+if ! curl -fsSL "${DOCA_URL}" >/dev/null 2>&1; then
+    echo "DOCA: repo not found at ${DOCA_URL}"
+    echo "Check if DOCA supports $ID $VERSION_ID for $ARCH"
+    exit 1
 fi
 
-if dpkg -l linux-headers-6.12.74+deb13+1-amd64 2>/dev/null | grep -q '^ii'; then
-    echo "SUCCESS: linux-headers package is configured."
-else
-    echo "WARNING: linux-headers package may still have issues."
-fi
-
-echo ""
-echo "=== Done ==="
+case $ID in
+debian | ubuntu)
+    add_repo doca "https://linux.mellanox.com/public/repo/doca/GPG-KEY-Mellanox.pub" "${DOCA_URL} ./"
+    # Pin DOCA repo higher to resolve version conflicts with CUDA repo (e.g. mft)
+    echo -e "Package: *\nPin: origin linux.mellanox.com\nPin-Priority: 900" \
+        >/etc/apt/preferences.d/doca
+    install_pkg "linux-headers-$(uname -r)" dkms
+    install_pkg doca-all
+    ;;
+rocky)
+    install -D -m 0644 /dev/stdin /etc/yum.repos.d/doca.repo <<EOF
+[doca]
+name=DOCA Online Repo
+baseurl=https://linux.mellanox.com/public/repo/doca/${DOCA_VERSION}/rhel9/${ARCH}/
+enabled=1
+gpgcheck=0
+EOF
+    install_pkg doca-all
+    ;;
+esac
