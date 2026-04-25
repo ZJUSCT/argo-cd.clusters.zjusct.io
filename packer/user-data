@@ -2,6 +2,11 @@
 # https://docs.cloud-init.io/en/latest/reference/modules.html
 # https://docs.cloud-init.io/en/latest/reference/examples.html
 
+# force use network-manager instead of systemd-networkd
+system_info:
+  network:
+    renderers: ['netplan']
+    activators: ['network-manager']
 users:
   - name: root
     # Password: packer, cleaned in 99-clean.sh

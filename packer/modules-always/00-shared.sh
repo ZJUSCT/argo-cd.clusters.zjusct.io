@@ -39,6 +39,13 @@ systemctl() {
 ########################################################################
 # OS specific
 ########################################################################
+
+case $ID in
+debian | ubuntu)
+    export DEBIAN_FRONTEND=noninteractive
+    ;;
+esac
+
 install_pkg() {
     case $ID in
     ubuntu | debian)

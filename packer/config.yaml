@@ -11,8 +11,7 @@
     - 30-driver-nvidia
     - 30-driver-doca
     - 31-toolkit-cuda
-    - 70-domain
-    - 70-mount-local
+    - 70-zjusct-cluster
 - name: debian-13-arm64
   arch: arm64
   # iso_url: https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-arm64.qcow2
@@ -36,8 +35,7 @@
     - 30-driver-nvidia
     - 30-driver-doca
     - 31-toolkit-cuda
-    - 70-domain
-    - 70-mount-local
+    - 70-zjusct-cluster
 - name: ubuntu-24.04-arm64
   arch: arm64
   # iso_url: https://mirrors.cernet.edu.cn/ubuntu-cloud-images/noble/current/noble-server-cloudimg-arm64.img

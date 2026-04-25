@@ -4,12 +4,13 @@ kind: Kustomization
 resources:
 - https://github.com/metal3-io/ironic-standalone-operator/releases/download/v0.8.0/install.yaml
 - resources/sealedsecret-bmc.yaml
+- resources/sealedsecret-userdata.yaml
 - bmo
 helmCharts:
 - name: cluster
   includeCRDs: true
   releaseName: cluster
-  namespace: zjusct
+  namespace: metal3
   valuesFile: values/cluster.yaml
 transformers:
   - ../../image-prefix.yaml
