@@ -6,9 +6,9 @@ default:
   bmc:
     credentialsName: bmc-credential
   image:
-    url: https://radosgw.clusters.zjusct.io/packer-images/debian/zjusct-full-b2db4a8.qcow2
+    url: https://radosgw.clusters.zjusct.io/packer-images/a625f2b/debian-13-amd64.qcow2
     checksumType: sha256
-    checksum: https://radosgw.clusters.zjusct.io/packer-images/debian/SHA256SUMS
+    checksum: https://radosgw.clusters.zjusct.io/packer-images/a625f2b/SHA256SUMS
     format: qcow2
   rootDeviceHints:
     rotational: false
