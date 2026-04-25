@@ -695,7 +695,7 @@ configs:
   # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#sensitive-data-and-sso-client-secrets
   secret:
     # -- Create the argocd-secret
-    createSecret: true
+    createSecret: false
     # -- Labels to be added to argocd-secret
     labels: {}
     # -- Annotations to be added to argocd-secret
@@ -2770,18 +2770,16 @@ server:
     hostnames:
       - grpc-argo-cd.clusters.zjusct.io
       - grpc-argo-cd.s.zjusct.io
-    ## Match all gRPC methods using RegularExpression to satisfy Gateway API validation
     # -- GRPCRoute rules configuration
     # @default -- `[]` (See [values.yaml])
+    # Use header matching to avoid GRPCMethodMatch validation constraints
+    # Ref: https://github.com/argoproj/argo-helm/issues/3550
     rules:
       - matches:
-          - method:
-              type: RegularExpression
-              service: ".*"
-              method: ".*"
-        backendRefs:
-          - name: argo-cd-argocd-server
-            port: 80
+          - headers:
+              - name: Content-Type
+                type: RegularExpression
+                value: "^application/grpc.*$"
         # filters: []
         #   - type: RequestHeaderModifier
         #     requestHeaderModifier:
