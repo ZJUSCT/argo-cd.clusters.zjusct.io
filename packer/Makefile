@@ -1,11 +1,10 @@
 INSIDE_DOCKER := $(shell test -f /.dockerenv && echo yes)
 ON_MACOS := $(shell uname -s | grep -q Darwin && echo yes)
-.DEFAULT_GOAL := all
 
 ifeq ($(filter yes,$(INSIDE_DOCKER) $(ON_MACOS)),yes)
 
 lint:
-	cloud-init schema -c user-data || true
+	cloud-init schema -c user-data || true # macos doesn't have cloud-init
 	packer fmt .
 	packer init .
 	packer validate .
@@ -17,17 +16,18 @@ copy-module:
 clean:
 	rm -rf output
 
-all: debian-13-amd64 debian-13-arm64 debian-13-riscv64 \
-	ubuntu-25.10-amd64 ubuntu-25.10-arm64 ubuntu-25.10-riscv64 \
-	ubuntu-20.04-amd64-ascend \
+all-amd64: debian-13-amd64 ubuntu-25.10-amd64 \
 	archlinux-amd64 fedora-43-amd64 rocky-9-amd64
+
+all-arm64: debian-13-arm64 ubuntu-25.10-arm64
+
+all-riscv64: debian-13-riscv64 ubuntu-25.10-riscv64
 
 %:
 	rm -rf output/$@
 	python3 packer.py $@
 
 else
-
 # Host-only targets (Linux)
 build-docker:
 	docker compose build packer --progress=plain --push
