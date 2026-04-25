@@ -70,6 +70,7 @@ fedora=("${common[@]}"
     python3 python3-pip
 
     NetworkManager
+    dnf-plugins-core
 )
 
 rocky=("${common[@]}"
@@ -89,6 +90,7 @@ rocky=("${common[@]}"
     python3 python3-pip
 
     NetworkManager
+    yum-utils
 )
 
 arch=("${common[@]}"

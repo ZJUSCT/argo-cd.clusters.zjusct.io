@@ -137,7 +137,10 @@ deb [signed-by=/etc/apt/keyrings/${name}.gpg] $source
 EOF
         apt-get update
         ;;
-    fedora | rocky)
+    fedora)
+        dnf config-manager addrepo --from-repofile="$1"
+        ;;
+    rocky)
         dnf config-manager --add-repo "$1"
         ;;
     *)

@@ -61,15 +61,14 @@
   iso_checksum: file:https://mirrors.cernet.edu.cn/fedora/releases/43/Cloud/x86_64/images/Fedora-Cloud-43-1.6-x86_64-CHECKSUM
   iso_url: download/Fedora-Cloud-Base-Generic-43-1.6.x86_64.qcow2
   modules:
-    - 20-software-ai
-    - 20-software-container
+    - 20-software-control-plane
     - 20-software-k8s
-    - 20-software-misc
     - 20-software-otelcol
-    - 20-software-python
     - 30-driver-nvidia
     - 30-driver-doca
     - 31-toolkit-cuda
+    - 70-domain
+    - 70-mount-local
 # # Arch Linux # Deprecated
 # - name: archlinux-amd64
 #   arch: x86_64

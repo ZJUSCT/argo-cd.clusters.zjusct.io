@@ -186,8 +186,11 @@ ubuntu | debian)
         "https://apt.releases.hashicorp.com $VERSION_CODENAME main"
     install_pkg packer
     ;;
-fedora | rocky)
-    dnf install -y dnf-plugins-core
+fedora)
+    add_repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+    install_pkg packer
+    ;;
+rocky)
     add_repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
     install_pkg packer
     ;;

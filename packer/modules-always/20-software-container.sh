@@ -87,9 +87,7 @@ x86_64)
         rm -f "$pkg"
         ;;
     fedora | rocky)
-        pkg=$(get_github_release_asset "apptainer/apptainer" "^apptainer-[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+\\.x86_64\\.rpm$")
-        install_pkg "$pkg"
-        rm -f "$pkg"
+        install_pkg apptainer
         ;;
     arch)
         install_pkg apptainer
