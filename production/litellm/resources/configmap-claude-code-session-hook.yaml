@@ -6,24 +6,179 @@ metadata:
 data:
   claude_code_session.py: |
     from litellm.integrations.custom_logger import CustomLogger
+    import time
+    import logging
 
+    logger = logging.getLogger("claude_code_session")
 
     class ClaudeCodeSessionMapper(CustomLogger):
-        CLAUDE_CODE_SESSION_HEADER = "x-claude-code-session-id"
+        """
+        Lazy-binding session affinity for Claude Code.
+
+        - First request: no session_id  ->  normal routing handles retries
+          (simple-shuffle + cooldown work as expected).
+        - First success: confirm session -> set session_id on subsequent
+          requests so LiteLLM pins the deployment.
+        - Bound session fails: clear affinity cache so the next request
+          re-routes via normal routing.
+
+        Optimisation: on first success, try to pre-populate LiteLLM's
+        affinity cache with the deployment's model_id.  If successful the
+        very next request is already pinned (zero KV-cache loss).  If the
+        model_id is unavailable we fall back to the standard lazy-binding
+        path (one KV-cache miss on the transition request).
+        """
+
+        HEADER = "x-claude-code-session-id"
+        CACHE_PREFIX = "deployment_affinity:v1:session:"
+        TTL = 3600
+
+        # session_id -> added_at
+        _pending: dict = {}
+        # session_id -> bound_at
+        _bound: dict = {}
+
+        # ── helpers ──────────────────────────────────────────────
+
+        def _get_session_id(self, data: dict) -> str:
+            """Read session_id from the Claude Code request header."""
+            headers = (
+                data.get("proxy_server_request") or {}
+            ).get("headers", {})
+            return (
+                headers.get(self.HEADER, "")
+                if isinstance(headers, dict)
+                else ""
+            )
+
+        async def _clear_affinity(self, session_id: str, model_group: str):
+            try:
+                from litellm.proxy.proxy_server import llm_router
+
+                cache = getattr(llm_router, "cache", None)
+                if not cache:
+                    return
+
+                key = f"{self.CACHE_PREFIX}{model_group}:{session_id}"
+
+                if hasattr(cache, "async_delete_cache"):
+                    await cache.async_delete_cache(key)
+                elif hasattr(cache, "delete_cache"):
+                    cache.delete_cache(key)
+
+                logger.info(
+                    "Cleared affinity cache for session %s on model %s",
+                    session_id[:8],
+                    model_group,
+                )
+            except Exception as exc:
+                logger.warning("Failed to clear affinity cache: %s", exc)
+
+        async def _prepopulate_affinity(
+            self, session_id: str, model_group: str, model_id: str
+        ):
+            """Best-effort: write affinity cache so next request is pinned."""
+            try:
+                from litellm.proxy.proxy_server import llm_router
+
+                cache = getattr(llm_router, "cache", None)
+                if not cache:
+                    return
+
+                key = f"{self.CACHE_PREFIX}{model_group}:{session_id}"
+
+                if hasattr(cache, "async_set_cache"):
+                    await cache.async_set_cache(
+                        key=key, value=model_id, ttl=self.TTL
+                    )
+                elif hasattr(cache, "set_cache"):
+                    cache.set_cache(
+                        key=key, value=model_id, ttl=self.TTL
+                    )
+
+                logger.info(
+                    "Pre-populated affinity cache for session %s -> model_id %s",
+                    session_id[:8],
+                    model_id[:12],
+                )
+            except Exception as exc:
+                logger.debug("Failed to pre-populate affinity cache: %s", exc)
+
+        def _cleanup(self):
+            now = time.time()
+            for store in (self._pending, self._bound):
+                expired = [s for s, t in list(store.items()) if now - t > self.TTL]
+                for s in expired:
+                    del store[s]
+
+        # ── hooks ───────────────────────────────────────────────
 
         async def async_pre_call_hook(
             self, user_api_key_dict, cache, data, call_type
         ):
-            headers = (data.get("proxy_server_request") or {}).get("headers", {})
+            session_id = self._get_session_id(data)
+            if not session_id:
+                return data
 
-            session_id = headers.get(self.CLAUDE_CODE_SESSION_HEADER)
+            self._cleanup()
 
-            if session_id:
+            if session_id in self._bound:
+                # Confirmed session — let LiteLLM's session affinity pin it
                 if "metadata" not in data:
                     data["metadata"] = {}
                 data["metadata"]["session_id"] = session_id
+            else:
+                # Pending session — do NOT set session_id so LiteLLM uses
+                # normal routing (simple-shuffle / cooldown / retries)
+                self._pending[session_id] = time.time()
 
             return data
 
+        async def async_success_call_hook(
+            self, user_api_key_dict, cache, data, call_type
+        ):
+            session_id = self._get_session_id(data)
+            if not (session_id and session_id in self._pending):
+                return data
+
+            # Session had its first successful request — confirm it
+            del self._pending[session_id]
+            self._bound[session_id] = time.time()
+
+            # Best-effort: pre-populate the affinity cache so the very
+            # next request is already pinned (preserving KV cache).
+            model_group = data.get("model", "")
+            model_id = (data.get("model_info") or {}).get("model_id", "")
+            if model_group and model_id:
+                await self._prepopulate_affinity(
+                    session_id, model_group, model_id
+                )
+
+            return data
+
+        async def async_failure_call_hook(
+            self, user_api_key_dict, cache, data, call_type
+        ):
+            session_id = self._get_session_id(data)
+            if not session_id:
+                return data
+
+            # Pending session failed — normal routing already handled retries
+            self._pending.pop(session_id, None)
+
+            # Bound session failed — clear affinity so next request re-routes
+            if session_id in self._bound:
+                model = data.get("model", "") or data.get(
+                    "model_info", {}
+                ).get("model_name", "")
+                if model:
+                    await self._clear_affinity(session_id, model)
+                logger.info(
+                    "Bound session %s failed on %s, affinity cleared",
+                    session_id[:8],
+                    model,
+                )
+
+            return data
 
     proxy_handler_instance = ClaudeCodeSessionMapper()
