@@ -817,15 +817,6 @@ cephFileSystems:
           parameters:
             pg_autoscale_mode: "on"
             pg_num_min: "128"
-        - name: cephfs-ssd-data
-          failureDomain: osd
-          deviceClass: nvme
-          enableCrushUpdates: true
-          replicated:
-            size: 2
-          parameters:
-            pg_autoscale_mode: "on"
-            pg_num_min: "32"
         - name: cephfs-home
           failureDomain: osd
           deviceClass: nvme
