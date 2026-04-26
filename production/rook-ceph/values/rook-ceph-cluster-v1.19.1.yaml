@@ -30,9 +30,9 @@ configOverride: |
 
   # OSD 队列和线程优化（解决队列瓶颈）
   osd_op_num_shards_hdd = 8
-  osd_op_num_shards_ssd = 16
+  osd_op_num_shards_nvme = 16
   osd_op_num_threads_per_shard_hdd = 5
-  osd_op_num_threads_per_shard_ssd = 4
+  osd_op_num_threads_per_shard_nvme = 4
 
   # 网络缓冲区优化（解决接收延迟瓶颈）
   ms_tcp_rcvbuf = 4194304
@@ -40,7 +40,7 @@ configOverride: |
 
   # BlueStore 缓存优化
   bluestore_cache_size_hdd = 4294967296
-  bluestore_cache_size_ssd = 8589934592
+  bluestore_cache_size_nvme = 8589934592
 
   [mon]
   mon_osd_prime_pg_temp = false
@@ -553,11 +553,11 @@ cephClusterSpec:
 
           - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG108600VR960CGN
             config:
-              deviceClass: ssd
+              deviceClass: nvme
 
           - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG108600WD960CGN
             config:
-              deviceClass: ssd
+              deviceClass: nvme
 
           - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e461f4495551
             config:
@@ -609,11 +609,11 @@ cephClusterSpec:
 
           - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG10860250960CGN
             config:
-              deviceClass: ssd
+              deviceClass: nvme
 
           - name: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_MX_00000000000030027
             config:
-              deviceClass: ssd
+              deviceClass: nvme
 
           - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e4768f455451
             config:
@@ -819,7 +819,7 @@ cephFileSystems:
             pg_num_min: "128"
         - name: cephfs-ssd-data
           failureDomain: osd
-          deviceClass: ssd
+          deviceClass: nvme
           enableCrushUpdates: true
           replicated:
             size: 2
