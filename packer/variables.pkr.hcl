@@ -15,7 +15,7 @@ variable "vm_name" {
 
 variable "modules" {
   type    = list(string)
-  default = ["modules-always/00-shared.sh"]
+  default = ["modules-always/header"]
 }
 
 variable "qemu_binary" {

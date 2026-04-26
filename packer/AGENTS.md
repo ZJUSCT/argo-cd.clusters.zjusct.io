@@ -34,7 +34,7 @@ Common module patterns:
 # <description of the module>
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 # Each module should consider ARCH, ID, VERSION_ID compatibility
 case "$ID" in
@@ -85,6 +85,7 @@ The above instructions are for running the build locally. After the builds are t
 To speed up the build process, we always use HTTP cache proxy and mirrors.
 
 - Cluster Squid HTTP/HTTPS cache proxy: `http://172.28.0.4:3128`. Make sure to install `squid.crt` to the trusted CA store to use the HTTPS proxy.
+- Prefer HTTP over HTTPS to avoid issues with proxy intercepting TLS traffic and to allow caching.
 - Mirror:
     - General: `https://mirrors.cernet.edu.cn/`. Documents on how to use the mirror can be found at `https://help.mirrors.cernet.edu.cn/`.
     - NPM: `https://registry.npmmirror.com/`.

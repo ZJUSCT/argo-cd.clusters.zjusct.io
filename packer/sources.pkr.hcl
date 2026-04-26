@@ -34,7 +34,6 @@ source "qemu" "packer" {
   shutdown_command  = "poweroff"
 
   # cloud-init https://cloudinit.readthedocs.io/en/latest/reference/datasources/nocloud.html
-  cd_files = ["user-data", "meta-data"]
   cd_label = "cidata"
 
   # Network and display

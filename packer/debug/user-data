@@ -1,0 +1,9 @@
+#cloud-config
+user:
+  name: root # prevent default debian user
+  lock_passwd: false
+ssh_pwauth: true
+disable_root: false
+apt:
+  preserve_sources_list: true
+prefer_fqdn_over_hostname: true
