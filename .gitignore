@@ -3,6 +3,8 @@ tmp/
 .codex
 .claude
 .devcontainer/devcontainer-lock.json
+.mcp.json
+.env
 # https://github.com/github/gitignore/blob/main/Global/macOS.gitignore
 # General
 .DS_Store

@@ -60,11 +60,11 @@ nodes:
     mac: "B0:EC:DD:D1:97:F4"
     bmc:
       address: redfish://172.25.3.66
-    # image:
-    #   url: https://radosgw.clusters.zjusct.io/packer-images/debian/ascend.qcow2
-    #   checksumType: sha256
-    #   checksum: https://radosgw.clusters.zjusct.io/packer-images/debian/SHA256SUMS
-    #   format: qcow2
+    image:
+      url: https://radosgw.clusters.zjusct.io/packer-images/e545dcf/debian-13-amd64.qcow2
+      checksumType: sha256
+      checksum: https://radosgw.clusters.zjusct.io/packer-images/e545dcf/SHA256SUMS
+      format: qcow2
     rootDeviceHints:
       vendor: ~  # NVMe disk, not ATA; clear the global ATA vendor hint
     userData:

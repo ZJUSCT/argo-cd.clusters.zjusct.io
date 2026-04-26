@@ -15,6 +15,7 @@ common=(
     zip unzip
     squashfs-tools
     rustup
+    pre-commit
 )
 
 debian=("${common[@]}"

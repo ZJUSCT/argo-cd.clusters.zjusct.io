@@ -8,9 +8,9 @@
     - 20-software-control-plane
     - 20-software-k8s
     - 20-software-otelcol
-    # - 30-driver-nvidia
-    # - 30-driver-doca
-    # - 31-toolkit-cuda
+    - 30-driver-nvidia
+    - 30-driver-doca
+    - 31-toolkit-cuda
     - 70-zjusct-cluster
 - name: debian-13-arm64
   arch: arm64
@@ -25,7 +25,7 @@
 # Ubuntu
 - name: ubuntu-26.04-amd64
   arch: amd64
-  iso_url: http://mirror.sjtu.edu.cn/ubuntu-cloud-images/resolute/current/resolute-server-cloudimg-amd64.img
+  iso_url: http://mirror.cernet.edu.cn/ubuntu-cloud-images/resolute/current/resolute-server-cloudimg-amd64.img
   iso_checksum: file:http://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/current/SHA256SUMS
   modules:
     - 20-software-control-plane
