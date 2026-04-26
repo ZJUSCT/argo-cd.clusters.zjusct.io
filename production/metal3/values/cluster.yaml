@@ -56,7 +56,7 @@ nodes:
       address: redfish://172.25.3.65
     bootMode: legacy
 
-  - name: atlas800
+  - name: atlas800.clusters.zjusct.io
     mac: "B0:EC:DD:D1:97:F4"
     bmc:
       address: redfish://172.25.3.66
@@ -67,6 +67,8 @@ nodes:
     #   format: qcow2
     rootDeviceHints:
       vendor: ~  # NVMe disk, not ATA; clear the global ATA vendor hint
+    userData:
+      name: userdata
 
   - name: m700
     mac: "9C:C2:C4:55:E3:92"
