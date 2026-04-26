@@ -2,7 +2,9 @@
 # ZJUSCT cluster specific configuration
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
+
+echo 'prefer_fqdn_over_hostname: true' > /etc/cloud/cloud.cfg.d/99-prefer-fqdn.cfg
 
 ########################################################################
 # FreeIPA client dependencies
@@ -141,3 +143,21 @@ for disk in /dev/nvme*n1; do
     fi
 done
 EOF
+
+##########################################################################
+# FreeIPA self-enroll environment
+##########################################################################
+
+install -D -m 0644 /dev/stdin /opt/ipa.yaml <<EOF
+name: ipa
+dependencies:
+  - python
+  - pip
+  - pip:
+    - urllib3
+    - python-freeipa
+EOF
+
+source /etc/profile.d/conda.sh
+
+conda env create -f /opt/ipa.yaml -p /opt/ipa

@@ -2,7 +2,7 @@
 # CLI Tools
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 ########################################################################
 # zellij: tmux alternative

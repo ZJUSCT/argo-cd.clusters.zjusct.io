@@ -2,7 +2,7 @@
 # Configure locale and timezone settings
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 case $ID in
 ubuntu | debian)

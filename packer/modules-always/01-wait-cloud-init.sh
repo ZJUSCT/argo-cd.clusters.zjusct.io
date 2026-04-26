@@ -1,32 +1,19 @@
 #!/usr/bin/env bash
 # Wait for cloud-init to complete and ensure the system is ready
 
+########################################################################
 # runtime immutable variables
-cat >>/tmp/00-shared.sh <<EOF
+########################################################################
+cat >>/run/header <<EOF
 ARCH="$(uname -m)"
 INIT="$(ps --no-headers -o comm 1)"
+# detect glibc/musl
+MUSL="$(ldd /bin/ls 2>&1 | grep -q musl && echo 1 || echo 0)"
+DPKG_ARCH="$(dpkg --print-architecture)"
 EOF
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
-
-if ldd /bin/ls 2>&1 | grep -q musl; then
-    cat >>/tmp/00-shared.sh <<EOF
-    MUSL=1
-EOF
-else
-    cat >>/tmp/00-shared.sh <<EOF
-    MUSL=0
-EOF
-fi
-
-case "$ID" in
-debian | ubuntu)
-    cat >>/tmp/00-shared.sh <<EOF
-DPKG_ARCH="$(dpkg --print-architecture)"
-EOF
-    ;;
-esac
+source /run/header
 
 ########################################################################
 # wait cloud-init
@@ -59,7 +46,5 @@ case "${EXIT_CODE}" in
     exit 1
     ;;
 esac
-
-
 
 echo 'System is ready!'

@@ -2,7 +2,7 @@
 # Container Runtimes and tools
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 ########################################################################
 # Podman
@@ -14,7 +14,7 @@ install_pkg podman
 # Docker
 ########################################################################
 
-DOCKER_MIRROR=https://$MIRROR/docker-ce
+DOCKER_MIRROR=http://$MIRROR/docker-ce
 
 case $ARCH in
 riscv64)

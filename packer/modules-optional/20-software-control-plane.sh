@@ -3,8 +3,8 @@
 # dnsmasq, haproxy, keepalived
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 install_pkg dnsmasq haproxy keepalived
 
-systemctl disable --now dnsmasq
+systemctl disable --now dnsmasq haproxy

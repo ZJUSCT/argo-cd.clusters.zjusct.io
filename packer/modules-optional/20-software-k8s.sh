@@ -2,7 +2,7 @@
 # K8S and tools
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 ########################################################################
 # K8S packages (kubectl, kubeadm, kubelet)
@@ -14,18 +14,18 @@ K8S_VERSION="v1.35"
 case $ID in
 ubuntu | debian)
     add_repo "kubernetes" \
-        "https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/deb/Release.key" \
-        "https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/deb/ /"
+        "http://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/deb/Release.key" \
+        "http://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/deb/ /"
     install_pkg kubectl kubeadm kubelet
     ;;
 fedora | rocky)
     cat >/etc/yum.repos.d/kubernetes.repo <<EOF
 [kubernetes]
 name=Kubernetes
-baseurl=https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/rpm/
+baseurl=http://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/rpm/repodata/repomd.xml.key
+gpgkey=http://${MIRROR}/kubernetes/core:/stable:/$K8S_VERSION/rpm/repodata/repomd.xml.key
 EOF
     install_pkg kubectl kubeadm kubelet
     ;;
@@ -48,8 +48,8 @@ systemctl disable --now kubelet
 case $ID in
 ubuntu | debian)
     add_repo "helm" \
-        "https://packages.buildkite.com/helm-linux/helm-debian/gpgkey" \
-        "https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+        "http://packages.buildkite.com/helm-linux/helm-debian/gpgkey" \
+        "http://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
     install_pkg helm
     ;;
 fedora | rocky)
@@ -182,16 +182,16 @@ fi
 case $ID in
 ubuntu | debian)
     add_repo "hashicorp" \
-        "https://apt.releases.hashicorp.com/gpg" \
-        "https://apt.releases.hashicorp.com $VERSION_CODENAME main"
+        "http://apt.releases.hashicorp.com/gpg" \
+        "http://apt.releases.hashicorp.com $VERSION_CODENAME main"
     install_pkg packer
     ;;
 fedora)
-    add_repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+    add_repo http://rpm.releases.hashicorp.com/fedora/hashicorp.repo
     install_pkg packer
     ;;
 rocky)
-    add_repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+    add_repo "http://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
     install_pkg packer
     ;;
 arch)

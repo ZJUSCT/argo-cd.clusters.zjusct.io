@@ -2,7 +2,7 @@
 # Cleanup script for packer images
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 echo 'Cleaning up...'
 

@@ -2,51 +2,31 @@
 # Install essential packages for image build and daily use
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 # packages with same name across distros
 common=(
-    # Shells & terminals
     fish zsh tmux bash-completion
-
-    # Editors
     vim neovim
-
-    # CLI utilities
     jq fzf ripgrep duf tree file
-
-    # Network
     curl wget rsync net-tools traceroute
-
-    # Build essentials
     git git-lfs pkg-config
-
-    # System
-    htop sudo
-
-    # Compression
+    btop htop sudo
     zip unzip
-
-    # Image & container
     squashfs-tools
+    rustup
 )
 
 debian=("${common[@]}"
-    # System
-    gpg locales
-
-    # CLI utilities
+    "linux-headers-$(uname -r)" dkms
+    gpg
+    locales
     fd-find
-
-    # Network
     sshfs
-
-    # Build essentials
     build-essential
-
-    # Python
     python3-full python3-pip python3-venv
-
+    zoxide
+    starship
     network-manager
     zfs-dkms zfsutils-linux
 )
@@ -54,61 +34,25 @@ debian=("${common[@]}"
 ubuntu=("${debian[@]}")
 
 fedora=("${common[@]}"
-    # System
+    "kernel-devel-$(uname -r | awk -F'-' '{print $1}')"
     gpg
-
-    # CLI utilities
-    fd-find bat eza
-
-    # Network
-    sshfs
-
-    # Build essentials
-    gcc make
-
-    # Python
-    python3 python3-pip
-
-    NetworkManager
-    dnf-plugins-core
-)
-
-rocky=("${common[@]}"
-    # System
-    gpg
-
-    # CLI utilities
     fd-find
-
-    # Network (package name differs from common)
-    fuse-sshfs
-
-    # Build essentials
+    eza
+    sshfs fuse-sshfs
     gcc make
-
-    # Python
     python3 python3-pip
-
     NetworkManager
-    yum-utils
+    dnf-plugins-core yum-utils
 )
+
+rocky=("${fedora[@]}")
 
 arch=("${common[@]}"
-    # System
     gnupg
-
-    # CLI utilities
-    fd bat eza
-
-    # Network
+    fd eza
     iputils bind sshfs
-
-    # Build essentials
     base-devel
-
-    # Python
     python python-pip
-
     networkmanager
 )
 

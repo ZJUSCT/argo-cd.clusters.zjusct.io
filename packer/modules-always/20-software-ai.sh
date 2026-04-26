@@ -2,7 +2,7 @@
 # AI Coding Assistants
 
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 ########################################################################
 # Claude Code

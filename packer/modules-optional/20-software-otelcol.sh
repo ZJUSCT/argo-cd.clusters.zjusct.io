@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 case "$ARCH" in
 x86_64) otelcol_arch="amd64" ;;
@@ -32,9 +32,9 @@ fedora | rocky)
     rm -f "$tarball"
     install -d -m 0755 /etc/otelcol-contrib
     curl --output /usr/lib/systemd/system/otelcol-contrib.service \
-        https://github.com/open-telemetry/opentelemetry-collector-releases/raw/refs/heads/main/distributions/otelcol-contrib/otelcol-contrib.service
+        http://github.com/open-telemetry/opentelemetry-collector-releases/raw/refs/heads/main/distributions/otelcol-contrib/otelcol-contrib.service
     curl --output /etc/otelcol-contrib/otelcol-contrib.conf \
-        https://github.com/open-telemetry/opentelemetry-collector-releases/raw/refs/heads/main/distributions/otelcol-contrib/otelcol-contrib.conf
+        http://github.com/open-telemetry/opentelemetry-collector-releases/raw/refs/heads/main/distributions/otelcol-contrib/otelcol-contrib.conf
     ;;
 esac
 
@@ -292,21 +292,21 @@ service:
     logs:
       receivers: [otlp, filelog/docker, filelog]
       processors: [memory_limiter, batch, resourcedetection]
-      exporters: [otlp_http]
+      exporters: [otlp_grpc]
     logs/journald:
       receivers: [journald]
       processors: [memory_limiter, batch, transform/journald, resourcedetection]
-      exporters: [otlp_http]
+      exporters: [otlp_grpc]
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch, resourcedetection]
-      exporters: [otlp_http]
+      exporters: [otlp_grpc]
     metrics:
       # not enabled by default:
       # - podman_stats
       receivers: [otlp, docker_stats, hostmetrics/fast, hostmetrics/slow]
       processors: [memory_limiter, batch, resourcedetection]
-      exporters: [otlp_http]
+      exporters: [otlp_grpc]
   # https://opentelemetry.io/docs/collector/internal-telemetry/#activate-internal-telemetry-in-the-collector
   # internal is enabled by default, close it
   telemetry:

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1091
-source /tmp/00-shared.sh
+source /run/header
 
 ########################################################################
 # uv
@@ -33,7 +33,7 @@ fi
 
 install -D -m 0644 /dev/stdin /etc/uv/uv.toml <<EOF
 [[index]]
-url = "https://$MIRROR/pypi/web/simple/"
+url = "http://$MIRROR/pypi/web/simple/"
 default = true
 EOF
 
@@ -42,7 +42,7 @@ EOF
 # https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 ########################################################################
 
-CONDA_MIRROR="https://$MIRROR/anaconda/"
+CONDA_MIRROR="http://$MIRROR/anaconda/"
 CONDA_PATH="/opt/conda"
 
 case "$ARCH" in
@@ -80,16 +80,18 @@ channels:
   - defaults
 show_channel_urls: true
 default_channels:
-  - https://$MIRROR/anaconda/pkgs/main
-  - https://$MIRROR/anaconda/pkgs/r
-  - https://$MIRROR/anaconda/pkgs/msys2
+  - http://$MIRROR/anaconda/pkgs/main
+  - http://$MIRROR/anaconda/pkgs/r
+  - http://$MIRROR/anaconda/pkgs/msys2
 custom_channels:
-  conda-forge: https://$MIRROR/anaconda/cloud
-  msys2: https://$MIRROR/anaconda/cloud
-  bioconda: https://$MIRROR/anaconda/cloud
-  menpo: https://$MIRROR/anaconda/cloud
-  pytorch: https://$MIRROR/anaconda/cloud
-  pytorch-lts: https://$MIRROR/anaconda/cloud
-  simpleitk: https://$MIRROR/anaconda/cloud
-  nvidia: https://$MIRROR/anaconda/cloud
+  conda-forge: http://$MIRROR/anaconda/cloud
+  msys2: http://$MIRROR/anaconda/cloud
+  bioconda: http://$MIRROR/anaconda/cloud
+  menpo: http://$MIRROR/anaconda/cloud
+  pytorch: http://$MIRROR/anaconda/cloud
+  pytorch-lts: http://$MIRROR/anaconda/cloud
+  simpleitk: http://$MIRROR/anaconda/cloud
+  nvidia: http://$MIRROR/anaconda/cloud
 EOF
+
+conda clean -i
