@@ -181,51 +181,31 @@ proxy_config:
 
   model_list:
     ####################################################################
-    # OpenCode Go
+    # DeepSeek
     ####################################################################
-    # OpenAI API
-    - model_name: plan/opencode-go/glm-5/openai
+    - model_name: api/deepseek/deepseek-v4-flash/openai
       litellm_params:
-        model: glm-5
-        api_base: https://opencode.ai/zen/go/v1
-        api_key: os.environ/PLAN_OPENCODE_ZBL
+        model: deepseek-v4-flash
+        api_base: https://api.deepseek.com
+        api_key: os.environ/API_DEEPSEEK_ZBL
         custom_llm_provider: hosted_vllm
-    - model_name: plan/opencode-go/glm-5.1/openai
+    - model_name: api/deepseek/deepseek-v4-pro/openai
       litellm_params:
-        model: glm-5.1
-        api_base: https://opencode.ai/zen/go/v1
-        api_key: os.environ/PLAN_OPENCODE_ZBL
+        model: deepseek-v4-pro
+        api_base: https://api.deepseek.com
+        api_key: os.environ/API_DEEPSEEK_ZBL
         custom_llm_provider: hosted_vllm
-    - model_name: plan/opencode-go/kimi-k2.5/openai
+    - model_name: api/deepseek/deepseek-v4-flash/anthropic
       litellm_params:
-        model: kimi-k2.5
-        api_base: https://opencode.ai/zen/go/v1
-        api_key: os.environ/PLAN_OPENCODE_ZBL
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/opencode-go/mimo-v2-pro/openai
-      litellm_params:
-        model: mimo-v2-pro
-        api_base: https://opencode.ai/zen/go/v1
-        api_key: os.environ/PLAN_OPENCODE_ZBL
-        custom_llm_provider: hosted_vllm
-    - model_name: plan/opencode-go/mimo-v2-omni/openai
-      litellm_params:
-        model: mimo-v2-omni
-        api_base: https://opencode.ai/zen/go/v1
-        api_key: os.environ/PLAN_OPENCODE_ZBL
-        custom_llm_provider: hosted_vllm
-    # Anthropic API
-    - model_name: plan/opencode-go/minimax-m2.5/anthropic
-      litellm_params:
-        model: minimax-m2.5
-        api_base: https://opencode.ai/zen/go
-        api_key: os.environ/PLAN_OPENCODE_ZBL
+        model: deepseek-v4-flash
+        api_base: https://api.deepseek.com/anthropic
+        api_key: os.environ/API_DEEPSEEK_ZBL
         custom_llm_provider: anthropic
-    - model_name: plan/opencode-go/minimax-m2.7/anthropic
+    - model_name: api/deepseek/deepseek-v4-pro/anthropic
       litellm_params:
-        model: minimax-m2.7
-        api_base: https://opencode.ai/zen/go
-        api_key: os.environ/PLAN_OPENCODE_ZBL
+        model: deepseek-v4-pro
+        api_base: https://api.deepseek.com/anthropic
+        api_key: os.environ/API_DEEPSEEK_ZBL
         custom_llm_provider: anthropic
 
     ####################################################################
