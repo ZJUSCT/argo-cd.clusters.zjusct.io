@@ -2,9 +2,9 @@ services:
   packer:
     build: .
     image: harbor.clusters.zjusct.io/library/packer
-    environment:
-      HTTP_PROXY: http://172.28.0.4:3128
-      HTTPS_PROXY: http://172.28.0.4:3128
+    # environment:
+    #   HTTP_PROXY: http://172.28.0.4:3128
+    #   HTTPS_PROXY: http://172.28.0.4:3128
     volumes:
       - .:/workspace
       - /dev/kvm:/dev/kvm

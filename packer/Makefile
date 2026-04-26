@@ -16,12 +16,12 @@ copy-module:
 clean:
 	rm -rf output
 
-all-amd64: debian-13-amd64 ubuntu-25.10-amd64 \
+all-amd64: debian-13-amd64 ubuntu-26.04-amd64 \
 	archlinux-amd64 fedora-43-amd64 rocky-9-amd64
 
-all-arm64: debian-13-arm64 ubuntu-25.10-arm64
+all-arm64: debian-13-arm64 ubuntu-26.04-arm64
 
-all-riscv64: debian-13-riscv64 ubuntu-25.10-riscv64
+all-riscv64: debian-13-riscv64 ubuntu-26.04-riscv64
 
 %:
 	rm -rf output/$@
