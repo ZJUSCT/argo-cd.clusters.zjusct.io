@@ -32,7 +32,9 @@ esac
 case $ID in
 debian | ubuntu)
     find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
-        -exec sed -i -e "s/[a-z]*\.debian\.org/mirrors.cernet.edu.cn/g; s/[a-z]*\.ubuntu\.com/$MIRROR/g" {} +
+        -exec sed -i -e "s/[a-z]*\.debian\.org/$MIRROR/g; s/[a-z]*\.ubuntu\.com/$MIRROR/g" {} +
+    find /etc/cloud -type f -name '*.cfg' \
+        -exec sed -i -e "s/[a-z]*\.debian\.org/$MIRROR/g; s/[a-z]*\.ubuntu\.com/$MIRROR/g" {} +
     find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
         -exec sed -i -e 's/https:/http:/g' {} +
     case $ID in
