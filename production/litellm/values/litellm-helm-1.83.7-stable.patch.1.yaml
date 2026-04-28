@@ -614,6 +614,8 @@ lifecycle: {}
 # Settings for Bitnami postgresql chart (if db.deployStandalone is true, ignored
 #  otherwise)
 postgresql:
+  image:
+    tag: "latest"
   primary:
     persistence:
       storageClass: openebs-hostpath
