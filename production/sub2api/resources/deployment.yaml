@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sub2api
+  labels:
+    app: sub2api
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: sub2api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sub2api
+  labels:
+    app: sub2api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sub2api
+  template:
+    metadata:
+      labels:
+        app: sub2api
+    spec:
+      containers:
+        - name: sub2api
+          image: weishaw/sub2api:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            # Auto setup
+            - name: AUTO_SETUP
+              value: "true"
+            # Server
+            - name: SERVER_HOST
+              value: "0.0.0.0"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: SERVER_MODE
+              value: "release"
+            - name: RUN_MODE
+              value: "standard"
+            - name: TZ
+              value: "Asia/Shanghai"
+            # Database
+            - name: DATABASE_HOST
+              value: "sub2api-postgresql"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_USER
+              value: "sub2api"
+            - name: DATABASE_DBNAME
+              value: "sub2api"
+            - name: DATABASE_SSLMODE
+              value: "disable"
+            - name: DATABASE_MAX_OPEN_CONNS
+              value: "50"
+            - name: DATABASE_MAX_IDLE_CONNS
+              value: "10"
+            - name: DATABASE_CONN_MAX_LIFETIME_MINUTES
+              value: "30"
+            - name: DATABASE_CONN_MAX_IDLE_TIME_MINUTES
+              value: "5"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sub2api-secrets
+                  key: database-password
+            # Redis
+            - name: REDIS_HOST
+              value: "sub2api-redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DB
+              value: "0"
+            - name: REDIS_POOL_SIZE
+              value: "1024"
+            - name: REDIS_MIN_IDLE_CONNS
+              value: "10"
+            - name: REDIS_ENABLE_TLS
+              value: "false"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sub2api-secrets
+                  key: redis-password
+            # Admin
+            - name: ADMIN_EMAIL
+              value: "admin@sub2api.local"
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sub2api-secrets
+                  key: admin-password
+            # JWT
+            - name: JWT_EXPIRE_HOUR
+              value: "24"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sub2api-secrets
+                  key: jwt-secret
+            # TOTP
+            - name: TOTP_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sub2api-secrets
+                  key: totp-encryption-key
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 1Gi
+              cpu: 1
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: sub2api-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sub2api-data
+  labels:
+    app: sub2api
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
