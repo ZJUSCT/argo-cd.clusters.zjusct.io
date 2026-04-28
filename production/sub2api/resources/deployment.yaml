@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: sub2api
-          image: weishaw/sub2api:latest
+          image: docker.io/weishaw/sub2api:latest
           ports:
             - name: http
               containerPort: 8080
@@ -76,7 +76,7 @@ spec:
                   key: database-password
             # Redis
             - name: REDIS_HOST
-              value: "sub2api-redis"
+              value: "sub2api-redis-master"
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_DB
