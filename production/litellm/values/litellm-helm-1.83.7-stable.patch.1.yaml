@@ -387,7 +387,7 @@ proxy_config:
         custom_llm_provider: anthropic
 
     ####################################################################
-    # 智谱华章 - GLM - Max - GH
+    # 智谱华章 - GLM - Max - ZSY
     ####################################################################
     # OpenAI API
     - model_name: plan/zhipu/glm-4.5/openai
@@ -614,6 +614,10 @@ lifecycle: {}
 # Settings for Bitnami postgresql chart (if db.deployStandalone is true, ignored
 #  otherwise)
 postgresql:
+  primary:
+    persistence:
+      storageClass: openebs-hostpath
+      size: 10Gi
   architecture: standalone
   auth:
     username: litellm
@@ -629,10 +633,6 @@ postgresql:
     # existingSecret: ""
     # secretKeys:
     #   userPasswordKey: password
-  primary:
-    persistence:
-      storageClass: openebs-hostpath
-      size: 10Gi
 
 # requires cache: true in config file
 # either enable this or pass a secret for REDIS_HOST, REDIS_PORT, REDIS_PASSWORD or REDIS_URL

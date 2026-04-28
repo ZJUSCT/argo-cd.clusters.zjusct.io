@@ -12,11 +12,11 @@ resources:
 helmCharts:
 - name: litellm-helm
   repo: oci://docker.litellm.ai/berriai
-  version: 1.82.3
+  version: 1.83.7-stable.patch.1
   releaseName: litellm
   namespace: litellm
   includeCRDs: true
-  valuesFile: values/litellm-helm-1.82.3.yaml
+  valuesFile: values/litellm-helm-1.83.7-stable.patch.1.yaml
 
 transformers:
   - ../../image-prefix.yaml
