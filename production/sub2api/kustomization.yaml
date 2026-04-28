@@ -11,10 +11,10 @@ resources:
 helmCharts:
   - name: postgresql
     repo: https://charts.bitnami.com/bitnami
-    version: "15.5.38"
+    version: "18.5.24"
     releaseName: sub2api-postgresql
     namespace: sub2api
-    valuesFile: values/postgresql-15.5.38.yaml
+    valuesFile: values/postgresql-18.5.24.yaml
     includeCRDs: true
   - name: redis
     repo: https://charts.bitnami.com/bitnami
