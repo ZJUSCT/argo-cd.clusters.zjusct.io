@@ -29,7 +29,8 @@ serviceAccount:
   name: ""
 
 # annotations for litellm deployment
-deploymentAnnotations: {}
+deploymentAnnotations:
+  argocd.argoproj.io/sync-wave: "1"
 deploymentLabels: {}
 deploymentMinReadySeconds: 0
 
@@ -617,6 +618,8 @@ postgresql:
   image:
     tag: "latest"
   primary:
+    annotations:
+      argocd.argoproj.io/sync-wave: "-1"
     persistence:
       storageClass: openebs-hostpath
       size: 10Gi

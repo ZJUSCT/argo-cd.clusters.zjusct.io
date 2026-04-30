@@ -135,6 +135,39 @@ kubectl -n litellm rollout restart deployment/litellm
 
 重启后 Prisma query engine 重新初始化并成功连接数据库，Dashboard 登录恢复。
 
+## 修复措施
+
+在 `values/litellm-helm-1.83.7-stable.patch.1.yaml` 中添加 ArgoCD sync-wave 注解，确保 ArgoCD 同步时 PostgreSQL 先于 LiteLLM 启动：
+
+```yaml
+# PostgreSQL StatefulSet — 先启动
+primary:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+
+# LiteLLM Deployment — 后启动
+deploymentAnnotations:
+  argocd.argoproj.io/sync-wave: "1"
+```
+
+**理由**：PG 和 LiteLLM 同时变更时避免启动竞赛。PG 先就绪，LiteLLM 后启动。
+
+## 运维手册
+
+如 Dashboard 再次出现 `Unexpected token ... is not valid JSON`，检查 LiteLLM 日志确认是否为 Prisma 断连：
+
+```bash
+kubectl -n litellm logs deploy/litellm | grep "prisma-query-engine PID 0 is dead"
+```
+
+若有此日志，重启 LiteLLM 即可恢复：
+
+```bash
+kubectl -n litellm rollout restart deployment/litellm
+```
+
+> 此问题的根因是 PostgreSQL Pod 重建导致 Prisma query engine 进程断连。通常由 Bitnami 镜像变更或 PG 节点重调度触发，概率低、恢复简单，不需要额外的自动化措施。
+
 ## 时间线
 
 | 时间 (CST) | 事件 |
@@ -147,7 +180,6 @@ kubectl -n litellm rollout restart deployment/litellm
 
 ## 后续建议
 
-1. **不要在 PostgreSQL 中使用 `latest` tag**（治本）：在 Helm values 中锁定明确的 PostgreSQL 镜像 tag，避免镜像变更触发意外重建
-2. **PostgreSQL 重建后联动重启 LiteLLM**：PostgreSQL Pod 重建后 LiteLLM 需要同步重启，可考虑用 ArgoCD sync-wave 或 post-sync hook 实现
-3. **设置 `DATABASE_URL` 环境变量**（增强容错）：在 Helm values 中显式设置完整连接字符串 `postgresql://litellm:<password>@litellm-postgresql:5432/litellm`，确保 Prisma 重连逻辑能正常工作
-4. **增加就绪探针 DB 检查**：在 `/health/readiness` 中加入数据库连通性检查，当 Prisma 不可用时自动将 Pod 标记为未就绪，由 Envoy Gateway 自动切流
+已添加 sync-wave 注解（见上方"修复措施"）。其他可按需考虑：
+
+1. **增加就绪探针 DB 检查**：在 `/health/readiness` 中加入数据库连通性检查，当 Prisma 不可用时自动将 Pod 标记为未就绪
