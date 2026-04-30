@@ -8,7 +8,6 @@ ARG NO_PROXY=localhost,zjusct.io
 
 ENV MIRROR=mirrors.cernet.edu.cn
 ARG K8S_VERSION=v1.35
-ARG KUBESEAL_VERSION=0.36.6
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN <<EOF
@@ -123,6 +122,7 @@ cd /usr/local/bin
 curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
 
 # https://github.com/bitnami-labs/sealed-secrets
+KUBESEAL_VERSION=$(curl -fsSL https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest | jq -r .tag_name | sed 's/^v//')
 curl -sSL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" | tar xz -C /usr/local/bin/
 chmod +x /usr/local/bin/kubeseal
 
@@ -145,17 +145,5 @@ default = true
 EOT
 
 pip config --global set global.index-url https://${MIRROR}/pypi/web/simple
-
-install -D -m 755 /dev/stdin /usr/local/share/devcontainer/post-start.sh <<'EOT'
-#!/bin/bash
-set -euo pipefail
-
-[ -f /home/host/.kube/config ] && install -D /home/host/.kube/config /home/vscode/.kube/config
-[ -f /home/host/.config/opencode/opencode.json ] && install -D /home/host/.config/opencode/opencode.json /home/vscode/.config/opencode/opencode.json
-[ -f /home/host/.claude/settings.json ] && install -D /home/host/.claude/settings.json /home/vscode/.claude/settings.json
-[ -f /home/host/.claude.json ] && install -D /home/host/.claude.json /home/vscode/.claude.json
-[ -f /home/host/.gitconfig ] && install -D /home/host/.gitconfig /home/vscode/.gitconfig
-[ -f /home/host/.codex/config.toml ] && install -D /home/host/.codex/config.toml /home/vscode/.codex/config.toml
-EOT
 
 EOF

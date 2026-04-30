@@ -23,9 +23,7 @@
       "type": "volume"
     }
   ],
-  "postStartCommand": [
-    "/usr/local/share/devcontainer/post-start.sh"
-  ],
+  "postStartCommand": "bash -c 'for p in .kube/config .config/opencode/opencode.json .claude/settings.json .claude.json .gitconfig .codex/config.toml; do [ -f /home/host/$p ] && install -D /home/host/$p /home/vscode/$p; done'",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": false
