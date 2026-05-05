@@ -12,7 +12,7 @@
   "containerEnv": {
     "HTTP_PROXY": "http://172.28.0.4:3128",
     "HTTPS_PROXY": "http://172.28.0.4:3128",
-    "NO_PROXY": "localhost,zjusct.io"
+    "NO_PROXY": "localhost,zjusct.io,zju.edu.cn"
   },
   "mounts": [
     "source=/dev/kvm,target=/dev/kvm,type=bind",
