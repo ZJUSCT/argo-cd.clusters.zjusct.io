@@ -30,6 +30,7 @@ debian=("${common[@]}"
     starship
     network-manager
     zfs-dkms zfsutils-linux
+    firmware-amd-graphics
 )
 
 ubuntu=("${debian[@]}")
