@@ -18,6 +18,9 @@ spec:
     kind: Issuer
     name: squid-selfsigned-issuer
   secretName: squid-ca
+  duration: 17520h # 2 years
+  renewBefore: 720h # 30 days before expiry
   privateKey:
     algorithm: RSA
     size: 2048
+    rotationPolicy: Never
