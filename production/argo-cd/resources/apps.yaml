@@ -6,6 +6,8 @@ metadata:
   name: default
   annotations:
     argocd.argoproj.io/sync-options: Prune=false
+    # https://github.com/argoproj/argo-cd/issues/22151
+    argocd.argoproj.io/compare-options: ServerSideDiff=true,IncludeMutationWebhook=true
 spec:
   sourceRepos:
     - "*"
