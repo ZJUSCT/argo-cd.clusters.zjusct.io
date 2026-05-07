@@ -16,9 +16,7 @@ spec:
             endpoint: 0.0.0.0:4317
     exporters:
       debug:
-        verbosity: detailed
-        sampling_initial: 5
-        sampling_thereafter: 200
+        verbosity: basic
       # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
       otlp_grpc/tempo:
         endpoint: "tempo.kube-prometheus-stack:4317"
