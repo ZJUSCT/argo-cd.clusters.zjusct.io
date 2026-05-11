@@ -4,10 +4,11 @@ import json
 import re
 import threading
 import time
-import urllib.request
 import urllib.error
 import urllib.parse
-from datetime import datetime, timezone, timedelta
+import urllib.request
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -25,7 +26,24 @@ _YAML_LOADER = yaml.CSafeLoader if hasattr(yaml, "CSafeLoader") else yaml.SafeLo
 HARBOR_PREFIX = "harbor.clusters.zjusct.io/"
 
 _SCAN_RE = re.compile(r"^v?\d+\.\d+\.\d+")
-_PRERELEASE_RE = re.compile(r"^v?\d+\.\d+\.\d+[-.]", re.IGNORECASE)
+
+# Patterns that indicate genuinely unstable/prerelease versions — these are
+# filtered out.  Everything else (including "-stable", bare versions, and
+# unrecognised suffixes) passes through so the user can decide.
+_UNSTABLE_PATTERNS = [
+    r"-alpha",
+    r"-beta",
+    r"-rc",
+    r"-nightly",
+    r"-dev",
+    r"-preview",
+    r"-pre",
+    r"-snapshot",
+    r"-canary",
+    r"-unstable",
+    r"-experimental",
+    r"-weekly",
+]
 
 _MIN_AGE_DAYS = 7
 _MAX_OCI_CANDIDATES = 20
@@ -113,8 +131,22 @@ def load_yaml(file_path: Path) -> Optional[dict]:
 
 
 def is_prerelease(version: str) -> bool:
-    """True if *version* looks like a pre-release (contains ``-alpha``, ``-beta``, etc.)."""
-    return bool(_PRERELEASE_RE.match(version))
+    """True if *version* is an unstable pre-release (alpha, beta, rc, nightly, etc.).
+
+    Only matches known unstable patterns.  ``-stable`` and other non-standard
+    suffixes are NOT treated as prerelease — they pass through for the user to
+    review manually.
+    """
+    m = re.match(r"^v?\d+\.\d+\.\d+", version)
+    if not m:
+        return True  # doesn't look like a version at all
+    suffix = version[m.end():].lower()
+    if not suffix:
+        return False
+    for pattern in _UNSTABLE_PATTERNS:
+        if re.match(pattern, suffix):
+            return True
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -132,11 +164,64 @@ def parse_semver(tag: str) -> Optional[Tuple[int, ...]]:
     return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
 
 
+def _parse_version_for_sort(version: str) -> Optional[Tuple[int, ...]]:
+    """Parse a version into a sortable tuple.
+
+    Extracts the semver triplet plus any trailing numbers from the suffix
+    (e.g. ``1.83.14-stable.patch.3`` → ``(1, 83, 14, 3)``).
+
+    Returns *None* for unparseable strings.
+    """
+    m = re.match(r"^v?(\d+)\.(\d+)\.(\d+)", version)
+    if not m:
+        return None
+    base = (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    extra = tuple(int(n) for n in re.findall(r"\d+", version[m.end():]))
+    return base + extra
+
+
 def sort_semver_tags(tags: List[str]) -> List[str]:
-    """Return *tags* sorted descending by semver (latest first)."""
-    tagged = [(parse_semver(t), t) for t in tags if parse_semver(t) is not None]
-    tagged.sort(key=lambda x: x[0], reverse=True)
-    return [t for _, t in tagged]
+    """Return *tags* sorted descending (latest first).
+
+    Sorts by semver triplet and any trailing numbers extracted from the suffix.
+    Falls back to string comparison when numeric parts are identical.
+    """
+    def _key(t: str):
+        parsed = _parse_version_for_sort(t)
+        if parsed is None:
+            return ((), t)
+        return (parsed, t)
+
+    tagged = [(t, _key(t)) for t in tags if parse_semver(t) is not None]
+    tagged.sort(key=lambda x: x[1], reverse=True)
+    return [t for t, _ in tagged]
+
+
+def has_non_semver_suffix(version: str) -> bool:
+    """True if *version* has a suffix that is neither bare semver nor a known
+    unstable prerelease pattern.
+
+    Used to warn the user about non-standard version names that require
+    manual review.
+    """
+    m = re.match(r"^v?\d+\.\d+\.\d+", version)
+    if not m:
+        return True
+    suffix = version[m.end():]
+    return bool(suffix)
+
+
+@dataclass
+class VersionCandidates:
+    """Result of an upstream version query.
+
+    *candidates* is ordered newest-first and contains at most 5 entries.
+    *current_date* is the creation date of the version currently deployed
+    (``None`` when unavailable).
+    """
+    candidates: List[Tuple[str, str]] = field(default_factory=list)
+    current_date: Optional[str] = None
+    error: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -362,23 +447,17 @@ def _get_oci_manifest_created(registry: str, repository: str,
 # ---------------------------------------------------------------------------
 
 def get_latest_helm_version_http(chart_name: str, repo_url: str,
-                                 cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
-    """Query an HTTP Helm repo ``index.yaml`` for the latest stable chart version
-    that is at least 7 days old.
+                                 current_version: str,
+                                 cache: VersionCache) -> VersionCandidates:
+    """Query an HTTP Helm repo ``index.yaml`` for the newest chart versions
+    (at least 7 days old, excluding unstable prereleases).
 
-    Returns *(version, error_message)*.
+    Returns up to 5 candidates, newest first.
     """
-    key = ("helm_http", f"{repo_url}/{chart_name}")
-    cached = cache.get(key)
-    if cached is not None:
-        return cached, None
-
     if not repo_url.endswith("/"):
         repo_url += "/"
 
-    # Cache parsed index.yaml per repo URL to avoid repeated large downloads.
-    # Use get_or_compute so that concurrent requests for the same repo block
-    # on a per-key lock and only one thread performs the download+parse.
+    # Cache parsed index.yaml per repo URL.
     index_key = ("helm_index", repo_url)
 
     def _fetch_index() -> Optional[dict]:
@@ -393,45 +472,71 @@ def get_latest_helm_version_http(chart_name: str, repo_url: str,
 
     index_data = cache.get_or_compute(index_key, _fetch_index)
     if index_data is None:
-        cache.put(key, None)
-        return None, "failed to fetch or parse index.yaml"
+        return VersionCandidates(error="failed to fetch or parse index.yaml")
 
     entries = index_data.get("entries", {})
     chart_entries = entries.get(chart_name, [])
     if not chart_entries:
-        cache.put(key, None)
-        return None, "chart not found in index"
+        return VersionCandidates(error="chart not found in index")
+
+    # Collect all qualifying versions with dates; deduplicate by version.
+    seen: set = set()
+    collected: List[Tuple[str, str]] = []
+    current_date: Optional[str] = None
 
     for entry in chart_entries:
         ver = entry.get("version", "")
         created = entry.get("created", "")
-        if ver and not is_prerelease(ver) and _is_old_enough(created):
-            cache.put(key, ver)
-            return ver, None
+        if not ver:
+            continue
+        if is_prerelease(ver):
+            continue
+        if not _is_old_enough(created):
+            continue
+        if ver in seen:
+            continue
+        seen.add(ver)
 
-    cache.put(key, None)
-    return None, "no stable version at least 7 days old"
+        # Track date for current version
+        if ver == current_version and not current_date:
+            current_date = created or None
+
+        collected.append((ver, created or ""))
+
+    if not collected:
+        return VersionCandidates(
+            current_date=current_date,
+            error="no stable version at least 7 days old",
+        )
+
+    # Sort by version descending, then by date descending as tiebreaker
+    def _sort_key(item: Tuple[str, str]) -> Tuple[Tuple[int, ...], str]:
+        parsed = _parse_version_for_sort(item[0])
+        return (parsed or (0, 0, 0), item[1])
+
+    collected.sort(key=_sort_key, reverse=True)
+
+    return VersionCandidates(
+        candidates=collected[:5],
+        current_date=current_date,
+    )
 
 
 def get_latest_helm_version_oci(chart_name: str, repo_url: str,
-                                cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
-    """Query an OCI registry for the latest stable Helm chart version that is
-    at least 7 days old.
+                                current_version: str,
+                                cache: VersionCache) -> VersionCandidates:
+    """Query an OCI registry for the newest Helm chart versions (at least 7 days
+    old, excluding unstable prereleases).
 
-    Returns *(version, error_message)*.
+    Returns up to 5 candidates, newest first.  Dates are obtained from OCI
+    manifests (one request per tag).
     """
-    key = ("helm_oci", f"{repo_url}/{chart_name}")
-    cached = cache.get(key)
-    if cached is not None:
-        return cached, None
-
     try:
         parsed = urllib.parse.urlparse(repo_url)
         registry = parsed.netloc
         path_part = parsed.path.strip("/")
         image = f"{path_part}/{chart_name}" if path_part else chart_name
 
-        # Docker Hub remapping
         if "docker.io" in registry:
             api_registry = "registry-1.docker.io"
         else:
@@ -443,40 +548,55 @@ def get_latest_helm_version_oci(chart_name: str, repo_url: str,
 
         token, auth_err = _get_oci_auth_token(api_registry, docker_image)
         if auth_err:
-            cache.put(key, None)
-            return None, auth_err
+            return VersionCandidates(error=auth_err)
 
-        tags, tags_err = _fetch_oci_tags(api_registry, docker_image, token)
-        if tags_err:
-            cache.put(key, None)
-            return None, tags_err
+        # Cache tags list per repo
+        tags_key = ("oci_tags", f"{api_registry}/{docker_image}")
+        tags: Optional[List[str]] = cache.get(tags_key)
+
+        if tags is None:
+            raw_tags, tags_err = _fetch_oci_tags(api_registry, docker_image, token)
+            if tags_err:
+                return VersionCandidates(error=tags_err)
+            tags = sort_semver_tags(
+                [t for t in raw_tags if _SCAN_RE.match(t) and not is_prerelease(t)]
+            )
+            cache.put(tags_key, tags)
+
         if not tags:
-            cache.put(key, None)
-            return None, "no tags found"
+            return VersionCandidates(error="no stable semver tags found")
 
-        version_tags = sort_semver_tags(
-            [t for t in tags if _SCAN_RE.match(t) and not is_prerelease(t)]
-        )
-        if not version_tags:
-            cache.put(key, None)
-            return None, "no stable semver tags found"
+        # Fetch manifests for top candidates to get dates.
+        collected: List[Tuple[str, str]] = []
+        current_date: Optional[str] = None
 
-        for tag in version_tags[:_MAX_OCI_CANDIDATES]:
+        for tag in tags[:_MAX_OCI_CANDIDATES]:
             created, created_err = _get_oci_manifest_created(
                 api_registry, docker_image, tag, token
             )
             if created_err:
                 continue
-            if _is_old_enough(created):
-                cache.put(key, tag)
-                return tag, None
+            if not _is_old_enough(created):
+                continue
+            if tag == current_version and not current_date:
+                current_date = created
+            collected.append((tag, created))
+            if len(collected) >= 5:
+                break
 
-        cache.put(key, None)
-        return None, "no stable OCI chart version at least 7 days old"
+        if not collected:
+            return VersionCandidates(
+                current_date=current_date,
+                error="no stable OCI chart version at least 7 days old",
+            )
+
+        return VersionCandidates(
+            candidates=collected,
+            current_date=current_date,
+        )
 
     except Exception as e:
-        cache.put(key, None)
-        return None, str(e)
+        return VersionCandidates(error=str(e))
 
 
 # ---------------------------------------------------------------------------
@@ -484,19 +604,16 @@ def get_latest_helm_version_oci(chart_name: str, repo_url: str,
 # ---------------------------------------------------------------------------
 
 def get_latest_github_release_version(owner_repo: str,
-                                       cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
-    """Query the GitHub Releases API for the latest stable release that is at
-    least *_MIN_AGE_DAYS* old.
+                                       current_tag: str,
+                                       cache: VersionCache) -> VersionCandidates:
+    """Query the GitHub Releases API for the newest stable releases (at least
+    7 days old, excluding prereleases and drafts).
+
+    Returns up to 5 candidates, newest first.
 
     *owner_repo* should be ``"owner/repo"`` (e.g. ``"tektoncd/operator"``).
-    Returns *(version_tag, error_message)*.
     """
-    key = ("github_release", owner_repo)
-    cached = cache.get(key)
-    if cached is not None:
-        return cached, None
-
-    url = f"https://api.github.com/repos/{owner_repo}/releases?per_page=20"
+    url = f"https://api.github.com/repos/{owner_repo}/releases?per_page=25"
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/vnd.github+json")
     req.add_header("User-Agent", _helm_user_agent())
@@ -506,24 +623,44 @@ def get_latest_github_release_version(owner_repo: str,
         with urllib.request.urlopen(req, timeout=15) as resp:
             releases = json.loads(resp.read())
     except urllib.error.HTTPError as e:
-        return None, f"HTTP {e.code} {e.reason}"
+        return VersionCandidates(error=f"HTTP {e.code} {e.reason}")
     except Exception as e:
-        return None, str(e)
+        return VersionCandidates(error=str(e))
 
-    candidates = [
-        r for r in releases
-        if not r.get("prerelease") and not r.get("draft")
-        and _is_old_enough(r.get("published_at"))
-        and parse_semver(r.get("tag_name", ""))
-    ]
-    if not candidates:
-        cache.put(key, None)
-        return None, "no stable release at least 7 days old"
+    current_date: Optional[str] = None
+    collected: List[Tuple[str, str]] = []
+    for r in releases:
+        if r.get("prerelease") or r.get("draft"):
+            continue
+        tag_name = r.get("tag_name", "")
+        published = r.get("published_at", "")
+        if not parse_semver(tag_name):
+            continue
+        if not _is_old_enough(published):
+            continue
+        # uses GitHub's prerelease flag, not our blocklist, so also check
+        if is_prerelease(tag_name):
+            continue
+        if tag_name == current_tag:
+            current_date = published or current_date
+        collected.append((tag_name, published or ""))
 
-    candidates.sort(key=lambda r: parse_semver(r["tag_name"]), reverse=True)
-    latest = candidates[0]["tag_name"]
-    cache.put(key, latest)
-    return latest, None
+    if not collected:
+        return VersionCandidates(
+            current_date=current_date,
+            error="no stable release at least 7 days old",
+        )
+
+    def _sort_key(item: Tuple[str, str]) -> Tuple[Tuple[int, ...], str]:
+        parsed = _parse_version_for_sort(item[0])
+        return (parsed or (0, 0, 0), item[1])
+
+    collected.sort(key=_sort_key, reverse=True)
+
+    return VersionCandidates(
+        candidates=collected[:5],
+        current_date=current_date,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -586,43 +723,43 @@ def _fetch_all_tags(api_registry: str, docker_repo: str,
 
 
 def get_latest_image_tag(registry: str, repository: str,
-                         cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
-    """Query a Docker Registry v2 API for the latest semver image tag.
+                         current_tag: str,
+                         cache: VersionCache) -> VersionCandidates:
+    """Query a Docker Registry v2 API for the newest semver image tags
+    (excluding unstable prereleases).
 
-    Returns (latest_tag, error_message).
+    Returns up to 5 candidates, newest first.  Dates are NOT available from the
+    tag-list API (manifest fetches would be needed), so ``current_date`` is
+    always ``None``.
     """
-    key = ("image", f"{registry}/{repository}")
-    cached = cache.get(key)
-    if cached is not None:
-        return (cached, None)
+    # Use cache for tags list
+    tags_key = ("image_tags", f"{registry}/{repository}")
+    version_tags: Optional[List[str]] = cache.get(tags_key)
 
-    # Determine API registry
-    if "docker.io" in registry:
-        api_registry = "registry-1.docker.io"
-    else:
-        api_registry = registry
+    if version_tags is None:
+        if "docker.io" in registry:
+            api_registry = "registry-1.docker.io"
+        else:
+            api_registry = registry
 
-    # Docker Hub library prefix
-    docker_repo = repository
-    if api_registry == "registry-1.docker.io" and "/" not in repository:
-        docker_repo = f"library/{repository}"
+        docker_repo = repository
+        if api_registry == "registry-1.docker.io" and "/" not in repository:
+            docker_repo = f"library/{repository}"
 
-    # Auth
-    token = None
-    if api_registry == "registry-1.docker.io":
-        token, auth_err = _get_oci_auth_token(api_registry, docker_repo)
-        if not token:
-            cache.put(key, None)
-            return (None, auth_err or "docker hub auth failed")
+        token = None
+        if api_registry == "registry-1.docker.io":
+            token, auth_err = _get_oci_auth_token(api_registry, docker_repo)
+            if not token:
+                return VersionCandidates(error=auth_err or "docker hub auth failed")
 
-    tags, err = _fetch_all_tags(api_registry, docker_repo, token)
-    if err:
-        cache.put(key, None)
-        return (None, err)
+        tags, err = _fetch_all_tags(api_registry, docker_repo, token)
+        if err:
+            return VersionCandidates(error=err)
 
-    version_tags = sort_semver_tags(
-        [t for t in tags if _SCAN_RE.match(t) and not is_prerelease(t)]
-    )
-    latest = version_tags[0] if version_tags else None
-    cache.put(key, latest)
-    return (latest, None)
+        version_tags = sort_semver_tags(
+            [t for t in tags if _SCAN_RE.match(t) and not is_prerelease(t)]
+        )
+        cache.put(tags_key, version_tags or [])
+
+    candidates = [(t, "") for t in (version_tags or [])[:5]]
+    return VersionCandidates(candidates=candidates)

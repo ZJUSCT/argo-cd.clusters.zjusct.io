@@ -18,10 +18,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from version_utils import (
     HARBOR_PREFIX,
     VersionCache,
+    VersionCandidates,
     get_latest_github_release_version,
     get_latest_helm_version_http,
     get_latest_helm_version_oci,
     get_latest_image_tag,
+    has_non_semver_suffix,
     load_yaml,
     parse_image_ref,
     parse_semver,
@@ -76,7 +78,9 @@ class Update:
     app_name: str
     resource_name: str
     current: str
-    latest: str
+    current_date: str = ""               # creation date of current version ("" if unknown)
+    candidates: List[Tuple[str, str]] = field(default_factory=list)  # [(version, date), ...]
+    non_semver: bool = False             # True if any version has a non-standard suffix
     source_file: str = ""
 
 
@@ -337,61 +341,104 @@ def scan_resource_images(repo_root: Path) -> List[ImageItem]:
 
 
 # ---------------------------------------------------------------------------
+# Query helpers
+# ---------------------------------------------------------------------------
+
+def _filter_newer(result: VersionCandidates, current_version: str) -> Update:
+    """Build an *Update* from a *VersionCandidates* result by filtering to
+    versions newer than *current_version* (up to 3)."""
+    candidates: List[Tuple[str, str]] = []
+    cur_parsed = parse_semver(current_version)
+    if cur_parsed is not None:
+        for ver, date in result.candidates:
+            cand_parsed = parse_semver(ver)
+            if cand_parsed is None:
+                continue
+            if cand_parsed < cur_parsed:
+                continue
+            if cand_parsed == cur_parsed:
+                # Same triplet — compare suffixes so we don't report
+                # the same version (or a bare candidate when current has
+                # extra suffix info that makes it newer).
+                cur_suffix = re.sub(r"^v?\d+\.\d+\.\d+", "", current_version)
+                cand_suffix = re.sub(r"^v?\d+\.\d+\.\d+", "", ver)
+                if cand_suffix == cur_suffix:
+                    continue
+                if not cand_suffix:
+                    continue
+            candidates.append((ver, date))
+            if len(candidates) >= 3:
+                break
+
+    non_semver = any(has_non_semver_suffix(v) for v, _ in candidates)
+
+    return Update(
+        app_name="",           # filled in by caller
+        resource_name="",      # filled in by caller
+        current=current_version,
+        current_date=result.current_date or "",
+        candidates=candidates,
+        non_semver=non_semver,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Query phase
 # ---------------------------------------------------------------------------
 
-def _query_helm(item: HelmItem, cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
-    """Return (latest_version, error_message)."""
+def _query_helm(item: HelmItem, cache: VersionCache) -> Tuple[Optional[Update], Optional[str]]:
+    """Return (Update, error_message).  Update is None when up-to-date."""
     try:
         if item.is_oci:
-            latest, error = get_latest_helm_version_oci(item.chart_name, item.repo, cache)
+            result = get_latest_helm_version_oci(item.chart_name, item.repo,
+                                                  item.current_version, cache)
         else:
-            latest, error = get_latest_helm_version_http(item.chart_name, item.repo, cache)
-        if error:
-            return None, error
-        if latest is None:
-            return None, "failed to fetch latest version"
-        # Normalize for comparison
-        cur = item.current_version.lstrip("v")
-        lat = latest.lstrip("v")
-        if cur == lat:
-            return item.current_version, None
-        return latest, None
+            result = get_latest_helm_version_http(item.chart_name, item.repo,
+                                                   item.current_version, cache)
+        if result.error:
+            return None, result.error
+        upd = _filter_newer(result, item.current_version)
+        upd.app_name = item.app_name
+        upd.resource_name = item.chart_name
+        if not upd.candidates:
+            return None, None  # up-to-date
+        return upd, None
     except Exception as e:
         return None, str(e)
 
 
-def _query_github(item: GitHubReleaseItem, cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
-    """Return (latest_tag, error_message)."""
+def _query_github(item: GitHubReleaseItem, cache: VersionCache) -> Tuple[Optional[Update], Optional[str]]:
+    """Return (Update, error_message).  Update is None when up-to-date."""
     try:
-        latest, err = get_latest_github_release_version(item.owner_repo, cache)
-        if err:
-            return None, err
-        if latest is None:
-            return None, "no stable release found"
-        cur = item.current_tag.lstrip("v")
-        lat = latest.lstrip("v")
-        if cur == lat:
-            return item.current_tag, None
-        return latest, None
+        result = get_latest_github_release_version(item.owner_repo,
+                                                    item.current_tag, cache)
+        if result.error:
+            return None, result.error
+        upd = _filter_newer(result, item.current_tag)
+        upd.app_name = item.app_name
+        upd.resource_name = item.owner_repo
+        upd.source_file = item.source_file
+        if not upd.candidates:
+            return None, None
+        return upd, None
     except Exception as e:
         return None, str(e)
 
 
-def _query_image(item: ImageItem, cache: VersionCache) -> Tuple[Optional[str], Optional[str]]:
-    """Return (latest_tag, error_message)."""
+def _query_image(item: ImageItem, cache: VersionCache) -> Tuple[Optional[Update], Optional[str]]:
+    """Return (Update, error_message).  Update is None when up-to-date."""
     try:
-        latest, err = get_latest_image_tag(item.registry, item.repository, cache)
-        if err:
-            return None, err
-        if latest is None:
-            return None, "no semver tags found"
-        # Normalize for comparison
-        cur = item.current_tag.lstrip("v")
-        lat = latest.lstrip("v")
-        if cur == lat:
-            return item.current_tag, None
-        return latest, None
+        result = get_latest_image_tag(item.registry, item.repository,
+                                       item.current_tag, cache)
+        if result.error:
+            return None, result.error
+        upd = _filter_newer(result, item.current_tag)
+        upd.app_name = item.app_name
+        upd.resource_name = item.image_ref
+        upd.source_file = item.source_file
+        if not upd.candidates:
+            return None, None
+        return upd, None
     except Exception as e:
         return None, str(e)
 
@@ -408,8 +455,14 @@ def _print_section(result: CategoryResult) -> None:
 
     # Updates first
     for u in result.updates:
+        cur = f"{u.current} ({u.current_date})" if u.current_date else u.current
         src = f"  [{u.source_file}]" if u.source_file else ""
-        print(f"  {u.app_name:40s} {u.resource_name:45s} {u.current:15s} -> {u.latest}{src}")
+        print(f"  {u.app_name:40s} {u.resource_name:45s} {cur}{src}")
+        for ver, date in u.candidates:
+            date_part = f" ({date})" if date else ""
+            print(f"    -> {ver}{date_part}")
+        if u.non_semver:
+            print(f"    [!] non-semver version names — review before upgrading")
 
     # Up to date (compact)
     for app, name, ver in result.up_to_date:
@@ -477,8 +530,16 @@ def main() -> int:
     values_result = CategoryResult(title="Container Images (values files)")
     resource_result = CategoryResult(title="Container Images (resource files)")
 
-    def _print_helm_update(u: Update) -> None:
-        print(f"  UPDATE: {u.app_name:40s} {u.resource_name:45s} {u.current:15s} -> {u.latest}", flush=True)
+    def _print_update(u: Update) -> None:
+        """Print an update line with candidates, one per line."""
+        cur = f"{u.current} ({u.current_date})" if u.current_date else u.current
+        src = f"  [{u.source_file}]" if u.source_file else ""
+        print(f"  UPDATE: {u.app_name:40s} {u.resource_name:45s} {cur}{src}", flush=True)
+        for ver, date in u.candidates:
+            date_part = f" ({date})" if date else ""
+            print(f"    -> {ver}{date_part}", flush=True)
+        if u.non_semver:
+            print(f"    [!] non-semver version names — review before upgrading", flush=True)
 
     def _print_helm_ok(app: str, name: str, ver: str) -> None:
         print(f"  OK:     {app:40s} {name:45s} {ver:15s}", flush=True)
@@ -486,17 +547,11 @@ def main() -> int:
     def _print_helm_error(e: CheckError) -> None:
         print(f"  ERROR:  {e.app_name:40s} {e.resource_name:30s} {e.message}", flush=True)
 
-    def _print_image_update(u: Update) -> None:
-        print(f"  UPDATE: {u.app_name:40s} {u.resource_name:45s} {u.current:15s} -> {u.latest}  [{u.source_file}]", flush=True)
-
     def _print_image_ok(app: str, name: str, ver: str) -> None:
         print(f"  OK:     {app:40s} {name:45s} {ver:15s}", flush=True)
 
     def _print_image_error(e: CheckError) -> None:
         print(f"  ERROR:  {e.app_name:40s} {e.resource_name:30s} [{e.source_file}] {e.message}", flush=True)
-
-    def _print_github_update(u: Update) -> None:
-        print(f"  UPDATE: {u.app_name:40s} {u.resource_name:45s} {u.current:15s} -> {u.latest}  [{u.source_file}]", flush=True)
 
     def _print_github_ok(app: str, name: str, ver: str) -> None:
         print(f"  OK:     {app:40s} {name:45s} {ver:15s}", flush=True)
@@ -525,7 +580,7 @@ def main() -> int:
 
         for future in as_completed(futures):
             category, item = futures[future]
-            latest, error = future.result()
+            upd, error = future.result()
 
             if category == "helm":
                 item: HelmItem  # type: ignore
@@ -538,15 +593,9 @@ def main() -> int:
                     )
                     helm_result.errors.append(err_obj)
                     _print_helm_error(err_obj)
-                elif latest and latest.lstrip("v") != item.current_version.lstrip("v"):
-                    upd = Update(
-                        app_name=item.app_name,
-                        resource_name=item.chart_name,
-                        current=item.current_version,
-                        latest=latest,
-                    )
+                elif upd:
                     helm_result.updates.append(upd)
-                    _print_helm_update(upd)
+                    _print_update(upd)
                 else:
                     helm_result.up_to_date.append((item.app_name, item.chart_name, item.current_version))
                     _print_helm_ok(item.app_name, item.chart_name, item.current_version)
@@ -563,16 +612,9 @@ def main() -> int:
                     )
                     github_result.errors.append(err_obj)
                     _print_github_error(err_obj)
-                elif latest and latest.lstrip("v") != item.current_tag.lstrip("v"):
-                    upd = Update(
-                        app_name=item.app_name,
-                        resource_name=item.owner_repo,
-                        current=item.current_tag,
-                        latest=latest,
-                        source_file=item.source_file,
-                    )
+                elif upd:
                     github_result.updates.append(upd)
-                    _print_github_update(upd)
+                    _print_update(upd)
                 else:
                     github_result.up_to_date.append((item.app_name, item.owner_repo, item.current_tag))
                     _print_github_ok(item.app_name, item.owner_repo, item.current_tag)
@@ -590,16 +632,9 @@ def main() -> int:
                     )
                     target.errors.append(err_obj)
                     _print_image_error(err_obj)
-                elif latest and latest.lstrip("v") != item.current_tag.lstrip("v"):
-                    upd = Update(
-                        app_name=item.app_name,
-                        resource_name=item.image_ref,
-                        current=item.current_tag,
-                        latest=latest,
-                        source_file=item.source_file,
-                    )
+                elif upd:
                     target.updates.append(upd)
-                    _print_image_update(upd)
+                    _print_update(upd)
                 else:
                     target.up_to_date.append((item.app_name, item.image_ref, item.current_tag))
                     _print_image_ok(item.app_name, item.image_ref, item.current_tag)
