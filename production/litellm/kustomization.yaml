@@ -12,11 +12,21 @@ resources:
 helmCharts:
 - name: litellm-helm
   repo: oci://docker.litellm.ai/berriai
-  version: 1.83.7-stable.patch.1
+  version: 1.83.14-stable
   releaseName: litellm
   namespace: litellm
   includeCRDs: true
-  valuesFile: values/litellm-helm-1.83.7-stable.patch.1.yaml
+  valuesFile: values/litellm-helm-1.83.14-stable.yaml
 
+# patches:
+#   - target:
+#       kind: Deployment
+#       name: litellm
+#     patch: |-
+#       - op: add
+#         path: /spec/template/spec/containers/0/env/-
+#         value:
+#           name: DATABASE_URL
+#           value: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
 transformers:
   - ../../image-prefix.yaml
