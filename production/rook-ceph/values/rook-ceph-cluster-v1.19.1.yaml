@@ -48,10 +48,24 @@ configOverride: |
   [mds]
   mds_session_blocklist_on_timeout = false
   mds_session_blocklist_on_evict = false
+
+  # MDS metadata/inode cache tuning,16 GiB target cache limit per MDS daemon.This is a target/soft limit, not a strict hard cap.
+  mds_cache_memory_limit = 17179869184
+
+  # Start cache pressure handling earlier.0.10 means MDS starts recalling/trimming more aggressively.around 90% of mds_cache_memory_limit.
+  mds_cache_reservation = 0.10
+
+  # Warn when cache exceeds 1.5x the configured target.
+  mds_health_cache_threshold = 1.5
+
+  # Limit caps held by a single client to reduce the chance that
+  mds_max_caps_per_client = 524288
+
   # Purge queue: remove hard cap, raise per-PG and file limits
   mds_max_purge_ops = 0
   mds_max_purge_ops_per_pg = 64
   mds_max_purge_files = 256
+
   # Journal: fewer rotations under bursty workloads
   mds_log_max_events = 131072
   mds_log_max_segments = 2048
