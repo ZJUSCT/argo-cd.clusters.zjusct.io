@@ -6,7 +6,7 @@ resources:
 - resources/httproute.yaml
 - resources/sealedsecret-masterkey.yaml
 - resources/sealedsecret-api-keys.yaml
-- resources/configmap-api-debug-env.yaml
+- resources/configmap-env.yaml
 - resources/configmap-claude-code-session-hook.yaml
 
 helmCharts:
@@ -17,17 +17,6 @@ helmCharts:
   namespace: litellm
   includeCRDs: true
   valuesFile: values/litellm-helm-1.83.14-stable.yaml
-
-patches:
-  - target:
-      kind: Deployment
-      name: litellm
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: DATABASE_URL
-          value: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
 
 transformers:
   - ../../image-prefix.yaml

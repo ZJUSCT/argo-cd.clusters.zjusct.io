@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-# numWorkers: 2
+numWorkers: 4
 
 image:
   # Use "ghcr.io/berriai/litellm-database" for optimized image with database
@@ -90,7 +90,7 @@ service:
 # Separate health app configuration
 # When enabled, health checks will use a separate port and the application
 # will receive SEPARATE_HEALTH_APP=1 and SEPARATE_HEALTH_PORT from environment variables
-separateHealthApp: true
+separateHealthApp: false
 separateHealthPort: 8081
 
 # Probe tuning for proxy container
@@ -499,7 +499,11 @@ proxy_config:
     # Pre-call checks
     enable_pre_call_check: false  # Filter deployments by context window and region before calling
 
-    # Cache
+    # Cache — shared across workers via Redis.
+    # Without Redis: Router cooldown, deployment affinity, session affinity,
+    # TPM/RPM tracking, and spend counting are all per-worker (inconsistent).
+    cache: true
+    enable_redis_auth_cache: true
     cache_responses: false
 
   general_settings:
@@ -643,7 +647,7 @@ postgresql:
 # either enable this or pass a secret for REDIS_HOST, REDIS_PORT, REDIS_PASSWORD or REDIS_URL
 # with cache: true to use existing redis instance
 redis:
-  enabled: false
+  enabled: true
   architecture: standalone
 
 # Prisma migration job settings
