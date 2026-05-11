@@ -18,15 +18,16 @@ helmCharts:
   includeCRDs: true
   valuesFile: values/litellm-helm-1.83.14-stable.yaml
 
-# patches:
-#   - target:
-#       kind: Deployment
-#       name: litellm
-#     patch: |-
-#       - op: add
-#         path: /spec/template/spec/containers/0/env/-
-#         value:
-#           name: DATABASE_URL
-#           value: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
+patches:
+  - target:
+      kind: Deployment
+      name: litellm
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: DATABASE_URL
+          value: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
+
 transformers:
   - ../../image-prefix.yaml
