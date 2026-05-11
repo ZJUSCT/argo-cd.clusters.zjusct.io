@@ -649,6 +649,10 @@ postgresql:
 redis:
   enabled: true
   architecture: standalone
+  # TODO: bitnami has deleted old images from docker.io/bitnami, use legacy repo
+  # wait for https://github.com/BerriAI/litellm/issues/26169 to be solved
+  image:
+    repository: bitnamilegacy/redis
 
 # Prisma migration job settings
 migrationJob:
