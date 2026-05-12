@@ -82,10 +82,7 @@ install_nvidia_container_toolkit() {
 # --- Main ---
 case $ID in
 debian | ubuntu)
-    ensure_cuda_keyring || {
-        echo "NVIDIA driver: failed to install cuda-keyring for $ID $VERSION_ID, skipping"
-        exit 0
-    }
+    ensure_cuda_keyring
     case $ID in
     debian) install_pkg nvidia-open ;;
     ubuntu) install_pkg nvidia-open ;;
@@ -93,10 +90,7 @@ debian | ubuntu)
     install_nvidia_container_toolkit
     ;;
 fedora)
-    ensure_cuda_keyring || {
-        echo "NVIDIA driver: failed to install cuda-keyring for $ID $VERSION_ID, skipping"
-        exit 0
-    }
+    ensure_cuda_keyring
     install_pkg nvidia-driver-open
     install_nvidia_container_toolkit
     ;;

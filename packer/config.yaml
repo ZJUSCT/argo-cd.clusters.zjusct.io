@@ -12,6 +12,15 @@
     - 30-driver-doca
     - 31-toolkit-cuda
     - 70-zjusct-cluster
+- name: debian-13-amd64-asc
+  arch: amd64
+  # iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2
+  iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
+  iso_url: download/debian-13-generic-amd64.qcow2
+  modules:
+    - 30-driver-nvidia
+    - 30-driver-doca
+    - 31-toolkit-cuda
 - name: debian-13-arm64
   arch: arm64
   # iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-arm64.qcow2

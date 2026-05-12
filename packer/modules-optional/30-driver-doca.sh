@@ -16,10 +16,7 @@ DOCA_URL="http://linux.mellanox.com/public/repo/doca/${DOCA_VERSION}/${DOCA_OS}/
 case $ID in
 debian | ubuntu)
     add_repo doca "http://linux.mellanox.com/public/repo/doca/GPG-KEY-Mellanox.pub" "${DOCA_URL} ./"
-    # Pin DOCA repo higher to resolve version conflicts with CUDA repo (e.g. mft)
-    echo -e "Package: *\nPin: origin linux.mellanox.com\nPin-Priority: 900" \
-        >/etc/apt/preferences.d/doca
-    install_pkg doca-all
+    install_pkg doca-all mlnx-nfsrdma-dkms
     ;;
 rocky)
     install -D -m 0644 /dev/stdin /etc/yum.repos.d/doca.repo <<EOF

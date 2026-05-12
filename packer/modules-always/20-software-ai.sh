@@ -92,8 +92,8 @@ esac
 
 if [ -n "${codex_arch:-}" ]; then
     codex_tarball=$(get_github_release_asset "openai/codex" \
-        "codex-${codex_arch}-unknown-linux-gnu\\.tar\\.gz")
+        "codex-${codex_arch}-unknown-linux-musl\\.tar\\.gz")
     tar xzf "$codex_tarball" -C /tmp/
-    install -m 755 "/tmp/codex-${codex_arch}-unknown-linux-gnu" /usr/local/bin/codex
-    rm -f "$codex_tarball" "/tmp/codex-${codex_arch}-unknown-linux-gnu"
+    install -m 755 "/tmp/codex-${codex_arch}-unknown-linux-musl" /usr/local/bin/codex
+    rm -f "$codex_tarball" "/tmp/codex-${codex_arch}-unknown-linux-musl"
 fi

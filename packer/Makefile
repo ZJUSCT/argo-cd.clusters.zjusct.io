@@ -1,5 +1,6 @@
 INSIDE_DOCKER := $(shell test -f /.dockerenv && echo yes)
 ON_MACOS := $(shell uname -s | grep -q Darwin && echo yes)
+.DEFAULT_GOAL := debian-13-amd64
 
 ifeq ($(filter yes,$(INSIDE_DOCKER) $(ON_MACOS)),yes)
 
@@ -43,6 +44,6 @@ down:
 
 # Proxy everything else into Docker
 %:
-	docker compose run --rm packer -c "make -j $@"
+	docker compose run --rm -t packer -c "make -j $@"
 
 endif

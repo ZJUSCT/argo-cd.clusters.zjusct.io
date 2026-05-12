@@ -16,6 +16,7 @@ common=(
     squashfs-tools
     rustup
     pre-commit
+    shfmt
 )
 
 debian=("${common[@]}"

@@ -2,6 +2,7 @@ services:
   packer:
     build: .
     image: harbor.clusters.zjusct.io/library/packer
+    init: true
     # environment:
     #   HTTP_PROXY: http://172.28.0.4:3128
     #   HTTPS_PROXY: http://172.28.0.4:3128
@@ -16,6 +17,7 @@ services:
     network_mode: host
     privileged: true
     working_dir: /workspace
+    command: ["-c", "sleep infinity"]
   # module test container
   # test modules faster using docker(based on qemu user-mode) instead of qemu vm
   test:
