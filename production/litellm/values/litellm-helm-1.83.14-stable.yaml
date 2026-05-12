@@ -158,6 +158,11 @@ proxyConfigMap:
 proxy_config:
   litellm_settings:
     callbacks: [ "otel", "prometheus", "hooks.claude_code_session.proxy_handler_instance" ]
+    # Redis-backed cache for shared state across workers.
+    # Without this: Router cooldown, deployment/session affinity, TPM/RPM
+    # tracking, and spend counting are all per-worker (inconsistent).
+    cache: true
+    enable_redis_auth_cache: true  # share API-key cache across workers
 
   mcp_servers:
     zhipu_websearch:
@@ -499,11 +504,6 @@ proxy_config:
     # Pre-call checks
     enable_pre_call_check: false  # Filter deployments by context window and region before calling
 
-    # Cache — shared across workers via Redis.
-    # Without Redis: Router cooldown, deployment affinity, session affinity,
-    # TPM/RPM tracking, and spend counting are all per-worker (inconsistent).
-    cache: true
-    enable_redis_auth_cache: true
     cache_responses: false
 
   general_settings:
