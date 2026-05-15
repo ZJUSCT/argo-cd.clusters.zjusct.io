@@ -13,6 +13,8 @@ default:
   rootDeviceHints:
     rotational: false
     vendor: "ATA"
+  userData:
+    name: userdata
 
 nodes:
   # m600, m601 is control plane cluster. DO NOT USE METAL3 TO MANAGE THEM.
@@ -35,17 +37,17 @@ nodes:
   #   annotations:
   #     baremetalhost.metal3.io/detached: ""
 
-  - name: m602
+  - name: m602.clusters.zjusct.io
     mac: "6c:b3:11:73:ea:a0"
     bmc:
       address: redfish://172.25.3.62
 
-  - name: m603
+  - name: m603.clusters.zjusct.io
     mac: "c4:07:78:d9:bf:97"
     bmc:
       address: redfish://172.25.3.63
 
-  - name: m604
+  - name: m604.clusters.zjusct.io
     mac: "6c:b3:11:73:f0:4c"
     bmc:
       address: redfish://172.25.3.64
@@ -67,20 +69,18 @@ nodes:
       format: qcow2
     rootDeviceHints:
       vendor: ~  # NVMe disk, not ATA; clear the global ATA vendor hint
-    userData:
-      name: userdata
 
-  - name: m700
+  - name: m700.clusters.zjusct.io
     mac: "9C:C2:C4:55:E3:92"
     bmc:
       address: redfish://172.25.3.70
 
-  - name: m701
+  - name: m701.clusters.zjusct.io
     mac: "9C:C2:C4:56:8C:9C"
     bmc:
       address: redfish://172.25.3.71
 
-  - name: a700
+  - name: a700.clusters.zjusct.io
     mac: "9C:C2:C4:55:E3:3E"
     bmc:
       address: redfish://172.25.3.72
