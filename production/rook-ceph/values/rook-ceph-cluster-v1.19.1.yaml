@@ -929,6 +929,7 @@ cephObjectStores:
       preservePoolsOnDelete: true
       gateway:
         port: 80
+        hostNetwork: false
         resources:
           limits:
             memory: "2Gi"
