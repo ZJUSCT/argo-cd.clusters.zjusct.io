@@ -1,3 +1,0 @@
-[submodule "dev/dev-gzctf/charts/gzctf-helm"]
-	path = disabled/dev-gzctf/charts/gzctf-helm
-    url = https://github.com/ZJUSCT/gzctf-helm.git
