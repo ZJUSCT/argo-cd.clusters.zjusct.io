@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - .github/.devcontainer/**
+      - .github/workflows/devcontainer.yml
   workflow_dispatch:
 
 permissions:
