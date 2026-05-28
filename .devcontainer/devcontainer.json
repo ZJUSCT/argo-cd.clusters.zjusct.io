@@ -1,9 +1,7 @@
 // https://containers.dev/implementors/json_reference/
 {
-  "name": "ZJUSCT K8S",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  "name": "argo-cd.clusters.zjusct.io",
+  "image": "ghcr.io/ZJUSCT/argo-cd.clusters.zjusct.io:latest",
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "init": true,
@@ -12,14 +10,6 @@
   // "mounts": [
   //   "source=/dev/kvm,target=/dev/kvm,type=bind"
   // ],
-  "features": {
-    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-      "minikube": "none"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:3": {
-      "moby": false
-    }
-  },
   "customizations": {
     "vscode": {
       "extensions": [

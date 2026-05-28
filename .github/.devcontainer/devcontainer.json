@@ -1,0 +1,14 @@
+{
+  "name": "argo-cd.clusters.zjusct.io",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "none"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:3": {
+      "moby": false
+    }
+  }
+}
