@@ -1,0 +1,199 @@
+# new-api Helm Chart Values
+
+# Image configuration
+image:
+  registry: ""  # Leave empty for Docker Hub, or set private registry (e.g., gcr.io/my-project)
+  repository: calciumion/new-api
+  tag: "v1.0.0-rc.8"
+  pullPolicy: IfNotPresent
+
+# Image pull secrets (only needed for private registries)
+imagePullSecrets: []
+  # - name: registry-secret-name
+
+# Replica count
+replicaCount: 1
+
+# Session secret for multi-node deployment (required when replicaCount > 1)
+# Generate with: openssl rand -hex 32
+# sessionSecret: "your-random-secret-string-here"
+
+# Service configuration
+service:
+  type: ClusterIP  # Options: ClusterIP, NodePort, LoadBalancer
+  port: 3000
+  # nodePort: 30000   # Only used when type is NodePort (range: 30000-32767)
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""  # If empty, will be auto-generated
+
+# Pod configuration
+podAnnotations: {}
+podLabels: {}
+
+# Pod security context
+podSecurityContext:
+  # fsGroup: 2000
+
+# Container security context
+securityContext:
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Resource limits and requests
+resources: {}
+  # requests:
+  #   memory: "256Mi"
+  #   cpu: "250m"
+  # limits:
+  #   memory: "512Mi"
+  #   cpu: "500m"
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Environment variables
+env:
+  # Timezone
+  TZ: "Asia/Shanghai"
+
+  # Error log enabled
+  ERROR_LOG_ENABLED: "true"
+
+  # Batch update enabled
+  BATCH_UPDATE_ENABLED: "true"
+
+  # Streaming timeout in seconds (default 120s)
+  # STREAMING_TIMEOUT: "120"
+
+  # Database sync frequency (optional, uncomment if needed)
+  # SYNC_FREQUENCY: "60"
+
+  # Google Analytics ID (optional)
+  # GOOGLE_ANALYTICS_ID: "G-XXXXXXXXXX"
+
+  # Umami configuration (optional)
+  # UMAMI_WEBSITE_ID: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  # UMAMI_SCRIPT_URL: "https://analytics.umami.is/script.js"
+
+# Additional environment variables, including secretKeyRef-based entries
+extraEnvVars: []
+
+# Database configuration
+database:
+  type: postgresql  # Options: postgresql, mysql, empty for SQLite
+  host: ""          # Database host (required for postgresql/mysql)
+  port: 5432        # Database port (5432 for PostgreSQL, 3306 for MySQL)
+  name: "new-api"   # Database name
+  username: ""      # Database username
+  password: ""      # Database password
+  dsn: ""           # Optional: override SQL_DSN directly
+
+# External Redis configuration (required)
+redis:
+  host: ""  # Set your Redis host (e.g., redis-service)
+  port: 6379
+  password: ""    # Optional: Redis password (empty for no auth)
+  db: 0           # Redis database index (0-15)
+  # This will generate: redis://[:password@]host:port/db
+  connString: ""  # Optional: override REDIS_CONN_STRING directly
+
+# Data volume configuration (./data)
+# Note: Data is stored using SQLite, which may have performance issues with NFS
+dataVolume:
+  enabled: false  # Set to true to persist data
+  # Storage class (empty string uses cluster default)
+  storageClass: ""  # Leave empty for cluster default
+  # Access mode
+  accessMode: ReadWriteOnce  # Options: ReadWriteOnce, ReadWriteMany
+  # Size
+  size: 1Gi
+  # Existing PVC name (if using external PVC)
+  existingPvc: ""
+
+# Logs volume configuration (./logs)
+logsVolume:
+  enabled: false  # Set to true to persist logs
+  # Storage type: pvc, emptyDir, or hostPath
+  type: pvc  # Options: pvc, emptyDir, hostPath
+
+  # PVC configuration (when type is pvc)
+  pvc:
+    storageClass: ""  # Leave empty for cluster default
+    accessMode: ReadWriteOnce
+    size: 1Gi
+    existingPvc: ""
+
+  # HostPath configuration (when type is hostPath)
+  hostPath:
+    path: "/var/log/new-api"
+    type: DirectoryOrCreate
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 30
+  failureThreshold: 3
+  successThreshold: 1
+
+# Startup probe (optional, for slow-starting containers)
+startupProbe:
+  enabled: false
+  initialDelaySeconds: 10
+  timeoutSeconds: 10
+  periodSeconds: 10
+  failureThreshold: 30
+
+# Liveness probe
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  timeoutSeconds: 10
+  periodSeconds: 30
+  failureThreshold: 3
+
+# Readiness probe
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
+# Ingress configuration (optional)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: new-api.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+    # - secretName: new-api-tls
+    #   hosts:
+    #     - new-api.local

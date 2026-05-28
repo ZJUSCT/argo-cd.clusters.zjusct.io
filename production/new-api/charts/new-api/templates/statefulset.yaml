@@ -1,0 +1,221 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "new-api.fullname" . }}
+  labels:
+    {{- include "new-api.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "new-api.fullname" . }}
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "new-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "new-api.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "new-api.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "new-api.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.logsVolume.enabled }}
+          args: ["--log-dir", "/app/logs"]
+          {{- else }}
+          args: ["--log-dir", ""]
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            # Timezone
+            - name: TZ
+              value: {{ .Values.env.TZ | quote }}
+
+            # Error log enabled
+            - name: ERROR_LOG_ENABLED
+              value: {{ .Values.env.ERROR_LOG_ENABLED | quote }}
+
+            # Batch update enabled
+            - name: BATCH_UPDATE_ENABLED
+              value: {{ .Values.env.BATCH_UPDATE_ENABLED | quote }}
+
+            # Session secret (required for multi-node)
+            {{- if .Values.sessionSecret }}
+            - name: SESSION_SECRET
+              value: {{ .Values.sessionSecret | quote }}
+            {{- end }}
+
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+
+            # Database DSN (optional, empty uses SQLite)
+            {{- if .Values.database.dsn }}
+            - name: SQL_DSN
+              value: {{ .Values.database.dsn | quote }}
+            {{- else if and .Values.database.host (or (eq .Values.database.type "postgresql") (eq .Values.database.type "mysql")) }}
+            - name: SQL_DSN
+              value: {{ include "new-api.databaseDSN" . | quote }}
+            {{- end }}
+
+            # Redis connection string
+            {{- if .Values.redis.connString }}
+            - name: REDIS_CONN_STRING
+              value: {{ .Values.redis.connString | quote }}
+            {{- else }}
+            - name: REDIS_CONN_STRING
+              value: {{ include "new-api.redisConnString" . | quote }}
+            {{- end }}
+
+            # Additional environment variables
+            {{- if .Values.env.STREAMING_TIMEOUT }}
+            - name: STREAMING_TIMEOUT
+              value: {{ .Values.env.STREAMING_TIMEOUT | quote }}
+            {{- end }}
+            {{- if .Values.env.SYNC_FREQUENCY }}
+            - name: SYNC_FREQUENCY
+              value: {{ .Values.env.SYNC_FREQUENCY | quote }}
+            {{- end }}
+            {{- if .Values.env.GOOGLE_ANALYTICS_ID }}
+            - name: GOOGLE_ANALYTICS_ID
+              value: {{ .Values.env.GOOGLE_ANALYTICS_ID | quote }}
+            {{- end }}
+            {{- if .Values.env.UMAMI_WEBSITE_ID }}
+            - name: UMAMI_WEBSITE_ID
+              value: {{ .Values.env.UMAMI_WEBSITE_ID | quote }}
+            {{- end }}
+            {{- if .Values.env.UMAMI_SCRIPT_URL }}
+            - name: UMAMI_SCRIPT_URL
+              value: {{ .Values.env.UMAMI_SCRIPT_URL | quote }}
+            {{- end }}
+          {{- if .Values.healthCheck.enabled }}
+          livenessProbe:
+            {{- if .Values.livenessProbe.enabled }}
+            httpGet:
+              path: /api/status
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            {{- end }}
+          readinessProbe:
+            {{- if .Values.readinessProbe.enabled }}
+            httpGet:
+              path: /api/status
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /api/status
+              port: http
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            # Data volume
+            - name: data
+              mountPath: /data
+            # Logs volume
+            - name: logs
+              mountPath: /app/logs
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or (not .Values.dataVolume.enabled) .Values.dataVolume.existingPvc (or (eq .Values.logsVolume.type "emptyDir") (not .Values.logsVolume.enabled)) (and (eq .Values.logsVolume.type "pvc") .Values.logsVolume.pvc.existingPvc) (eq .Values.logsVolume.type "hostPath") }}
+      volumes:
+        # Data volume as emptyDir when disabled
+        {{- if not .Values.dataVolume.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else if .Values.dataVolume.existingPvc }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.dataVolume.existingPvc }}
+        {{- end }}
+        # Logs volume
+        {{- if or (eq .Values.logsVolume.type "emptyDir") (not .Values.logsVolume.enabled) }}
+        - name: logs
+          emptyDir: {}
+        {{- else if and (eq .Values.logsVolume.type "pvc") .Values.logsVolume.pvc.existingPvc }}
+        - name: logs
+          persistentVolumeClaim:
+            claimName: {{ .Values.logsVolume.pvc.existingPvc }}
+        {{- else if eq .Values.logsVolume.type "hostPath" }}
+        - name: logs
+          hostPath:
+            path: {{ .Values.logsVolume.hostPath.path }}
+            type: {{ .Values.logsVolume.hostPath.type }}
+        {{- end }}
+      {{- end }}
+  {{- if or (and .Values.dataVolume.enabled (not .Values.dataVolume.existingPvc)) (and .Values.logsVolume.enabled (eq .Values.logsVolume.type "pvc") (not .Values.logsVolume.pvc.existingPvc)) }}
+  volumeClaimTemplates:
+    {{- if and .Values.dataVolume.enabled (not .Values.dataVolume.existingPvc) }}
+    - metadata:
+        name: data
+        labels:
+          {{- include "new-api.selectorLabels" . | nindent 10 }}
+      spec:
+        {{- if .Values.dataVolume.storageClass }}
+        storageClassName: {{ .Values.dataVolume.storageClass }}
+        {{- end }}
+        accessModes:
+          - {{ .Values.dataVolume.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.dataVolume.size }}
+    {{- end }}
+    {{- if and .Values.logsVolume.enabled (eq .Values.logsVolume.type "pvc") (not .Values.logsVolume.pvc.existingPvc) }}
+    - metadata:
+        name: logs
+        labels:
+          {{- include "new-api.selectorLabels" . | nindent 10 }}
+      spec:
+        {{- if .Values.logsVolume.pvc.storageClass }}
+        storageClassName: {{ .Values.logsVolume.pvc.storageClass }}
+        {{- end }}
+        accessModes:
+          - {{ .Values.logsVolume.pvc.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.logsVolume.pvc.size }}
+    {{- end }}
+  {{- end }}

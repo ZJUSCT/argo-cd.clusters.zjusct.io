@@ -1,0 +1,22 @@
+apiVersion: v2
+appVersion: v1.0.0-rc.8
+description: A Helm chart for deploying new-api on Kubernetes
+home: https://github.com/douglarek/newapi-helm
+icon: https://raw.githubusercontent.com/QuantumNous/new-api/refs/heads/main/web/public/logo.png
+keywords:
+- ai
+- llm
+- model-gateway
+- model-hub
+- api-gateway
+- openai
+kubeVersion: '>=1.19.0-0'
+maintainers:
+- name: douglarek
+  url: https://github.com/douglarek
+name: new-api
+sources:
+- https://github.com/douglarek/newapi-helm
+- https://github.com/QuantumNous/new-api
+type: application
+version: 0.3.6

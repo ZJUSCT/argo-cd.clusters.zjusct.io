@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: new-api
+resources:
+  - resources/namespace.yaml
+  - resources/sealedsecret.yaml
+  - resources/httproute.yaml
+
+helmCharts:
+  - name: new-api
+    releaseName: new-api
+    namespace: new-api
+    includeCRDs: true
+    valuesFile: values/new-api-0.3.6.yaml
+  - name: postgresql
+    repo: oci://registry-1.docker.io/bitnamicharts
+    version: 18.5.24
+    releaseName: new-api-postgresql
+    namespace: new-api
+    includeCRDs: true
+    valuesFile: values/postgresql-18.5.24.yaml
+  - name: redis
+    repo: oci://registry-1.docker.io/bitnamicharts
+    version: 25.4.1
+    releaseName: new-api-redis
+    namespace: new-api
+    includeCRDs: true
+    valuesFile: values/redis-25.4.1.yaml
+
+transformers:
+  - ../../image-prefix.yaml
