@@ -10,6 +10,7 @@ spec:
       namespace: envoy-gateway
   hostnames:
     - newapi.clusters.zjusct.io
+    - newapi.s.zjusct.io
   rules:
     - backendRefs:
         - name: new-api
