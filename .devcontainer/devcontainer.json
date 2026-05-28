@@ -1,35 +1,25 @@
 // https://containers.dev/implementors/json_reference/
 {
-  "name": "ZJUSCT K8S Dev Container",
-  "image": "harbor.clusters.zjusct.io/library/devcontainer-k8s:latest",
-  // "build": {
-  //   "dockerfile": "Dockerfile"
-  // },
+  "name": "ZJUSCT K8S",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-  "privileged": true,
   "init": true,
-  "containerEnv": {
-    "HTTP_PROXY": "http://172.28.0.4:3128",
-    "HTTPS_PROXY": "http://172.28.0.4:3128",
-    "NO_PROXY": "localhost,zjusct.io,zju.edu.cn"
-  },
-  "mounts": [
-    "source=/dev/kvm,target=/dev/kvm,type=bind",
-    "source=${localEnv:HOME},target=/home/host,type=bind,readonly",
-    {
-      "source": "home",
-      "target": "/home/vscode",
-      "type": "volume"
-    }
-  ],
-  "postStartCommand": "bash -c 'for p in .kube/config .claude/settings.json .claude.json .gitconfig; do [ -f /home/host/$p ] && install -D /home/host/$p /home/vscode/$p; done'",
+  // enable this for packer KVM
+  // "privileged": true,
+  // "mounts": [
+  //   "source=/dev/kvm,target=/dev/kvm,type=bind"
+  // ],
   "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "none"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:3": {
       "moby": false
     }
   },
-  "shutdownAction": "none",
   "customizations": {
     "vscode": {
       "extensions": [
