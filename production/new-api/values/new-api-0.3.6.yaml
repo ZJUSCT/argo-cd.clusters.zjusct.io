@@ -93,6 +93,10 @@ extraEnvVars:
     value: "https://newapi.clusters.zjusct.io"
   - name: CRITICAL_RATE_LIMIT_ENABLE
     value: "false"
+  - name: GLOBAL_WEB_RATE_LIMIT_ENABLE
+    value: "false"
+  - name: GLOBAL_API_RATE_LIMIT_ENABLE
+    value: "false"
 
   # Streaming timeout in seconds (default 120s)
   # STREAMING_TIMEOUT: "120"
