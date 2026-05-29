@@ -1,0 +1,25 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-webhook
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway
+  hostnames:
+    - clusters.zju.edu.cn
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /argocd/api/webhook
+          method: POST
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /api/webhook
+      backendRefs:
+        - name: argo-cd-argocd-server
+          port: 80

@@ -6,6 +6,7 @@ resources:
 - resources/configmap-plugin.yaml
 - resources/namespace.yaml
 - resources/sealedsecret.yaml
+- resources/argocd-webhook-httproute.yaml
 helmCharts:
 - name: argo-cd
   repo: https://argoproj.github.io/argo-helm
