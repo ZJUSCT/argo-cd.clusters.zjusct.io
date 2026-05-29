@@ -1,7 +1,7 @@
 // https://containers.dev/implementors/json_reference/
 {
   "name": "argo-cd.clusters.zjusct.io",
-  "image": "ghcr.io/ZJUSCT/argo-cd.clusters.zjusct.io:latest",
+  "image": "ghcr.io/zjusct/argo-cd.clusters.zjusct.io:latest",
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "init": true,
