@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: openclaw
-  namespace: dev-openclaw
+  namespace: openclaw
   labels:
     app: openclaw
 spec:

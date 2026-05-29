@@ -30,7 +30,7 @@
 ## 仓库布局
 
 - **`production/`** — 已经在生产环境中稳定部署的应用
-- **`dev/`** — 用于开发/测试应用
+- **`disabled/`** — 已停用的应用，不再由 Argo CD 管理
 - **`scripts/`** — 辅助脚本，如验证、部署等工具脚本`
 
 ## 应用部署
@@ -49,7 +49,7 @@
 - Application 可以由 ApplicationSet 自动生成
 - 我们配置了 Application 和 ApplicationSet 的 Any Namespace 功能，以方便部署任意命名空间的应用
 
-`dev/` 和 `production/` 目录各由一个 Argo CD ApplicationSet 管理，其核心机制是通过 Git 生成器将每个子目录映射为一个 Application，使用文件夹名作为名称和目标命名空间。具体配置见 [production/argo-cd/apps.yaml](production/argo-cd/apps.yaml)，其中的关键规则如下：
+`production/` 目录由一个 Argo CD ApplicationSet 管理，其核心机制是通过 Git 生成器将每个子目录映射为一个 Application，使用文件夹名作为名称和目标命名空间。具体配置见 [production/argo-cd/apps.yaml](production/argo-cd/apps.yaml)，其中的关键规则如下：
 
 ```yaml
 generators:
@@ -67,7 +67,7 @@ template:
         namespace: '{{path.basename}}'
 ```
 
-每个应用文件夹（`production/*` 或 `dev/*`）遵循此模式：
+每个应用文件夹（`production/*`）遵循此模式：
 
 ```text
 namespace-name/
