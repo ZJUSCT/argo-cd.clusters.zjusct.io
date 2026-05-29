@@ -10,17 +10,9 @@ helmCharts:
     repo: https://guerzon.github.io/vaultwarden
     includeCRDs: true
     releaseName: vaultwarden
-    version: 0.35.1
+    version: 0.36.4
     namespace: vaultwarden
-    valuesFile: values/vaultwarden-0.35.1.yaml
+    valuesFile: values/vaultwarden-0.36.4.yaml
 
 transformers:
   - ../../image-prefix.yaml
-
-patches:
-  - target:
-      kind: ConfigMap
-      name: vaultwarden
-    patch: |-
-      - op: remove
-        path: /data/DOMAIN
