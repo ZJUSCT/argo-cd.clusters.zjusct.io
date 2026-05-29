@@ -18,3 +18,33 @@ spec:
       timeouts:
         request: 0s
         backendRequest: 0s
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: new-api-clusters-zju-edu-cn
+  labels:
+    app: new-api
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway
+  hostnames:
+    - clusters.zju.edu.cn
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /newapi
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: new-api
+          port: 3000
+      timeouts:
+        request: 0s
+        backendRequest: 0s
