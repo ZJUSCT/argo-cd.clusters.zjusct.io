@@ -11,7 +11,7 @@ spec:
     - name: git-url
       description: Git repository URL
       type: string
-      default: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+      default: "https://github.com/ZJUSCT/argo-cd.clusters.zjusct.io.git"
     - name: git-revision
       description: Git revision to checkout
       type: string

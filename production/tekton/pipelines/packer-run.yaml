@@ -8,7 +8,7 @@ spec:
     name: packer
   params:
     - name: git-url
-      value: "https://git.zju.edu.cn/zjusct/ops/argo-cd.clusters.zjusct.io.git"
+      value: "https://github.com/ZJUSCT/argo-cd.clusters.zjusct.io.git"
     - name: git-revision
       value: "master"
     - name: build-script
