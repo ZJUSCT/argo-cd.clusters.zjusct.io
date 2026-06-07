@@ -27,6 +27,11 @@ kind: ApplicationSet
 metadata:
   name: production
 spec:
+  # Allow temporarily toggling auto-sync for maintenance
+  # https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/#allow-temporarily-toggling-auto-sync
+  ignoreApplicationDifferences:
+    - jsonPointers:
+        - /spec/syncPolicy
   generators:
     - git:
         repoURL: https://github.com/ZJUSCT/argo-cd.clusters.zjusct.io.git
