@@ -16,24 +16,12 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-      nodeSelector:
-        kubernetes.io/hostname: storage
       containers:
         - name: openng
           image: ghcr.io/zjusct/openng:latest
           args:
             - -config
             - /etc/netgate/config.yaml
-          ports:
-            - name: tcp-0
-              containerPort: 4430
-              protocol: TCP
-            - name: tcp-1
-              containerPort: 4431
-              protocol: TCP
-            - name: tcp-2
-              containerPort: 4432
-              protocol: TCP
           volumeMounts:
             - name: config
               mountPath: /etc/netgate/config.yaml
