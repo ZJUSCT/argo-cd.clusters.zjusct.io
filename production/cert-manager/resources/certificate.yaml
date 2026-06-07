@@ -5,6 +5,12 @@ metadata:
   namespace: cert-manager
 spec:
   secretName: clusters-zjusct-io-cert
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "openng"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "openng"
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -19,6 +25,12 @@ metadata:
   namespace: cert-manager
 spec:
   secretName: s-zjusct-io-cert
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "openng"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "openng"
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -33,6 +45,12 @@ metadata:
   namespace: cert-manager
 spec:
   secretName: clusters-zju-edu-cn-cert
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "openng"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "openng"
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer

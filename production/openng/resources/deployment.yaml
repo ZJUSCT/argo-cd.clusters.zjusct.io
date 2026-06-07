@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openng
+  labels:
+    app.kubernetes.io/name: openng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openng
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openng
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: storage
+      containers:
+        - name: openng
+          image: ghcr.io/zjusct/openng:latest
+          args:
+            - -config
+            - /etc/netgate/config.yaml
+          ports:
+            - name: tcp-0
+              containerPort: 4430
+              protocol: TCP
+            - name: tcp-1
+              containerPort: 4431
+              protocol: TCP
+            - name: tcp-2
+              containerPort: 4432
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/netgate/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: cert-clusters-zjusct-io
+              mountPath: /etc/netgate/cert/clusters-zjusct-io.crt
+              subPath: tls.crt
+              readOnly: true
+            - name: cert-clusters-zjusct-io
+              mountPath: /etc/netgate/cert/clusters-zjusct-io.key
+              subPath: tls.key
+              readOnly: true
+            - name: cert-clusters-zju-edu-cn
+              mountPath: /etc/netgate/cert/clusters-zju-edu-cn.crt
+              subPath: tls.crt
+              readOnly: true
+            - name: cert-clusters-zju-edu-cn
+              mountPath: /etc/netgate/cert/clusters-zju-edu-cn.key
+              subPath: tls.key
+              readOnly: true
+            - name: cert-s-zjusct-io
+              mountPath: /etc/netgate/cert/s-zjusct-io.crt
+              subPath: tls.crt
+              readOnly: true
+            - name: cert-s-zjusct-io
+              mountPath: /etc/netgate/cert/s-zjusct-io.key
+              subPath: tls.key
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+        - name: keepalived
+          image: docker.io/osixia/keepalived
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_BROADCAST
+                - NET_RAW
+              drop:
+                - ALL
+          env:
+            - name: KEEPALIVED_INTERFACE
+              value: "bond0"
+            - name: KEEPALIVED_VIRTUAL_IPS
+              value: "172.25.4.4"
+            - name: KEEPALIVED_STATE
+              value: "MASTER"
+            - name: KEEPALIVE_ROUTER_ID
+              value: "52"
+            - name: KEEPALIVED_PRIORITY
+              value: "150"
+      volumes:
+        - name: config
+          secret:
+            secretName: openng-config
+        - name: cert-clusters-zjusct-io
+          secret:
+            secretName: clusters-zjusct-io-cert
+        - name: cert-clusters-zju-edu-cn
+          secret:
+            secretName: clusters-zju-edu-cn-cert
+        - name: cert-s-zjusct-io
+          secret:
+            secretName: s-zjusct-io-cert
