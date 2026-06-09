@@ -123,9 +123,9 @@ manager:
       pullPolicy: IfNotPresent
   ingress:
     # -- Enable ingress.
-    enable: true
+    enable: false
     # -- Ingress class name. Requirement: kubernetes >=1.18.
-    className: 'nginx'
+    className: ''
     # -- Ingress annotations.
     annotations: {}
     # -- Ingress host path.
@@ -133,9 +133,7 @@ manager:
     # -- Ingress path type. Requirement: kubernetes >=1.18.
     pathType: ImplementationSpecific
     # -- Manager ingress hosts.
-    hosts:
-      - dragonfly.clusters.zjusct.io
-      - dragonfly.s.zjusct.io
+    hosts: []
     # -- Ingress TLS configuration.
     tls: []
   config:
