@@ -160,7 +160,7 @@ class Checker:
     def check_kustomize_build(self, app_dir: Path, app_name: str) -> None:
         """Test if kustomize can successfully build the manifests."""
         code, _, stderr = self.run_command(
-            ["kustomize", "build", "--enable-helm", "--load-restrictor=LoadRestrictionsNone", str(app_dir)],
+            ["kubectl", "kustomize", "--enable-helm", "--load-restrictor=LoadRestrictionsNone", str(app_dir)],
             timeout=30
         )
         if code != 0:

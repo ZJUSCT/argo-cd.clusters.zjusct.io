@@ -23,7 +23,6 @@ apt-get install -y --no-install-recommends \
     jq \
     git \
     packer \
-    kustomize \
     fish \
     python3-yaml \
     python3-dotenv \
