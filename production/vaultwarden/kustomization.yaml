@@ -3,16 +3,15 @@ kind: Kustomization
 namespace: vaultwarden
 resources:
   - resources/namespace.yaml
-  - resources/httproute.yaml
 
 helmCharts:
   - name: vaultwarden
     repo: https://guerzon.github.io/vaultwarden
     includeCRDs: true
     releaseName: vaultwarden
-    version: 0.36.4
+    version: 0.38.0
     namespace: vaultwarden
-    valuesFile: values/vaultwarden-0.36.4.yaml
+    valuesFile: values/vaultwarden-0.38.0.yaml
 
 transformers:
   - ../../image-prefix.yaml
