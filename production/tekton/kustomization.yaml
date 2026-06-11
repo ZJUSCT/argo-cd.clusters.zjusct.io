@@ -8,7 +8,6 @@ resources:
   - resources/httproute.yaml
   - resources/buildkit-client-cert.yaml
   - resources/sealedsecret-harbor.yaml
-  - resources/pvc-packer.yaml
   - resources/obc-packer-images.yaml
   - tasks/buildkit.yaml
   - tasks/run-script.yaml
