@@ -50,6 +50,8 @@ apt-get install -y --no-install-recommends \
     ripgrep
 apt-get autoremove -y
 apt-get distclean
+
+packer plugins install github.com/hashicorp/qemu
 EOF
 
 # https://argo-cd.readthedocs.io/en/stable/cli_installation/
