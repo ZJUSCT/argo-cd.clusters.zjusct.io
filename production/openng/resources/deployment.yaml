@@ -4,6 +4,8 @@ metadata:
   name: openng
   labels:
     app.kubernetes.io/name: openng
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:

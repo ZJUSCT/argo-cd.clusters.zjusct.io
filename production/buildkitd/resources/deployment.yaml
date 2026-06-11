@@ -5,6 +5,8 @@ metadata:
   labels:
     app: buildkitd
   name: buildkitd
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:
