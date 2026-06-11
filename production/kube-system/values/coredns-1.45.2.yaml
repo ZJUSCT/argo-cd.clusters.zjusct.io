@@ -205,16 +205,14 @@ readinessProbe:
 #            - master
 affinity:
   podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: k8s-app
-                operator: In
-                values:
-                  - kube-dns
-          topologyKey: kubernetes.io/hostname
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: k8s-app
+              operator: In
+              values:
+                - kube-dns
+        topologyKey: kubernetes.io/hostname
 
 # expects input structure as per specification https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.21/#topologyspreadconstraint-v1-core
 # and supports Helm templating.
