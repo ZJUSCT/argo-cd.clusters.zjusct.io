@@ -6,29 +6,30 @@ metadata:
 spec:
   pipelineRef:
     name: packer
+  taskRunTemplate:
+    podTemplate:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+        cpu-feature.node.kubevirt.io/vmx: "true"
+      securityContext:
+        fsGroup: 65532
   params:
     - name: git-url
       value: "https://github.com/ZJUSCT/argo-cd.clusters.zjusct.io.git"
     - name: git-revision
       value: "master"
-    - name: build-script
-      value: "packer/pipeline.sh"
+    - name: target
+      value: "k8s"
     - name: build-image
-      value: "harbor.clusters.zjusct.io/library/packer:latest"
-    - name: upload-image
+      value: "harbor.clusters.zjusct.io/ghcr.io/zjusct/argo-cd.clusters.zjusct.io:latest"
+    - name: git-image
+      value: "harbor.clusters.zjusct.io/docker.io/alpine/git:latest"
+    - name: mc-image
       value: "harbor.clusters.zjusct.io/docker.io/minio/mc:latest"
-    - name: upload-s3-prefix
-      value: "debian/"
-  taskRunTemplate:
-    podTemplate:
-      securityContext:
-        fsGroup: 65532
-  workspaces:
-    - name: shared-data
-      emptyDir: {}
-    - name: bucket-config
-      configMap:
-        name: packer-images
-    - name: credentials
-      secret:
-        secretName: packer-images
+    - name: cache-prefix
+      value: "cache/base/"
+    - name: upload-prefix
+      value: "built/"
+    - name: public-base-url
+      value: "https://radosgw.clusters.zjusct.io/packer-images"

@@ -3,7 +3,7 @@
 ## How to use
 
 - See `config.yaml` for available build targets. A target is a combination of a base image and a set of modules to be installed on top of it.
-- Run `make <target>` to build the image for the specified target. See the `Makefile` for details on how the build is executed.
+- Run `python3 packer.py <target>` from this directory to build the image for the specified target. The command expects Packer, QEMU, cloud-init tooling, and Python dependencies to be available in the current environment.
 - `packer.py` is the main script that resolves the variables in the target configuration, prepares the Packer variable file, and executes the Packer build command.
 
 ## Debug
@@ -65,7 +65,7 @@ EOF
 
 ## Running on K8S Tekton CI
 
-The above instructions are for running the build locally. After the builds are tested locally, they will be run on the K8S Tekton CI pipeline.
+The above instructions are for running the build locally. Tekton uses the devcontainer image as the build environment and runs the same `packer.py` entrypoint, with pipeline-specific base image caching and artifact upload around it.
 
 ## Agent Task Loop
 

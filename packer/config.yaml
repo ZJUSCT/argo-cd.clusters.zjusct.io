@@ -1,48 +1,46 @@
+- name: k8s
+  arch: amd64
+  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2
+  iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
+  modules:
+    - 20-software-k8s
+    - 20-software-otelcol
+    - 70-k8s
+    - 70-zjusct-cluster
+
 # Debian
 - name: debian-13-amd64
   arch: amd64
-  # iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2
+  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2
   iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
-  iso_url: download/debian-13-generic-amd64.qcow2
   modules:
-    - 20-software-control-plane
     - 20-software-k8s
     - 20-software-otelcol
     - 30-driver-nvidia
     - 30-driver-doca
     - 31-toolkit-cuda
+    - 70-k8s
     - 70-zjusct-cluster
-- name: debian-13-amd64-asc
-  arch: amd64
-  # iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2
-  iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
-  iso_url: download/debian-13-generic-amd64.qcow2
-  modules:
-    - 30-driver-nvidia
-    - 30-driver-doca
-    - 30-driver-amd
 - name: debian-13-arm64
   arch: arm64
-  # iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-arm64.qcow2
+  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-arm64.qcow2
   iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
-  iso_url: download/debian-13-generic-arm64.qcow2
 - name: debian-13-riscv64
   arch: riscv64
-  # iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-riscv64.qcow2
+  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-riscv64.qcow2
   iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
-  iso_url: download/debian-13-generic-riscv64.qcow2
 # Ubuntu
 - name: ubuntu-26.04-amd64
   arch: amd64
   iso_url: http://mirror.cernet.edu.cn/ubuntu-cloud-images/resolute/current/resolute-server-cloudimg-amd64.img
   iso_checksum: file:http://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/current/SHA256SUMS
   modules:
-    - 20-software-control-plane
     - 20-software-k8s
     - 20-software-otelcol
     - 30-driver-nvidia
     - 30-driver-doca
     - 31-toolkit-cuda
+    - 70-k8s
     - 70-zjusct-cluster
 - name: ubuntu-26.04-arm64
   arch: arm64
@@ -62,18 +60,17 @@
   iso_url: http://mirrors.cernet.edu.cn/fedora/releases/43/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-43-1.6.x86_64.qcow2
   iso_checksum: file:http://mirrors.cernet.edu.cn/fedora/releases/43/Cloud/x86_64/images/Fedora-Cloud-43-1.6-x86_64-CHECKSUM
   modules:
-    - 20-software-control-plane
     - 20-software-k8s
     - 20-software-otelcol
     - 30-driver-nvidia
     - 31-toolkit-cuda
+    - 70-k8s
     - 70-zjusct-cluster
 # Arch Linux
 - name: archlinux-amd64
   arch: amd64
-  # iso_url: http://fastly.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2
+  iso_url: http://fastly.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2
   iso_checksum: file:http://fastly.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2.SHA256
-  iso_url: download/Arch-Linux-x86_64-cloudimg.qcow2
 # Rocky Linux
 - name: rockylinux-10-amd64
   arch: amd64

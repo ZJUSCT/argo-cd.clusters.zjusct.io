@@ -64,6 +64,13 @@ def find_entry(config, name):
     return None
 
 
+def get_base_image(entry):
+    base_image = entry.get("base_image", {})
+    iso_url = base_image.get("url") or entry.get("iso_url")
+    iso_checksum = base_image.get("checksum") or entry.get("iso_checksum")
+    return iso_url, iso_checksum
+
+
 def gather_modules(entry):
     modules = []
 
@@ -152,6 +159,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("target")
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument(
+        "--iso-url",
+        help="Override the base image URL from config.yaml",
+    )
+    parser.add_argument(
+        "--iso-checksum",
+        help="Override the base image checksum from config.yaml",
+    )
     args = parser.parse_args()
 
     target = args.target
@@ -180,12 +195,16 @@ def main():
         iso_checksum = "none"
         modules = []
     else:
-        iso_url = entry.get("iso_url")
+        iso_url, iso_checksum = get_base_image(entry)
+        if args.iso_url:
+            iso_url = args.iso_url
+        if args.iso_checksum:
+            iso_checksum = args.iso_checksum
+
         if not iso_url:
             print(f'skipping "{target}": missing iso_url', file=sys.stderr)
             sys.exit(0)
 
-        iso_checksum = entry.get("iso_checksum")
         if not iso_checksum:
             print(f'skipping "{target}": missing iso_checksum', file=sys.stderr)
             sys.exit(0)

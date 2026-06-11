@@ -10,6 +10,7 @@ resources:
   - resources/sealedsecret-harbor.yaml
   - resources/obc-packer-images.yaml
   - tasks/buildkit.yaml
+  - tasks/packer-build-upload.yaml
   - tasks/run-script.yaml
   - tasks/s3upload.yaml
   - pipelines/buildkit.yaml
