@@ -5,6 +5,7 @@
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "init": true,
+  "shutdownAction": "none",
   // enable this for packer KVM
   // "privileged": true,
   // "mounts": [

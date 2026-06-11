@@ -47,7 +47,8 @@ apt-get install -y --no-install-recommends \
     shellcheck \
     shfmt \
     apache2-utils \
-    ripgrep
+    ripgrep \
+    chromium
 apt-get autoremove -y
 apt-get distclean
 
@@ -81,6 +82,7 @@ case "${ARCH}" in
 esac
 curl -fsSL "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${RUST_TARGET}.tar.gz" | tar xz -C /usr/local/bin/
 chmod +x /usr/local/bin/zellij
+zellij setup --generate-completion fish > /etc/fish/completions/zellij.fish
 EOF
 
 # https://kubevirt.io/user-guide/user_workloads/virtctl_client_tool/
