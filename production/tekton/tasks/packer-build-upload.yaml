@@ -322,6 +322,7 @@ spec:
         BASE_SHA256="$(cat /work/base.sha256)"
 
         ISO_URL="http://${BUCKET_HOST}:${BUCKET_PORT}/${BUCKET_NAME}/${CACHE_KEY}"
+        packer init .
         python3 packer.py "$(params.target)" \
           --iso-url "${ISO_URL}" \
           --iso-checksum "sha256:${BASE_SHA256}"
