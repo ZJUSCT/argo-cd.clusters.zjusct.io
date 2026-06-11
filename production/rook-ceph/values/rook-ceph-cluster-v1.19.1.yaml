@@ -724,7 +724,7 @@ cephBlockPools:
     spec:
       failureDomain: osd
       enableCrushUpdates: true
-      deviceClass: nvme
+      deviceClass: hdd
       replicated:
         size: 2
       parameters:
