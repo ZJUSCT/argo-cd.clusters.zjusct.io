@@ -45,7 +45,9 @@ apt-get install -y --no-install-recommends \
     minio-client \
     unzip \
     shellcheck \
-    shfmt
+    shfmt \
+    apache2-utils \
+    ripgrep
 apt-get autoremove -y
 apt-get distclean
 EOF
