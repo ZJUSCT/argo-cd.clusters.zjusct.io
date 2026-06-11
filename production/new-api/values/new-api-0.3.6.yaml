@@ -135,7 +135,7 @@ redis:
 dataVolume:
   enabled: true  # Set to true to persist data
   # Storage class (empty string uses cluster default)
-  storageClass: "openebs-hostpath"  # Leave empty for cluster default
+  storageClass: "ceph-block"
   # Access mode
   accessMode: ReadWriteOnce  # Options: ReadWriteOnce, ReadWriteMany
   # Size
@@ -151,7 +151,7 @@ logsVolume:
 
   # PVC configuration (when type is pvc)
   pvc:
-    storageClass: "openebs-hostpath"  # Leave empty for cluster default
+    storageClass: "ceph-block"
     accessMode: ReadWriteOnce
     size: 2Gi
     existingPvc: ""
