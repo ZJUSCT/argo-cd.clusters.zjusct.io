@@ -34,7 +34,7 @@ spec:
     - name: cache-prefix
       description: Prefix for cached upstream base images in the bucket
       type: string
-      default: "cache/base/"
+      default: "cache/"
     - name: upload-prefix
       description: Prefix for built QCOW2 images in the bucket
       type: string

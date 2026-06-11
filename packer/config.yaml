@@ -1,7 +1,7 @@
 - name: k8s
   arch: amd64
-  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2
-  iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
+  iso_url: https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/debian-13-generic-amd64-20260601-2496.qcow2
+  iso_checksum: file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/SHA512SUMS
   modules:
     - 20-software-k8s
     - 20-software-otelcol
@@ -11,8 +11,8 @@
 # Debian
 - name: debian-13-amd64
   arch: amd64
-  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-amd64.qcow2
-  iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
+  iso_url: https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/debian-13-generic-amd64-20260601-2496.qcow2
+  iso_checksum: file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/SHA512SUMS
   modules:
     - 20-software-k8s
     - 20-software-otelcol
@@ -23,17 +23,17 @@
     - 70-zjusct-cluster
 - name: debian-13-arm64
   arch: arm64
-  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-arm64.qcow2
-  iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
+  iso_url: https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/debian-13-generic-arm64-20260601-2496.qcow2
+  iso_checksum: file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/SHA512SUMS
 - name: debian-13-riscv64
   arch: riscv64
-  iso_url: http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/debian-13-generic-riscv64.qcow2
-  iso_checksum: file:http://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/latest/SHA512SUMS
+  iso_url: https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/debian-13-generic-riscv64-20260601-2496.qcow2
+  iso_checksum: file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/SHA512SUMS
 # Ubuntu
 - name: ubuntu-26.04-amd64
   arch: amd64
-  iso_url: http://mirror.cernet.edu.cn/ubuntu-cloud-images/resolute/current/resolute-server-cloudimg-amd64.img
-  iso_checksum: file:http://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/current/SHA256SUMS
+  iso_url: https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/resolute-server-cloudimg-amd64.img
+  iso_checksum: file:https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/SHA256SUMS
   modules:
     - 20-software-k8s
     - 20-software-otelcol
@@ -44,16 +44,16 @@
     - 70-zjusct-cluster
 - name: ubuntu-26.04-arm64
   arch: arm64
-  iso_url: http://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/current/resolute-server-cloudimg-arm64.img
-  iso_checksum: file:http://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/current/SHA256SUMS
+  iso_url: https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/resolute-server-cloudimg-arm64.img
+  iso_checksum: file:https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/SHA256SUMS
 - name: ubuntu-26.04-riscv64
   arch: riscv64
-  iso_url: http://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/current/resolute-server-cloudimg-riscv64.img
-  iso_checksum: file:http://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/current/SHA256SUMS
+  iso_url: https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/resolute-server-cloudimg-riscv64.img
+  iso_checksum: file:https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/SHA256SUMS
 - name: ubuntu-20.04-amd64-ascend
   arch: amd64
-  iso_url: http://mirrors.cernet.edu.cn/ubuntu-cloud-images/focal/current/focal-server-cloudimg-amd64.img
-  iso_checksum: file:http://mirrors.cernet.edu.cn/ubuntu-cloud-images/focal/current/SHA256SUMS
+  iso_url: https://mirrors.cernet.edu.cn/ubuntu-cloud-images/focal/20250624/focal-server-cloudimg-amd64.img
+  iso_checksum: file:https://mirrors.cernet.edu.cn/ubuntu-cloud-images/focal/20250624/SHA256SUMS
 # Fedora
 - name: fedora-43-amd64
   arch: amd64
@@ -69,14 +69,14 @@
 # Arch Linux
 - name: archlinux-amd64
   arch: amd64
-  iso_url: http://fastly.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2
-  iso_checksum: file:http://fastly.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2.SHA256
+  iso_url: https://fastly.mirror.pkgbuild.com/images/v20260601.539459/Arch-Linux-x86_64-cloudimg-20260601.539459.qcow2
+  iso_checksum: file:https://fastly.mirror.pkgbuild.com/images/v20260601.539459/Arch-Linux-x86_64-cloudimg-20260601.539459.qcow2.SHA256
 # Rocky Linux
 - name: rockylinux-10-amd64
   arch: amd64
-  iso_url: http://mirrors.cernet.edu.cn/rocky/10/images/x86_64/Rocky-10-GenericCloud-Base.latest.x86_64.qcow2
-  iso_checksum: file:http://mirrors.cernet.edu.cn/rocky/10/images/x86_64/Rocky-10-GenericCloud-Base.latest.x86_64.qcow2.CHECKSUM
+  iso_url: https://mirrors.cernet.edu.cn/rocky/10/images/x86_64/Rocky-10-GenericCloud-Base-10.2-20260525.0.x86_64.qcow2
+  iso_checksum: file:https://mirrors.cernet.edu.cn/rocky/10/images/x86_64/Rocky-10-GenericCloud-Base-10.2-20260525.0.x86_64.qcow2.CHECKSUM
 - name: rockylinux-10-arm64
   arch: arm64
-  iso_url: http://mirrors.cernet.edu.cn/rocky/10/images/aarch64/Rocky-10-GenericCloud-Base.latest.aarch64.qcow2
-  iso_checksum: file:http://mirrors.cernet.edu.cn/rocky/10/images/aarch64/Rocky-10-GenericCloud-Base.latest.aarch64.qcow2.CHECKSUM
+  iso_url: https://mirrors.cernet.edu.cn/rocky/10/images/aarch64/Rocky-10-GenericCloud-Base-10.2-20260525.0.aarch64.qcow2
+  iso_checksum: file:https://mirrors.cernet.edu.cn/rocky/10/images/aarch64/Rocky-10-GenericCloud-Base-10.2-20260525.0.aarch64.qcow2.CHECKSUM

@@ -39,7 +39,7 @@ spec:
     - name: cache-prefix
       description: Prefix for cached upstream base images in the bucket
       type: string
-      default: "cache/base/"
+      default: "cache/"
     - name: upload-prefix
       description: Prefix for built QCOW2 images in the bucket
       type: string
@@ -69,7 +69,7 @@ spec:
       workingDir: /work
       script: |
         #!/bin/sh
-        set -xeu
+        set -eu
 
         git init source
         cd source
@@ -118,7 +118,7 @@ spec:
             sys.exit(1)
 
         cache_prefix = "$(params.cache-prefix)".strip("/")
-        cache_key = f"{cache_prefix}/{target}/{filename}" if cache_prefix else f"{target}/{filename}"
+        cache_key = f"{cache_prefix}/{filename}" if cache_prefix else filename
         checksum_key = f"{cache_key}.sha256sum"
 
         values = {
@@ -141,7 +141,7 @@ spec:
       workingDir: /work
       script: |
         #!/bin/sh
-        set -xeu
+        set -eu
 
         BUCKET_NAME="$(cat /bucket-config/BUCKET_NAME)"
         BUCKET_HOST="$(cat /bucket-config/BUCKET_HOST)"
@@ -157,7 +157,8 @@ spec:
 
         if mc stat "ceph/${BUCKET_NAME}/${CACHE_KEY}" && mc stat "ceph/${BUCKET_NAME}/${CHECKSUM_KEY}"; then
           mc cat "ceph/${BUCKET_NAME}/${CHECKSUM_KEY}" > /work/base.sha256sum
-          awk '{print $1}' /work/base.sha256sum > /work/base.sha256
+          read -r BASE_SHA256 _ < /work/base.sha256sum
+          printf "%s\n" "${BASE_SHA256}" > /work/base.sha256
           echo hit > /work/cache_status
         else
           echo miss > /work/cache_status
@@ -268,7 +269,7 @@ spec:
       workingDir: /work
       script: |
         #!/bin/sh
-        set -xeu
+        set -eu
 
         if [ "$(cat /work/cache_status)" = "hit" ]; then
           exit 0
@@ -340,7 +341,7 @@ spec:
       workingDir: /work/source/packer
       script: |
         #!/bin/sh
-        set -xeu
+        set -eu
 
         BUCKET_NAME="$(cat /bucket-config/BUCKET_NAME)"
         BUCKET_HOST="$(cat /bucket-config/BUCKET_HOST)"

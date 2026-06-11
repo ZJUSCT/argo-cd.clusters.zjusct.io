@@ -28,7 +28,7 @@ spec:
     - name: mc-image
       value: "harbor.clusters.zjusct.io/docker.io/minio/mc:latest"
     - name: cache-prefix
-      value: "cache/base/"
+      value: "cache/"
     - name: upload-prefix
       value: "built/"
     - name: public-base-url
