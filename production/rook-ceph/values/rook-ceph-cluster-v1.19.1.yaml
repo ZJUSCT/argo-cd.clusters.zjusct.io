@@ -722,7 +722,7 @@ cephBlockPools:
   - name: ceph-blockpool
     # see https://github.com/rook/rook/blob/master/Documentation/CRDs/Block-Storage/ceph-block-pool-crd.md#spec for available configuration
     spec:
-      failureDomain: osd
+      failureDomain: host
       enableCrushUpdates: true
       deviceClass: hdd
       replicated:
@@ -796,7 +796,7 @@ cephFileSystems:
     spec:
       preserveFilesystemOnDelete: true
       metadataPool:
-        failureDomain: osd
+        failureDomain: host
         enableCrushUpdates: true
         deviceClass: nvme
         replicated:
@@ -805,7 +805,7 @@ cephFileSystems:
           pg_autoscale_mode: "on"
           pg_num_min: "16"
       dataPools:
-        - failureDomain: osd
+        - failureDomain: host
           enableCrushUpdates: true
           replicated:
             size: 2
@@ -814,7 +814,7 @@ cephFileSystems:
             pg_autoscale_mode: "on"
             pg_num_min: "32"
         - name: cephfs-hdd-data
-          failureDomain: osd
+          failureDomain: host
           enableCrushUpdates: true
           deviceClass: hdd
           replicated:
@@ -823,7 +823,7 @@ cephFileSystems:
             pg_autoscale_mode: "on"
             pg_num_min: "256"
         - name: cephfs-nvme-data
-          failureDomain: osd
+          failureDomain: host
           deviceClass: nvme
           enableCrushUpdates: true
           replicated:
@@ -832,7 +832,7 @@ cephFileSystems:
             pg_autoscale_mode: "on"
             pg_num_min: "128"
         - name: cephfs-home
-          failureDomain: osd
+          failureDomain: host
           deviceClass: nvme
           enableCrushUpdates: true
           replicated:
@@ -909,7 +909,7 @@ cephObjectStores:
     # see https://github.com/rook/rook/blob/master/Documentation/CRDs/Object-Storage/ceph-object-store-crd.md#object-store-settings for available configuration
     spec:
       metadataPool:
-        failureDomain: osd
+        failureDomain: host
         enableCrushUpdates: true
         deviceClass: hdd
         replicated:
@@ -918,7 +918,7 @@ cephObjectStores:
           pg_autoscale_mode: "on"
           pg_num_min: "8"
       dataPool:
-        failureDomain: osd
+        failureDomain: host
         enableCrushUpdates: true
         deviceClass: hdd
         replicated:
