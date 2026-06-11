@@ -14,7 +14,8 @@
     // persist configs under workspace
     "KUBECONFIG": "/workspace/.kube/config",
     "CLAUDE_CONFIG_DIR": "/workspace/.claude",
-    "OPENCODE_CONFIG_DIR": "/workspace/.opencode"
+    "OPENCODE_CONFIG_DIR": "/workspace/.opencode",
+    "CODEX_HOME": "/workspace/.codex"
   },
   "customizations": {
     "vscode": {
