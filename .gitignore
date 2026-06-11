@@ -1,11 +1,8 @@
 tmp.yaml
 tmp/
-.codex
-.claude
-.devcontainer/devcontainer-lock.json
-.mcp.json
-.env
-.kube
+.claude/
+.opencode/
+.kube/
 # https://github.com/github/gitignore/blob/main/Global/macOS.gitignore
 # General
 .DS_Store

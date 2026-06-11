@@ -10,6 +10,12 @@
   // "mounts": [
   //   "source=/dev/kvm,target=/dev/kvm,type=bind"
   // ],
+  "containerEnv": {
+    // persist configs under workspace
+    "KUBECONFIG": "/workspace/.kube/config",
+    "CLAUDE_CONFIG_DIR": "/workspace/.claude",
+    "OPENCODE_CONFIG_DIR": "/workspace/.opencode"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
