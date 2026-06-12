@@ -1,0 +1,14 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: campus-net
+  namespace: mihomo
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "mihomo-campus-net",
+      "type": "bridge",
+      "bridge": "br0",
+      "ipam": {}
+    }

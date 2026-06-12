@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mihomo
+  namespace: mihomo
+  labels:
+    app.kubernetes.io/name: mihomo
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mihomo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mihomo
+      annotations:
+        k8s.v1.cni.cncf.io/networks: campus-net
+    spec:
+      initContainers:
+      - name: network-setup
+        image: m.daocloud.io/docker.io/nicolaka/netshoot:latest
+        command:
+        - /bin/sh
+        - /etc/mihomo-network/setup.sh
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+        volumeMounts:
+        - name: network-config
+          mountPath: /etc/mihomo-network
+          readOnly: true
+      containers:
+      - name: mihomo
+        image: m.daocloud.io/docker.io/metacubex/mihomo:latest
+        args:
+        - -d
+        - /root/.config/mihomo
+        ports:
+        - name: controller
+          containerPort: 9090
+        - name: dns
+          containerPort: 1053
+          protocol: UDP
+        - name: tproxy-tcp
+          containerPort: 7893
+        - name: tproxy-udp
+          containerPort: 7893
+          protocol: UDP
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+        volumeMounts:
+        - name: config
+          mountPath: /root/.config/mihomo/config.yaml
+          subPath: config.yaml
+          readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: "1"
+            memory: 512Mi
+      - name: metacubexd
+        image: m.daocloud.io/ghcr.io/metacubex/metacubexd:latest
+        env:
+        - name: DEFAULT_BACKEND_URL
+          value: http://172.25.4.3:9090
+        ports:
+        - name: ui
+          containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      volumes:
+      - name: config
+        secret:
+          secretName: mihomo-config
+      - name: network-config
+        configMap:
+          name: mihomo-network
+          defaultMode: 0755
