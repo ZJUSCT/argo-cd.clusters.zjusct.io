@@ -14,9 +14,8 @@ data:
 
     # Interface settings
     # lo is managed by systemd-resolved
-    interface=br0
     except-interface=lo
-    # listen to br0 addresses, including the kube-vip address on the leader
+    # listen to all non-loopback interfaces, including cilium_host and br0
     # listen-address=172.25.4.1
     bind-dynamic
     cache-size=0
