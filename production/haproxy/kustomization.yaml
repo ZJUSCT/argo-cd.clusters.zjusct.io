@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: haproxy
+resources:
+- resources/namespace.yaml
+helmCharts:
+- name: haproxy
+  repo: https://haproxytech.github.io/helm-charts
+  includeCRDs: true
+  releaseName: haproxy
+  valuesFile: values/haproxy-1.29.0.yaml
+  version: 1.29.0
+  namespace: haproxy
+transformers:
+- ../../image-prefix.yaml
