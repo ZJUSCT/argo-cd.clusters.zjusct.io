@@ -798,7 +798,7 @@ cephFileSystems:
       metadataPool:
         failureDomain: host
         enableCrushUpdates: true
-        deviceClass: nvme
+        deviceClass: hdd
         replicated:
           size: 2
         parameters:
@@ -807,6 +807,7 @@ cephFileSystems:
       dataPools:
         - failureDomain: host
           enableCrushUpdates: true
+          deviceClass: hdd
           replicated:
             size: 2
           name: data0
@@ -824,7 +825,7 @@ cephFileSystems:
             pg_num_min: "256"
         - name: cephfs-nvme-data
           failureDomain: osd
-          deviceClass: nvme
+          deviceClass: hdd
           enableCrushUpdates: true
           replicated:
             size: 2
@@ -833,7 +834,7 @@ cephFileSystems:
             pg_num_min: "128"
         - name: cephfs-home
           failureDomain: osd
-          deviceClass: nvme
+          deviceClass: hdd
           enableCrushUpdates: true
           replicated:
             size: 2
