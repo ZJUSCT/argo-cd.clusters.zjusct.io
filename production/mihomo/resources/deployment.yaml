@@ -21,7 +21,7 @@ spec:
     spec:
       initContainers:
       - name: network-setup
-        image: m.daocloud.io/docker.io/nicolaka/netshoot:latest
+        image: ghcr.io/nicolaka/netshoot:latest
         command:
         - /bin/sh
         - /etc/mihomo-network/setup.sh
@@ -37,7 +37,7 @@ spec:
           readOnly: true
       containers:
       - name: mihomo
-        image: m.daocloud.io/docker.io/metacubex/mihomo:latest
+        image: library/mihomo:latest
         args:
         - -d
         - /root/.config/mihomo
@@ -70,7 +70,7 @@ spec:
             cpu: "1"
             memory: 512Mi
       - name: metacubexd
-        image: m.daocloud.io/ghcr.io/metacubex/metacubexd:latest
+        image: ghcr.io/metacubex/metacubexd:latest
         env:
         - name: DEFAULT_BACKEND_URL
           value: http://172.25.4.3:9090
