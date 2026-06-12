@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: openng
   labels:
@@ -7,7 +7,6 @@ metadata:
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: openng
@@ -60,27 +59,6 @@ spec:
             limits:
               cpu: "1"
               memory: 512Mi
-        - name: keepalived
-          image: docker.io/osixia/keepalived
-          securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-                - NET_BROADCAST
-                - NET_RAW
-              drop:
-                - ALL
-          env:
-            - name: KEEPALIVED_INTERFACE
-              value: "br0"
-            - name: KEEPALIVED_VIRTUAL_IPS
-              value: "172.25.4.4"
-            - name: KEEPALIVED_STATE
-              value: "MASTER"
-            - name: KEEPALIVE_ROUTER_ID
-              value: "52"
-            - name: KEEPALIVED_PRIORITY
-              value: "150"
       volumes:
         - name: config
           secret:
