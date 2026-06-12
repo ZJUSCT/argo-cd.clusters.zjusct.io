@@ -41,6 +41,6 @@ spec:
     # ironic self maintained HA IP
     ipAddress: "172.25.4.2"
     ipAddressManager: "keepalived"
-    interface: "bond0"
+    interface: "br0"
   tls:
     certificateName: ironic-cert

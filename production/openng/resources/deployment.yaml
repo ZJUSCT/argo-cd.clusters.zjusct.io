@@ -72,7 +72,7 @@ spec:
                 - ALL
           env:
             - name: KEEPALIVED_INTERFACE
-              value: "bond0"
+              value: "br0"
             - name: KEEPALIVED_VIRTUAL_IPS
               value: "172.25.4.4"
             - name: KEEPALIVED_STATE

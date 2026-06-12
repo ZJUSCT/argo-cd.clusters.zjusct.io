@@ -12,7 +12,7 @@ config:
 
 # Check https://kube-vip.io/docs/installation/flags/
 env:
-  vip_interface: "bond0"
+  vip_interface: "br0"
   vip_arp: "true"
   lb_enable: "false"
   lb_port: "6444"
