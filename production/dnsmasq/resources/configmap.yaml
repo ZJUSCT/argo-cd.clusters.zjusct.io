@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dnsmasq-config
+  namespace: dnsmasq
+data:
+  dnsmasq.conf: |
+    # https://github.com/imp/dnsmasq/blob/master/dnsmasq.conf.example
+    # https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html
+    # --- Global Settings ---
+    domain-needed # never forward A or AAAA queries for plain names, without dots or domain parts, to upstream nameservers
+    bogus-priv
+    no-resolv # Don't read /etc/resolv.conf. It's controlled by systemd-resolved.
+
+    # Interface settings
+    # lo is managed by systemd-resolved
+    interface=br0
+    except-interface=lo
+    # listen to br0 addresses, including the kube-vip address on the leader
+    # listen-address=172.25.4.1
+    bind-dynamic
+    cache-size=0
+
+    # debug
+    log-queries
+
+    # --- Specific Internal Overrides ---
+    # These 'address' lines take highest priority (Static/Handwritten)
+    address=/k8s-api.clusters.zjusct.io/172.25.4.1
+    address=/ipa-01.clusters.zjusct.io/172.28.0.2
+    # OpenNG served domains
+    address=/netgate.clusters.zjusct.io/172.25.4.3
+    address=/clusters.zju.edu.cn/172.28.0.1
+
+    # --- Physical Node DNS (Static Records) ---
+    #address=/storage.clusters.zjusct.io/172.25.4.11
+    #address=/m600.clusters.zjusct.io/172.25.4.60
+    #address=/m601.clusters.zjusct.io/172.25.4.61
+    #address=/m602.clusters.zjusct.io/172.25.4.62
+    #address=/m603.clusters.zjusct.io/172.25.4.63
+    #address=/m604.clusters.zjusct.io/172.25.4.64
+    #address=/root.clusters.zjusct.io/172.25.4.65
+    #address=/atlas800.clusters.zjusct.io/172.25.4.66
+
+    #address=/m700.clusters.zjusct.io/172.25.4.70
+    #address=/m701.clusters.zjusct.io/172.25.4.71
+    #address=/a700.clusters.zjusct.io/172.25.4.72
+    #address=/nvidia-spark.clusters.zjusct.io/172.25.4.73
+
+    # --- BMC / Management DNS ---
+    address=/storage-bmc.clusters.zjusct.io/172.25.3.11
+    address=/m4-bmc.clusters.zjusct.io/172.25.3.41
+    address=/m600-bmc.clusters.zjusct.io/172.25.3.60
+    address=/m601-bmc.clusters.zjusct.io/172.25.3.61
+    address=/m602-bmc.clusters.zjusct.io/172.25.3.62
+    address=/m603-bmc.clusters.zjusct.io/172.25.3.63
+    address=/m604-bmc.clusters.zjusct.io/172.25.3.64
+    address=/root-bmc.clusters.zjusct.io/172.25.3.65
+    address=/atlas800-bmc.clusters.zjusct.io/172.25.3.66
+
+    address=/m700-bmc.clusters.zjusct.io/172.25.3.70
+    address=/m701-bmc.clusters.zjusct.io/172.25.3.71
+    address=/a700-bmc.clusters.zjusct.io/172.25.3.72
+    address=/nvidia-spark-bmc.clusters.zjusct.io/172.25.3.73
+    address=/m800-bmc.clusters.zjusct.io/172.25.3.80
+
+    # --- Infrastucture DNS ---
+    address=/ib40.clusters.zjusct.io/172.25.3.200
+
+    address=/pdu1.clusters.zjusct.io/172.25.3.231
+    address=/pdu2.clusters.zjusct.io/172.25.3.232
+    address=/pdu3.clusters.zjusct.io/172.25.3.233
+
+    address=/swc0.clusters.zjusct.io/172.25.3.240
+    address=/swc1.clusters.zjusct.io/172.25.3.241
+    address=/swc2.clusters.zjusct.io/172.25.3.242
+    address=/swc3.clusters.zjusct.io/172.25.3.243
+
+    # --- Routing Logic ---
+
+    # 1. Local/Internal: Route all subdomains of clusters.zjusct.io to FreeIPA
+    server=/clusters.zjusct.io/172.28.0.2
+
+    # 2. Reverse DNS: Route local IP ranges to FreeIPA
+    server=/3.25.172.in-addr.arpa/172.28.0.2
+    server=/4.25.172.in-addr.arpa/172.28.0.2
+
+    # 3. Direct
+    server=/cn/10.10.0.21
+    server=/jsdelivr.net/10.10.0.21 # Mihomo GeoData
+
+    # 4. Global Catch-all: Everything else goes to FakeIP
+    server=172.25.4.3#1053
