@@ -92,6 +92,14 @@ data:
     server=/cn/10.10.0.21
     server=/s.zjusct.io/10.10.0.21
     server=/jsdelivr.net/10.10.0.21 # Mihomo GeoData
+    # these registries is directly reachable
+    server=/ghcr.io/10.10.0.21
+    server=/quay.io/10.10.0.21
+    server=/nvcr.io/10.10.0.21
+    server=/registry.k8s.io/10.10.0.21
+    server=/ecr-public.aws.com/10.10.0.21
+    server=/registry.gitlab.com/10.10.0.21
+    server=/mcr.microsoft.com/10.10.0.21
 
     # 4. Global Catch-all: Everything else goes to FakeIP
     server=172.25.4.3#1053
