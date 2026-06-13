@@ -5,7 +5,7 @@
 # shellcheck disable=SC1091
 source /run/header
 
-K8S_VERSION="v1.35"
+K8S_VERSION="v1.36"
 
 case $ID in
 ubuntu | debian)
