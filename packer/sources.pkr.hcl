@@ -19,7 +19,12 @@ source "qemu" "packer" {
   accelerator      = var.accelerator
   memory           = 16384
   disk_image       = true
-  disk_size        = "30G"
+  # qcow2 is sparse and Packer compacts the output by default (skip_compaction=false
+  # runs `qemu-img convert`), so the published file size ~= actual used space, NOT the
+  # virtual disk_size. disk_size only sets the guest's virtual capacity (what cloud-init
+  # growpart grows the partition to). Keep it generous: ROCm alone is ~28 GB and the full
+  # GPU stack peaks ~58 GB during install; a larger value costs nothing in output size.
+  disk_size        = "100G"
   iso_url          = var.iso_url
   iso_checksum     = var.iso_checksum
   format           = "qcow2"
