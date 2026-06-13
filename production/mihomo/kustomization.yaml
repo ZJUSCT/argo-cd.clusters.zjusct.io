@@ -6,7 +6,6 @@ resources:
 - resources/network-attachment-definition.yaml
 - resources/network-config.yaml
 - resources/deployment.yaml
-- resources/metacubexd-service.yaml
 - resources/sealedsecret.yaml
 transformers:
 - ../../image-prefix.yaml

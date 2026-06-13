@@ -44,10 +44,6 @@ spec:
         - -d
         - /root/.config/mihomo
         ports:
-        - name: proxy
-          containerPort: 7890
-        - name: controller
-          containerPort: 9090
         - name: dns
           containerPort: 1053
           protocol: UDP
