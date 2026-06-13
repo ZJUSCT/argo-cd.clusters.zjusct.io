@@ -69,21 +69,6 @@ spec:
           limits:
             cpu: "1"
             memory: 512Mi
-      - name: metacubexd
-        image: ghcr.io/metacubex/metacubexd:latest
-        env:
-        - name: DEFAULT_BACKEND_URL
-          value: https://mihomo-api.clusters.zjusct.io
-        ports:
-        - name: ui
-          containerPort: 80
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            cpu: 100m
-            memory: 128Mi
       volumes:
       - name: config
         secret:
