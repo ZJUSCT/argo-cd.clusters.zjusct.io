@@ -463,7 +463,7 @@ cephClusterSpec:
         memory: "50Mi"
 
   # The option to automatically remove OSDs that are out and are safe to destroy.
-  removeOSDsIfOutAndSafeToRemove: false
+  removeOSDsIfOutAndSafeToRemove: true
 
   # priority classes to apply to ceph resources
   priorityClassNames:
@@ -565,24 +565,6 @@ cephClusterSpec:
               metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part3
               databaseSizeMB: "51200"
 
-          - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG108600VR960CGN
-            config:
-              deviceClass: nvme
-
-          - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG108600WD960CGN
-            config:
-              deviceClass: nvme
-
-          - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e461f4495551
-            config:
-              deviceClass: nvme
-          - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e4723bd15451
-            config:
-              deviceClass: nvme
-          - name: /dev/disk/by-id/nvme-eui.36344830549008810025385300000001
-            config:
-              deviceClass: nvme
-
       - name: m601
         devices:
           - name: /dev/disk/by-id/ata-ST2000DM001-1ER164_W4Z0XS4C
@@ -620,22 +602,6 @@ cephClusterSpec:
               deviceClass: hdd
               metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part6
               databaseSizeMB: "51200"
-
-          - name: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG10860250960CGN
-            config:
-              deviceClass: nvme
-
-          - name: /dev/disk/by-id/ata-Fanxiang_FP325Q_1TB_MX_00000000000030027
-            config:
-              deviceClass: nvme
-
-          - name: /dev/disk/by-id/nvme-eui.01000000000000005cd2e4768f455451
-            config:
-              deviceClass: nvme
-
-          - name: /dev/disk/by-id/nvme-eui.5d8bc59060003a0ad8bc591e3b060001
-            config:
-              deviceClass: nvme
 
   # The section for configuring management of daemon disruptions during upgrade or fencing.
   disruptionManagement:
