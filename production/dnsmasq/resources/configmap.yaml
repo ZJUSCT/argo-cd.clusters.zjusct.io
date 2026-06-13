@@ -29,21 +29,6 @@ data:
     address=/netgate.clusters.zjusct.io/172.25.4.3
     address=/clusters.zju.edu.cn/172.28.0.1
 
-    # --- Physical Node DNS (Static Records) ---
-    #address=/storage.clusters.zjusct.io/172.25.4.11
-    #address=/m600.clusters.zjusct.io/172.25.4.60
-    #address=/m601.clusters.zjusct.io/172.25.4.61
-    #address=/m602.clusters.zjusct.io/172.25.4.62
-    #address=/m603.clusters.zjusct.io/172.25.4.63
-    #address=/m604.clusters.zjusct.io/172.25.4.64
-    #address=/root.clusters.zjusct.io/172.25.4.65
-    #address=/atlas800.clusters.zjusct.io/172.25.4.66
-
-    #address=/m700.clusters.zjusct.io/172.25.4.70
-    #address=/m701.clusters.zjusct.io/172.25.4.71
-    #address=/a700.clusters.zjusct.io/172.25.4.72
-    #address=/nvidia-spark.clusters.zjusct.io/172.25.4.73
-
     # --- BMC / Management DNS ---
     address=/storage-bmc.clusters.zjusct.io/172.25.3.11
     address=/m4-bmc.clusters.zjusct.io/172.25.3.41
@@ -88,18 +73,12 @@ data:
     server=/4.25.172.in-addr.arpa/172.28.0.3
     server=/4.25.172.in-addr.arpa/172.28.0.5
 
-    # 3. Direct
-    server=/cn/10.10.0.21
-    server=/s.zjusct.io/10.10.0.21
-    server=/jsdelivr.net/10.10.0.21 # Mihomo GeoData
-    # these registries is directly reachable
-    server=/ghcr.io/10.10.0.21
-    server=/quay.io/10.10.0.21
-    server=/nvcr.io/10.10.0.21
-    server=/registry.k8s.io/10.10.0.21
-    server=/ecr-public.aws.com/10.10.0.21
-    server=/registry.gitlab.com/10.10.0.21
-    server=/mcr.microsoft.com/10.10.0.21
-
-    # 4. Global Catch-all: Everything else goes to FakeIP
+    # 3. Global routing. mihomo is the primary resolver, campus
+    #    DNS is the failover, used only when mihomo is down (e.g. during rollout).
+    #
+    #    strict-order is REQUIRED here. Without it dnsmasq periodically races the
+    #    two catch-all upstreams and keeps the fastest.
+    strict-order
     server=172.25.4.3#1053
+    server=10.10.0.21
+    server=10.10.2.21
