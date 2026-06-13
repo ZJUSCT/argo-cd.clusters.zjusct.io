@@ -10,14 +10,12 @@ data:
     # --- Global Settings ---
     domain-needed # never forward A or AAAA queries for plain names, without dots or domain parts, to upstream nameservers
     bogus-priv
-    no-resolv # Don't read /etc/resolv.conf. It's controlled by systemd-resolved.
+    no-resolv # Don't read /etc/resolv.conf. It's controlled by k8s.
 
     # Interface settings
-    # lo is managed by systemd-resolved
-    except-interface=lo
-    # listen to all non-loopback interfaces, including cilium_host and br0
-    # listen-address=172.25.4.1
-    bind-dynamic
+    # Notice that dnsmasq uses hostNetwork
+    except-interface=lo # lo is managed by systemd-resolved
+    bind-dynamic # listen to all non-loopback interfaces, including cilium_host and br0
     cache-size=0
 
     # debug
@@ -79,13 +77,20 @@ data:
 
     # 1. Local/Internal: Route all subdomains of clusters.zjusct.io to FreeIPA
     server=/clusters.zjusct.io/172.28.0.2
+    server=/clusters.zjusct.io/172.28.0.3
+    server=/clusters.zjusct.io/172.28.0.5
 
     # 2. Reverse DNS: Route local IP ranges to FreeIPA
     server=/3.25.172.in-addr.arpa/172.28.0.2
+    server=/3.25.172.in-addr.arpa/172.28.0.3
+    server=/3.25.172.in-addr.arpa/172.28.0.5
     server=/4.25.172.in-addr.arpa/172.28.0.2
+    server=/4.25.172.in-addr.arpa/172.28.0.3
+    server=/4.25.172.in-addr.arpa/172.28.0.5
 
     # 3. Direct
     server=/cn/10.10.0.21
+    server=/s.zjusct.io/10.10.0.21
     server=/jsdelivr.net/10.10.0.21 # Mihomo GeoData
 
     # 4. Global Catch-all: Everything else goes to FakeIP
