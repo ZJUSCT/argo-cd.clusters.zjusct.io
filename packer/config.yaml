@@ -3,7 +3,6 @@
   iso_url: https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/debian-13-generic-amd64-20260601-2496.qcow2
   iso_checksum: file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/SHA512SUMS
   modules:
-    - 20-software-k8s
     - 20-software-otelcol
     - 70-k8s
     - 70-zjusct-cluster
@@ -14,11 +13,12 @@
   iso_url: https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/debian-13-generic-amd64-20260601-2496.qcow2
   iso_checksum: file:https://mirrors.cernet.edu.cn/debian-cdimage/cloud/trixie/20260601-2496/SHA512SUMS
   modules:
-    - 20-software-k8s
     - 20-software-otelcol
     - 30-driver-nvidia
     - 30-driver-doca
+    - 30-driver-amd
     - 31-toolkit-cuda
+    - 31-toolkit-rocm
     - 70-k8s
     - 70-zjusct-cluster
 - name: debian-13-arm64
@@ -35,7 +35,6 @@
   iso_url: https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/resolute-server-cloudimg-amd64.img
   iso_checksum: file:https://mirrors.cernet.edu.cn/ubuntu-cloud-images/resolute/20260520/SHA256SUMS
   modules:
-    - 20-software-k8s
     - 20-software-otelcol
     - 30-driver-nvidia
     - 30-driver-doca
@@ -60,7 +59,6 @@
   iso_url: http://mirrors.cernet.edu.cn/fedora/releases/43/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-43-1.6.x86_64.qcow2
   iso_checksum: file:http://mirrors.cernet.edu.cn/fedora/releases/43/Cloud/x86_64/images/Fedora-Cloud-43-1.6-x86_64-CHECKSUM
   modules:
-    - 20-software-k8s
     - 20-software-otelcol
     - 30-driver-nvidia
     - 31-toolkit-cuda
