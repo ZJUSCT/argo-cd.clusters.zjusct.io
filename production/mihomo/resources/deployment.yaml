@@ -5,6 +5,8 @@ metadata:
   namespace: mihomo
   labels:
     app.kubernetes.io/name: mihomo
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   strategy:
@@ -42,6 +44,8 @@ spec:
         - -d
         - /root/.config/mihomo
         ports:
+        - name: proxy
+          containerPort: 7890
         - name: controller
           containerPort: 9090
         - name: dns
@@ -73,7 +77,7 @@ spec:
         image: ghcr.io/metacubex/metacubexd:latest
         env:
         - name: DEFAULT_BACKEND_URL
-          value: http://172.25.4.3:9090
+          value: https://mihomo-api.clusters.zjusct.io
         ports:
         - name: ui
           containerPort: 80

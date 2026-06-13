@@ -4,6 +4,8 @@ metadata:
   name: openlist
   labels:
     app: openlist
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   strategy:
