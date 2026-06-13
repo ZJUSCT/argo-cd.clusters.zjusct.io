@@ -463,7 +463,7 @@ cephClusterSpec:
         memory: "50Mi"
 
   # The option to automatically remove OSDs that are out and are safe to destroy.
-  removeOSDsIfOutAndSafeToRemove: true
+  removeOSDsIfOutAndSafeToRemove: false
 
   # priority classes to apply to ceph resources
   priorityClassNames:
@@ -565,6 +565,18 @@ cephClusterSpec:
               metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part3
               databaseSizeMB: "51200"
 
+          - name: /dev/disk/by-id/ata-ST4000VN006-3CW104_ZW62Z457
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part5
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-ST4000DM004-2CV104_ZFN2AW9H
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KB960G8_PHYF10720166960CGN-part6
+              databaseSizeMB: "51200"
+
       - name: m601
         devices:
           - name: /dev/disk/by-id/ata-ST2000DM001-1ER164_W4Z0XS4C
@@ -601,6 +613,12 @@ cephClusterSpec:
             config:
               deviceClass: hdd
               metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part6
+              databaseSizeMB: "51200"
+
+          - name: /dev/disk/by-id/ata-WDC_WD40EJRX-89T1XY0_WD-WCC7K5YCZSSL
+            config:
+              deviceClass: hdd
+              metadataDevice: /dev/disk/by-id/ata-INTEL_SSDSC2KG960G8_PHYG1086023Z960CGN-part7
               databaseSizeMB: "51200"
 
   # The section for configuring management of daemon disruptions during upgrade or fencing.
