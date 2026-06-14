@@ -24,6 +24,7 @@ spec:
       initContainers:
       - name: network-setup
         image: ghcr.io/nicolaka/netshoot:latest
+        imagePullPolicy: IfNotPresent
         command:
         - /bin/sh
         - /etc/mihomo-network/setup.sh
@@ -40,6 +41,7 @@ spec:
       containers:
       - name: mihomo
         image: library/mihomo:latest
+        imagePullPolicy: IfNotPresent
         args:
         - -d
         - /root/.config/mihomo
