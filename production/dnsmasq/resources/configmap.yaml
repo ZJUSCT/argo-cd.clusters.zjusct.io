@@ -16,7 +16,7 @@ data:
     # Notice that dnsmasq uses hostNetwork
     except-interface=lo # lo is managed by systemd-resolved
     bind-dynamic # listen to all non-loopback interfaces, including cilium_host and br0
-    cache-size=0
+    cache-size=10000
 
     # debug
     log-queries
@@ -64,6 +64,10 @@ data:
     server=/clusters.zjusct.io/172.28.0.2
     server=/clusters.zjusct.io/172.28.0.3
     server=/clusters.zjusct.io/172.28.0.5
+
+    # This prevents dnsmasq from trying to resolve *.clusters.zjusct.io
+    # via the global upstream if FreeIPA returns NXDOMAIN.
+    local=/clusters.zjusct.io/
 
     # 2. Reverse DNS: Route local IP ranges to FreeIPA
     server=/3.25.172.in-addr.arpa/172.28.0.2
