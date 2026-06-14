@@ -12,3 +12,5 @@ helmCharts:
   valuesFile: values/harbor-1.18.3.yaml
   version: 1.18.3
   namespace: harbor
+transformers:
+- image-prefix.yaml

@@ -1,0 +1,10 @@
+# https://stackoverflow.com/questions/71920192/add-registry-prefix-to-all-images-with-kustomize-image-transformer
+apiVersion: builtin
+kind: PrefixTransformer
+metadata:
+  name: image-prefix
+prefix: m.daocloud.io/docker.io/
+
+fieldSpecs:
+- path: spec/template/spec/containers/image
+- path: spec/template/spec/initContainers/image
