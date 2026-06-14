@@ -45,7 +45,7 @@ spec:
         - /root/.config/mihomo
         ports:
         - name: dns
-          containerPort: 1053
+          containerPort: 53
           protocol: UDP
         - name: tproxy-tcp
           containerPort: 7893

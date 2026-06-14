@@ -83,6 +83,6 @@ data:
     #    strict-order is REQUIRED here. Without it dnsmasq periodically races the
     #    two catch-all upstreams and keeps the fastest.
     strict-order
-    server=172.25.4.3#1053
+    server=172.25.4.3
     server=10.10.0.21
     server=10.10.2.21
