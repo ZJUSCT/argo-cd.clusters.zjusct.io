@@ -222,7 +222,7 @@ cephClusterSpec:
       - name: restful
         enabled: true
       - name: snap_schedule
-        enabled: true
+        enabled: false
       # List of modules to optionally enable or disable.
       # Note the "dashboard" and "monitoring" modules are already configured by other settings in the cluster CR.
       # - name: rook
