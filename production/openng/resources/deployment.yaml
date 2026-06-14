@@ -20,6 +20,7 @@ spec:
       containers:
         - name: openng
           image: ghcr.io/zjusct/openng:latest
+          imagePullPolicy: IfNotPresent
           args:
             - -config
             - /etc/netgate/config.yaml
