@@ -812,7 +812,7 @@ cephFileSystems:
         activeStandby: true
         resources:
           limits:
-            memory: "32Gi"
+            memory: "64Gi"
           requests:
             cpu: "1000m"
             memory: "4Gi"
