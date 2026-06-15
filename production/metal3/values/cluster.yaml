@@ -6,9 +6,9 @@ default:
   bmc:
     credentialsName: bmc-credential
   image:
-    url: https://radosgw.clusters.zjusct.io/packer-images/e545dcf/debian-13-amd64.qcow2
+    url: https://radosgw.clusters.zjusct.io/packer-images/built/d115171/debian-13-amd64.qcow2
     checksumType: sha256
-    checksum: https://radosgw.clusters.zjusct.io/packer-images/e545dcf/SHA256SUMS
+    checksum: https://radosgw.clusters.zjusct.io/packer-images/built/d115171/debian-13-amd64.sha256sum
     format: qcow2
   rootDeviceHints:
     rotational: false
@@ -84,3 +84,4 @@ nodes:
     mac: "50:79:73:1F:53:AC"
     bmc:
       address: redfish://172.25.3.80
+    online: false
