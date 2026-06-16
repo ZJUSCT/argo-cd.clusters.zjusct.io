@@ -142,19 +142,15 @@ data:
             href: http://latex.s.zjusct.io
             description: Collaborative LaTeX editor
             icon: overleaf
-        - LiteLLM:
-            href: https://litellm.s.zjusct.io/ui
+        - NewAPI:
+            href: https://newapi.s.zjusct.io
             description: LLM proxy gateway
-            icon: open-router
+            icon: https://newapi.s.zjusct.io/logo.png
     - CI/CD:
         - Argo CD:
             href: https://argo-cd.s.zjusct.io
             description: GitOps continuous deployment
             icon: argo-cd
-        # - Jenkins:
-        #     href: https://jenkins.s.zjusct.io
-        #     description: Continuous integration
-        #     icon: jenkins
         - Tekton:
             href: https://tekton.s.zjusct.io
             description: Kubernetes-native CI/CD
@@ -168,10 +164,6 @@ data:
             href: https://ceph.s.zjusct.io
             description: Distributed storage dashboard
             icon: ceph
-        - Dragonfly:
-            href: https://dragonfly.s.zjusct.io
-            description: P2P file distribution
-            icon: https://landscape.cncf.io/logos/60b07adb6812ca92688c7a1c33b13001022b0dd73cd3b8e64a415e4f003cde16.svg
     - Monitoring:
         - Headlamp:
             href: https://headlamp.s.zjusct.io
@@ -189,14 +181,14 @@ data:
             href: https://alertmanager.s.zjusct.io
             description: Alert management
             icon: alertmanager
-        - Hubble:
-            href: https://hubble.s.zjusct.io
-            description: Cilium network observability
-            icon: cilium
-        - OpenTelemetry:
-            href: https://otel-http.s.zjusct.io
-            description: Observability collector
-            icon: si-opentelemetry
+        # - Hubble:
+        #     href: https://hubble.s.zjusct.io
+        #     description: Cilium network observability
+        #     icon: cilium
+        # - OpenTelemetry:
+        #     href: https://otel-http.s.zjusct.io
+        #     description: Observability collector
+        #     icon: si-opentelemetry
   widgets.yaml: |
     - datetime:
         text_size: xl
