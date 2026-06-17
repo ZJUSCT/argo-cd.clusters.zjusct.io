@@ -8,13 +8,12 @@ RUN <<EOF
 set -xe
 . /etc/os-release
 
-# <<< HashiCorp APT Repo
+# https://www.hashicorp.com/en/official-packaging-guide
 curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 chmod 644 /usr/share/keyrings/hashicorp-archive-keyring.gpg
 cat <<EOT | tee /etc/apt/sources.list.d/hashicorp.list
 deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${VERSION_CODENAME} main
 EOT
-# >>>
 
 apt-get update
 apt-get install -y --no-install-recommends \
@@ -131,3 +130,6 @@ curl -fsSL "https://github.com/openai/codex/releases/latest/download/codex-${SUF
 mv "/tmp/codex-${SUFFIX}" /usr/local/bin/codex
 chmod 755 /usr/local/bin/codex
 EOF
+
+# https://docs.astral.sh/uv/guides/integration/docker/
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
