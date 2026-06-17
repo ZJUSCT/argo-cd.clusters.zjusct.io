@@ -10,6 +10,8 @@ data:
 
     ip link set net1 up
     ip addr replace 172.25.4.3/24 dev net1
+    ip route add 172.25.123.0/24 dev net1 src 172.25.4.3 via 172.25.4.254
+    ip route add 172.25.2.0/24 dev net1 src 172.25.4.3 via 172.25.4.254
 
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w net.ipv4.conf.all.rp_filter=0
