@@ -187,7 +187,7 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     if debug:
-        iso_url = os.path.join(output_dir, target, f"{target}.qcow2")
+        iso_url = os.path.join(output_dir, target, f"{target}.raw")
         if not os.path.isfile(iso_url):
             print(f'error: image not found: {iso_url}', file=sys.stderr)
             sys.exit(1)

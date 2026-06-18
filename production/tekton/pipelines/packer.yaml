@@ -4,7 +4,7 @@ metadata:
   name: packer
 spec:
   description: |
-    Build one Packer QCOW2 target and upload the image plus its per-image
+    Build one Packer raw target and upload the image plus its per-image
     SHA256 checksum to S3-compatible object storage. Intermediate files live in
     the packer-build-upload Task's emptyDir and are discarded after the TaskRun.
   params:
@@ -36,7 +36,7 @@ spec:
       type: string
       default: "cache/"
     - name: upload-prefix
-      description: Prefix for built QCOW2 images in the bucket
+      description: Prefix for built raw images in the bucket
       type: string
       default: "built/"
     - name: public-base-url
@@ -45,7 +45,7 @@ spec:
       default: "https://radosgw.clusters.zjusct.io/packer-images"
   results:
     - name: image-url
-      description: Public URL of the uploaded QCOW2 image
+      description: Public URL of the uploaded raw image
       value: $(tasks.build.results.image-url)
     - name: checksum-url
       description: Public URL of the uploaded SHA256 checksum file

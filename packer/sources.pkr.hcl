@@ -13,23 +13,22 @@ source "qemu" "packer" {
   qemu_binary = var.qemu_binary
 
   # VM Configuration
-  cpus             = 8
-  machine_type     = var.machine_type
-  cpu_model        = var.cpu_model
-  accelerator      = var.accelerator
-  memory           = 16384
-  disk_image       = true
-  # qcow2 is sparse and Packer compacts the output by default (skip_compaction=false
-  # runs `qemu-img convert`), so the published file size ~= actual used space, NOT the
-  # virtual disk_size. disk_size only sets the guest's virtual capacity (what cloud-init
-  # growpart grows the partition to). Keep it generous: ROCm alone is ~28 GB and the full
-  # GPU stack peaks ~58 GB during install; a larger value costs nothing in output size.
+  cpus         = 8
+  machine_type = var.machine_type
+  cpu_model    = var.cpu_model
+  accelerator  = var.accelerator
+  memory       = 16384
+  disk_image   = true
+  # raw images allow Ironic Python Agent to stream directly to the target disk
+  # without first caching the image in the deploy ramdisk /tmp tmpfs. Unlike
+  # qcow2, the uploaded raw object is close to the virtual disk_size, so keep
+  # disk_size no larger than the deployed system actually needs.
   disk_size        = "100G"
   iso_url          = var.iso_url
   iso_checksum     = var.iso_checksum
-  format           = "qcow2"
+  format           = "raw"
   output_directory = "output/${var.vm_name}"
-  vm_name          = "${var.vm_name}.qcow2"
+  vm_name          = "${var.vm_name}.raw"
 
   # Boot configuration
   efi_boot          = true

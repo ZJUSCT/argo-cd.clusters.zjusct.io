@@ -67,6 +67,14 @@ EOF
 
 The above instructions are for running the build locally. Tekton uses the devcontainer image as the build environment and runs the same `packer.py` entrypoint, with pipeline-specific base image caching and artifact upload around it.
 
+## Metal3/Ironic raw image deployment
+
+- Prefer publishing `raw` images for Metal3 deployments. Ironic Python Agent can stream raw images directly to the target disk when Ironic passes `stream_raw_images=true` and `image_disk_format=raw`, avoiding the deploy ramdisk `/tmp` tmpfs image cache.
+- Do not mark a qcow2 image as `raw`. IPA skips qemu-img inspection/conversion for streamed raw images and writes bytes directly to the block device.
+- The Packer QEMU plugin supports `format = "raw"`. With `disk_image = true` and a qcow2 base image, the plugin converts the base image to raw before running the VM.
+- Raw images are usually much larger to transfer than qcow2 images. Size Tekton ephemeral storage and object storage expectations for the raw virtual disk size, not the compact qcow2 file size.
+- Metal3 configDrive remains compatible with streamed raw whole-disk images. BMO sends userData/networkData/metaData as Ironic configdrive, and IPA creates the configdrive partition after streaming the raw image. Ensure the image partition layout leaves room at the end of the target disk for the configdrive partition.
+
 ## Agent Task Loop
 
 1. Run user specified build command

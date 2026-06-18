@@ -29,10 +29,10 @@ default:
 
   # OS image to deploy
   image:
-    url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+    url: https://example.com/custom-image.raw
     checksumType: sha256
-    checksum: https://cloud-images.ubuntu.com/noble/current/SHA256SUMS
-    format: qcow2
+    checksum: https://example.com/custom-image.sha256sum
+    format: raw
 
   # Hints for selecting the root device
   rootDeviceHints:
@@ -83,8 +83,9 @@ nodes:
   #     address: redfish://1.2.3.6
   #     credentialsName: bmc-credential
   #   image:
-  #     url: https://example.com/custom-image.img
+  #     url: https://example.com/custom-image.raw
   #     checksum: https://example.com/custom-SHA256SUMS
+  #     format: raw
   #   networkData:
   #     name: custom-networkdata
   #     namespace: default

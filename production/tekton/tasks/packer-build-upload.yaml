@@ -12,7 +12,7 @@ metadata:
 spec:
   description: >-
     Clone the repository, cache the target base image in S3-compatible object
-    storage, build a QCOW2 image with Packer, and upload the image with its
+    storage, build a raw image with Packer, and upload the image with its
     per-image SHA256 checksum.
   params:
     - name: git-url
@@ -41,7 +41,7 @@ spec:
       type: string
       default: "cache/"
     - name: upload-prefix
-      description: Prefix for built QCOW2 images in the bucket
+      description: Prefix for built raw images in the bucket
       type: string
       default: "built/"
     - name: public-base-url
@@ -60,7 +60,7 @@ spec:
     - name: git-commit
       description: Checked out git commit
     - name: image-url
-      description: Public URL of the uploaded QCOW2 image
+      description: Public URL of the uploaded raw image
     - name: checksum-url
       description: Public URL of the uploaded SHA256 checksum file
   steps:
@@ -310,7 +310,7 @@ spec:
         requests:
           cpu: "8"
           memory: 16Gi
-          ephemeral-storage: 80Gi
+          ephemeral-storage: 140Gi
       script: |
         #!/usr/bin/env bash
         set -xeuo pipefail
@@ -327,7 +327,7 @@ spec:
           --iso-url "${ISO_URL}" \
           --iso-checksum "sha256:${BASE_SHA256}"
 
-        IMAGE="output/$(params.target)/$(params.target).qcow2"
+        IMAGE="output/$(params.target)/$(params.target).raw"
         test -f "${IMAGE}"
         sha256sum "${IMAGE}" | awk '{print $1}' > "output/$(params.target)/$(params.target).sha256sum"
       volumeMounts:
@@ -357,13 +357,13 @@ spec:
 
         PREFIX="$(params.upload-prefix)"
         PREFIX="${PREFIX%/}/${SHORT_COMMIT}"
-        IMAGE="output/$(params.target)/$(params.target).qcow2"
+        IMAGE="output/$(params.target)/$(params.target).raw"
         CHECKSUM="output/$(params.target)/$(params.target).sha256sum"
 
-        mc cp "${IMAGE}" "ceph/${BUCKET_NAME}/${PREFIX}/$(params.target).qcow2"
+        mc cp "${IMAGE}" "ceph/${BUCKET_NAME}/${PREFIX}/$(params.target).raw"
         mc cp "${CHECKSUM}" "ceph/${BUCKET_NAME}/${PREFIX}/$(params.target).sha256sum"
 
-        IMAGE_URL="$(params.public-base-url)/${PREFIX}/$(params.target).qcow2"
+        IMAGE_URL="$(params.public-base-url)/${PREFIX}/$(params.target).raw"
         CHECKSUM_URL="$(params.public-base-url)/${PREFIX}/$(params.target).sha256sum"
 
         printf "%s" "${IMAGE_URL}" > "$(results.image-url.path)"
@@ -383,7 +383,7 @@ spec:
   volumes:
     - name: work
       emptyDir:
-        sizeLimit: 120Gi
+        sizeLimit: 180Gi
     - name: bucket-config
       configMap:
         name: $(params.bucket-config-name)

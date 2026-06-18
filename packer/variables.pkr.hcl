@@ -1,6 +1,6 @@
 variable "iso_url" {
   type    = string
-  default = "none.qcow2"
+  default = "none.raw"
 }
 
 variable "iso_checksum" {
