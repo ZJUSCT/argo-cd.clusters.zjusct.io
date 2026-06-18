@@ -15,7 +15,7 @@ DOCA_URL="http://linux.mellanox.com/public/repo/doca/${DOCA_VERSION}/${DOCA_OS}/
 
 case $ID in
 debian | ubuntu)
-    add_repo doca "http://linux.mellanox.com/public/repo/doca/GPG-KEY-Mellanox.pub" "${DOCA_URL} ./"
+    add_repo doca "https://linux.mellanox.com/public/repo/doca/public_keys/nvidia-doca-debian-gpg-public-key.gpg" "${DOCA_URL} ./"
     install_pkg doca-all mlnx-nfsrdma-dkms
     ;;
 rocky)
