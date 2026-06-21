@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/devcontainers/base:trixie
 
 ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
+ARG NODE_MAJOR=26
 
 RUN <<EOF
 set -xe
@@ -14,6 +15,16 @@ chmod 644 /usr/share/keyrings/hashicorp-archive-keyring.gpg
 cat <<EOT | tee /etc/apt/sources.list.d/hashicorp.list
 deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${VERSION_CODENAME} main
 EOT
+
+# # https://github.com/nodesource/distributions/wiki/Repository-Manual-Installation
+# curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+# cat <<EOT | sudo tee /etc/apt/sources.list.d/nodesource.sources
+# Types: deb
+# URIs: https://deb.nodesource.com/node_${NODE_MAJOR}.x/
+# Suites: nodistro
+# Components: main
+# Signed-By: /etc/apt/keyrings/nodesource.gpg
+# EOT
 
 apt-get update
 apt-get install -y --no-install-recommends \
@@ -47,7 +58,9 @@ apt-get install -y --no-install-recommends \
     shfmt \
     apache2-utils \
     ripgrep \
-    chromium
+    chromium \
+    nodejs \
+    npm
 apt-get autoremove -y
 apt-get distclean
 
