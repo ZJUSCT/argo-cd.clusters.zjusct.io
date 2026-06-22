@@ -2,8 +2,6 @@
 {
   "name": "argo-cd.clusters.zjusct.io",
   "image": "ghcr.io/zjusct/argo-cd.clusters.zjusct.io:latest",
-  "workspaceFolder": "/workspace",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "init": true,
   "shutdownAction": "none",
   // enable this for packer KVM
@@ -13,10 +11,10 @@
   // ],
   "containerEnv": {
     // persist configs under workspace
-    "KUBECONFIG": "/workspace/.kube/config",
-    "CLAUDE_CONFIG_DIR": "/workspace/.claude",
-    "OPENCODE_CONFIG_DIR": "/workspace/.opencode",
-    "CODEX_HOME": "/workspace/.codex"
+    "KUBECONFIG": "${containerWorkspaceFolder}/.kube/config",
+    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/.claude",
+    "OPENCODE_CONFIG_DIR": "${containerWorkspaceFolder}/.opencode",
+    "CODEX_HOME": "${containerWorkspaceFolder}/.codex"
   },
   "customizations": {
     "vscode": {
