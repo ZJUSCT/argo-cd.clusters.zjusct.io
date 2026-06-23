@@ -4,7 +4,7 @@
 image:
   registry: "docker.io"  # Leave empty for Docker Hub, or set private registry (e.g., gcr.io/my-project)
   repository: calciumion/new-api
-  tag: "latest"
+  tag: "v1.0.0-rc.14"
   pullPolicy: IfNotPresent
 
 # Image pull secrets (only needed for private registries)

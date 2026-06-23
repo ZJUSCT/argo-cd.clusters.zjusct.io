@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/devcontainers/base:trixie
 
 ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
-ARG NODE_MAJOR=26
 
 RUN <<EOF
 set -xe
@@ -17,6 +16,7 @@ deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.re
 EOT
 
 # # https://github.com/nodesource/distributions/wiki/Repository-Manual-Installation
+# NODE_MAJOR=26
 # curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
 # cat <<EOT | sudo tee /etc/apt/sources.list.d/nodesource.sources
 # Types: deb
@@ -146,3 +146,6 @@ EOF
 
 # https://docs.astral.sh/uv/guides/integration/docker/
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+COPY setup-mirror.sh /usr/local/bin/setup-mirror.sh
+RUN chmod 755 /usr/local/bin/setup-mirror.sh && /usr/local/bin/setup-mirror.sh
