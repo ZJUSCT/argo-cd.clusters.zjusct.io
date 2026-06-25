@@ -71,7 +71,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/openlist/data
+            - name: files
+              mountPath: /opt/openlist/files
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: openlist-data
+        - name: files
+          persistentVolumeClaim:
+            claimName: openlist-files
