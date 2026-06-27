@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metacubexd
+  labels:
+    app.kubernetes.io/name: metacubexd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metacubexd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: metacubexd
+    spec:
+      containers:
+        - name: metacubexd
+          image: ghcr.io/metacubex/metacubexd:latest
+          env:
+            - name: DEFAULT_BACKEND_URL
+              value: https://mihomo.clusters.zjusct.io
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

@@ -54,6 +54,8 @@ spec:
         - name: tproxy-udp
           containerPort: 7893
           protocol: UDP
+        - name: api
+          containerPort: 9090
         securityContext:
           capabilities:
             add:

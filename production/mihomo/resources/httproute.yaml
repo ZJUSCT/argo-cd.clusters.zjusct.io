@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mihomo-api
+  labels:
+    app.kubernetes.io/name: mihomo
+spec:
+  parentRefs:
+    - name: envoy-gateway
+      namespace: envoy-gateway
+  hostnames:
+    - mihomo.clusters.zjusct.io
+    - mihomo.s.zjusct.io
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: mihomo-api
+          port: 9090

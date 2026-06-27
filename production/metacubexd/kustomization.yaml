@@ -1,13 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: mihomo
+namespace: metacubexd
 resources:
 - resources/namespace.yaml
-- resources/network-attachment-definition.yaml
-- resources/network-config.yaml
 - resources/deployment.yaml
 - resources/service.yaml
 - resources/httproute.yaml
-- resources/sealedsecret.yaml
 transformers:
 - ../../image-prefix.yaml
