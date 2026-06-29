@@ -349,6 +349,7 @@ primary:
   ##
   extendedConfiguration: |-
     synchronous_commit = off
+    max_connections = 200
   ## @param primary.existingExtendedConfigmap Name of an existing ConfigMap with PostgreSQL Primary extended configuration
   ## NOTE: `primary.extendedConfiguration` will be ignored
   ##
@@ -507,11 +508,11 @@ primary:
   ##
   resources:
     requests:
-      cpu: 100m
+      cpu: 250m
       memory: 512Mi
     limits:
-      cpu: 150m
-      memory: 1Gi
+      cpu: "1"
+      memory: 2Gi
   ## @param primary.fips.openssl Configure OpenSSL FIPS mode: '', 'restricted', 'relaxed', 'off'. If empty (""), 'global.defaultFips' would be used
   ##
   fips:

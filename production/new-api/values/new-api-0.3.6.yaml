@@ -97,6 +97,12 @@ extraEnvVars:
     value: "false"
   - name: GLOBAL_API_RATE_LIMIT_ENABLE
     value: "false"
+  - name: SQL_MAX_OPEN_CONNS
+    value: "50"
+  - name: SQL_MAX_IDLE_CONNS
+    value: "25"
+  - name: SQL_MAX_LIFETIME
+    value: "30m"
 
   # Streaming timeout in seconds (default 120s)
   # STREAMING_TIMEOUT: "120"
