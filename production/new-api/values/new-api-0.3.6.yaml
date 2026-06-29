@@ -102,7 +102,7 @@ extraEnvVars:
   - name: SQL_MAX_IDLE_CONNS
     value: "25"
   - name: SQL_MAX_LIFETIME
-    value: "30m"
+    value: "1800"
 
   # Streaming timeout in seconds (default 120s)
   # STREAMING_TIMEOUT: "120"
