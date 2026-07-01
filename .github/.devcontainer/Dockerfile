@@ -106,19 +106,6 @@ curl -fsSL -o /usr/local/bin/virtctl "https://github.com/kubevirt/kubevirt/relea
 chmod +x /usr/local/bin/virtctl
 EOF
 
-# https://code.claude.com/docs/en/quickstart
-RUN <<EOF
-set -xe
-ARCH=${TARGETARCH:-$(dpkg --print-architecture)}
-case "${ARCH}" in
-  amd64) PLATFORM="linux-x64" ;;
-  arm64) PLATFORM="linux-arm64" ;;
-esac
-version=$(curl -fsSL https://downloads.claude.ai/claude-code-releases/latest)
-curl -fsSL -o /usr/local/bin/claude "https://downloads.claude.ai/claude-code-releases/${version}/${PLATFORM}/claude"
-chmod 755 /usr/local/bin/claude
-EOF
-
 # https://opencode.ai/download
 RUN <<EOF
 set -xe

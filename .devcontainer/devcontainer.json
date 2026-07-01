@@ -12,7 +12,6 @@
   "containerEnv": {
     // persist configs under workspace
     "KUBECONFIG": "${containerWorkspaceFolder}/.kube/config",
-    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/.claude",
     "OPENCODE_CONFIG_DIR": "${containerWorkspaceFolder}/.opencode",
     "CODEX_HOME": "${containerWorkspaceFolder}/.codex"
   },

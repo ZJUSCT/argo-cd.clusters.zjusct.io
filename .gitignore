@@ -1,7 +1,6 @@
 tmp.yaml
 secret.yaml
 tmp/
-.claude/
 .opencode/
 .codex/
 .kube/
